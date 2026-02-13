@@ -23,9 +23,9 @@ jobs:
     - name: Install Python dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip3 install ruff pytest-mock
+        python3 -m pip install ruff pytest pytest-mock pyyaml
         # rclpy is already part of the ros-base image
-        pip3 install -r requirements/requirements.txt || true # Ignore fallback for rclpy if pip fails
+        python3 -m pip install -r requirements/requirements.txt || true
 
     - name: Prepare test environment
     # Create dummy config and .env for integrity tests

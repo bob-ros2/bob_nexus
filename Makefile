@@ -9,15 +9,15 @@ help:
 
 lint:
 	@echo "[*] Running Linter (Ruff)..."
-	ruff check .
+	python3 -m ruff check .
 
 format:
 	@echo "[*] Formatting Code (Ruff)..."
-	ruff format .
+	python3 -m ruff format .
 
 test:
 	@echo "[*] Running Integrity Tests (Pytest)..."
-	PYTHONPATH=master/core:master/cli pytest tests/
+	PYTHONPATH=master/core:master/cli python3 -m pytest tests/
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
