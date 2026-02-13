@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 import time
 
 # Ensure we can import DashboardService
@@ -19,9 +19,9 @@ NC = '\033[0m'
 def print_dashboard(root_dir):
     svc = DashboardService(root_dir)
     data = svc.get_stats()
-    
+
     os.system('clear')
-    
+
     # Logo Area
     print(f"{C}{B}")
     print("  ██████╗  ██████╗ ██████╗     ███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗")
@@ -39,7 +39,7 @@ def print_dashboard(root_dir):
     print(f" {B}MASTER:{NC} {Y}{data['master_name']}{NC} | {B}MODE:{NC} {data['cpu']} CPU / {data['mem']} MEM | {B}TIME:{NC} {data['timestamp']}")
     print(f" {B}PATH:{NC}   {p['root']}")
     print(f" {B}CONFIG:{NC} {p['config']}")
-    
+
     # Counters Area
     print(f" {B}SWARM:{NC}  {G}{data['running_masters']} Masters Running{NC} | {C}{data['running_others']} Others Running{NC} | {R}{data['stopped']} Stopped{NC}")
     print(f"{P}----------------------------------------------------------------------{NC}")
@@ -47,14 +47,14 @@ def print_dashboard(root_dir):
     # Entities Table
     print(f"{B}{'CATEGORY':<15} {'NAME':<15} {'STATUS':<10} {'IDENTIFIER':<15}{NC}")
     print("-" * 65)
-    
+
     # Sort entities: Master first, then others
     sorted_ents = sorted(data["entities"], key=lambda x: (x["category"] != "master", x["name"]))
-    
+
     for ent in sorted_ents:
         status_color = G if ent["status"] == "running" else R
         print(f"{ent['category']:<15} {ent['name']:<15} {status_color}{ent['status']:<10}{NC} {ent['id']:<15}")
-    
+
     print(f"\n{Y}Press Ctrl+C to disconnect from Nexus.{NC}")
 
 if __name__ == "__main__":

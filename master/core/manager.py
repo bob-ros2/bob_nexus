@@ -1,7 +1,7 @@
 import os
 import shutil
-import yaml
 
+import yaml
 from template_engine import TemplateEngine
 
 
@@ -66,7 +66,7 @@ class EntityManager:
         skill_conf = self.conf.get("skills", {})
         # Prioritize category specifically, fall back to 'defaults'
         defaults = skill_conf.get(category, skill_conf.get("defaults", []))
-        
+
         if defaults:
             print(f"[*] Post-spawn: Linking default skills for category '{category}'...")
             for s_cat, s_name in defaults:

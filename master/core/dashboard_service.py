@@ -1,9 +1,9 @@
-import os
 import json
-import yaml
-import subprocess
-import time
+import os
 from datetime import datetime
+
+import yaml
+
 
 class DashboardService:
     def __init__(self, root_dir):
@@ -20,7 +20,7 @@ class DashboardService:
 
     def get_stats(self):
         master_name = self.conf.get("master_name", "Unknown Mastermind")
-        
+
         running_masters = 0
         running_others = 0
         stopped = 0
@@ -29,12 +29,13 @@ class DashboardService:
         if os.path.exists(self.entities_dir):
             for category in os.listdir(self.entities_dir):
                 cat_path = os.path.join(self.entities_dir, category)
-                if not os.path.isdir(cat_path): continue
-                
+                if not os.path.isdir(cat_path):
+                    continue
+
                 for ent in os.listdir(cat_path):
                     ent_path = os.path.join(cat_path, ent)
                     manifest_path = os.path.join(ent_path, "manifest.json")
-                    
+
                     status = "stopped"
                     identifier = "-"
                     if os.path.exists(manifest_path):
@@ -47,7 +48,7 @@ class DashboardService:
                                     identifier = f"PID:{m['pid']}"
                                 elif m.get("container_id"):
                                     identifier = f"CID:{m['container_id'][:12]}"
-                    
+
                     entities_list.append({
                         "category": category,
                         "name": ent,
@@ -73,11 +74,10 @@ class DashboardService:
             with open('/proc/meminfo', 'r') as f:
                 lines = f.readlines()
                 total = int(lines[0].split()[1])
-                free = int(lines[1].split()[1])
                 avail = int(lines[2].split()[1])
                 used_pct = int((1 - (avail / total)) * 100)
                 mem = f"{used_pct}%"
-        except:
+        except Exception:
             pass
 
         return {

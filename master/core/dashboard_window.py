@@ -1,7 +1,7 @@
+import os
+import sys
 import tkinter as tk
 from tkinter import ttk
-import sys
-import os
 
 # Ensure we can import DashboardService
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "core"))

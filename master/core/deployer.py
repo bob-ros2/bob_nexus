@@ -44,10 +44,10 @@ class HostDriver(BaseDriver):
     def down(self, manifest):
         pid = manifest.get("pid")
         pgid = manifest.get("pgid")
-        
+
         if not pid and not pgid:
             return False
-            
+
         # If we don't have a stored PGID, try to get it from the PID
         if not pgid and pid:
             try:
@@ -58,10 +58,10 @@ class HostDriver(BaseDriver):
         try:
             # 1. Be polite: SIGINT (ROS likes this)
             os.killpg(pgid, signal.SIGINT)
-            
+
             import time
             time.sleep(0.5)
-            
+
             # Check if leader still exists
             try:
                 os.kill(pid, 0)
@@ -77,7 +77,7 @@ class HostDriver(BaseDriver):
                 os.killpg(pgid, signal.SIGKILL)
             except ProcessLookupError:
                 pass
-                
+
             return True
         except (ProcessLookupError, PermissionError):
             return True
