@@ -1,0 +1,21 @@
+# Common ROS 2 arguments anchor
+- &common_ns "__ns:=/bob"
+
+- name: sdlviz
+  package: bob_sdlviz
+  executable: sdlviz
+  output: screen
+  arguments:
+    - --ros-args
+    - --log-level
+    - info
+    - -p
+    - screen_width:=854
+    - -p
+    - screen_height:=480
+    - -p
+    - show_window:=true
+    - -p
+    - fps:=30.0
+    - -r
+    - *common_ns

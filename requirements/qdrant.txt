@@ -1,0 +1,5 @@
+# Shared Memory (Qdrant) Dependencies
+qdrant-client
+numpy
+mcp
+mcp-server-qdrant

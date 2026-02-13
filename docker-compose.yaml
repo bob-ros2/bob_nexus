@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  mastermind:
+    build: .
+    container_name: mastermind_core
+    network_mode: host # Or use a bridge and a discovery server
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock # Allow mastermind to spawn containers
+    environment:
+      - BOB_LAUNCH_CONFIG=/app/entities/master/mastermind/llm.yaml
+    command: /bin/bash -c "source /opt/ros/humble/setup.bash && ros2 launch bob_launch generic.launch.py"
+    restart: unless-stopped

@@ -1,0 +1,33 @@
+repositories:
+  - https://github.com/bob-ros2/bob_llm
+  - https://github.com/bob-ros2/bob_launch
+
+# Mastermind configuration
+master_name: Mastermind
+default_category: assistant
+
+ros:
+  setups:
+    - /opt/ros/humble/setup.bash
+    - ./ros2_ws/install/setup.bash
+    - /home/user/ros2_ws/install/setup.bash
+
+# Orchestration Settings
+orchestration:
+  mode: "host"         # Options: host, swarm
+  image: "mastermind:latest"
+  network: "mastermind_net"
+  discovery_server: null # e.g., "172.18.0.2:11811" if using a Discovery Server
+  domain_id: 42
+  compose_file: "docker-compose.yaml" # Default compose file in root or path to a template
+
+# Default Skills for entities by category
+skills:
+  master:
+    - ["core", "memory"]
+    - ["core", "sdlviz"]
+    - ["core", "send_matrix"]
+  assistant:
+    - ["core", "memory"]
+  defaults:
+    - ["core", "memory"]

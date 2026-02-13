@@ -1,0 +1,36 @@
+# --- Experiment 7! Nexus GitIgnore ---
+
+# Core Secrets & Local Configs
+.env
+master/config/conf.yaml
+!master/config/conf.template.yaml
+!.env.template
+
+# Entity Runtime (The Swarm)
+# We ignore everything inside entities/ but keep the directory structure
+entities/*
+!entities/.gitkeep
+
+# ROS 2 Build Artifacts
+ros2_ws/install/
+ros2_ws/build/
+ros2_ws/log/
+ros2_ws/src/*
+!ros2_ws/src/.gitkeep
+
+# Python Environment & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.pytest_cache/
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# Logs & Temp
+*.log
+/tmp/
+memory/

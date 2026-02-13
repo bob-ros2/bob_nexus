@@ -1,0 +1,53 @@
+# Common ROS 2 arguments anchor
+- &common_ns "__ns:=${COMMON_NS:-/bob}"
+
+- name: ${LLM_NAME:-llm}
+  package: bob_llm
+  executable: llm
+  output: screen
+  arguments:
+    - --ros-args
+    - --log-level
+    - debug
+    - -p
+    - api_url:=${API_URL:-${MASTER_API_URL}}
+    - -p
+    - api_key:=${API_KEY:-${MASTER_API_KEY}}
+    - -p
+    - api_model:=${API_MODEL:-${MASTER_API_MODEL}}
+    - -p
+    - max_history_length:=30
+    - -p
+    - max_tool_calls:=10
+    - -p
+    - "tool_interfaces:=${TOOL_INTERFACES:-['${BOB_LLM_DIR}/config/qdrant_tools.py', '${BOB_LLM_DIR}/config/ros_cli_tools.py', '${BOB_NEXUS_DIR}/master/core/skill_tools.py']}"
+    - -p
+    - "system_prompt:=${SYSTEM_PROMPT:-'You are a helpfull assistant'}"
+    - -r
+    - *common_ns
+
+- name: aggregator
+  package: bob_topic_tools
+  executable: aggregator
+  arguments:
+    - --ros-args
+    - -p
+    - "delimiters:='.!?'"
+    - -r
+    - stream_in:=llm_stream
+    - -r
+    - stream_out:=text
+    - -r
+    - *common_ns
+
+- name: terminal
+  package: bob_topic_tools
+  executable: terminal
+  arguments:
+    - --ros-args
+    - -r
+    - topic_in:=llm_stream
+    - -r
+    - topic_out:=llm_prompt
+    - -r
+    - *common_ns

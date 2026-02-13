@@ -1,0 +1,19 @@
+[project]
+name = "bob_nexus"
+version = "0.1.0"
+description = "The central nervous system and orchestration hub for the bob-ros2 ecosystem."
+dependencies = [
+    "pyyaml",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"] # Ignore line length for now to be gentle
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "*_test.py"

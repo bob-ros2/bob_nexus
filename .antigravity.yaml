@@ -1,0 +1,32 @@
+# Antigravity Project Configuration & Rules
+
+rules:
+  mastermind_log:
+    file: "MASTERMINDLOG.md"
+    conventions:
+      - "NEVER overwrite the file; always append new phases to maintain a chronological history."
+      - "Each phase must have a header including the phase name and the codename: 'Experiment 7!'."
+      - "Structure: Header -> Brief Summary -> Key Achievements (List) -> Status."
+      - "Prose: Every phase entry MUST conclude with a descriptive, atmospheric prose section (the 'soul' of the project)."
+      - "Creative Roadmap: The 'Creative Roadmap' table must always be at the bottom of the file, updated to reflect progress."
+      - "Tone: Direct and technical for achievements, poetic and immersive for prose."
+
+  project_structure:
+    - "No code in the project root."
+    - "Core logic in master/core/ and master/cli/."
+    - "AI entities in entities/."
+    - "Shared capabilities in skills/."
+    - "Blueprints in templates/."
+    - "Dependencies in requirements/."
+
+  entity_management:
+    - "Entities should be spawned via the Mastermind CLI or mastermind.sh."
+    - "Skills must be linked via symbolic links."
+    - "Recursive template resolution (${VAR:-${DEFAULT}}) is mandatory for portability."
+
+  readme_conventions:
+    - "Language: English."
+    - "Duality: Optimized for both human comprehension and LLM/AI Agent efficiency."
+    - "Structure: High-level overview -> User Guide (Installation & Start) -> Developer Guide (Architecture & CLI) -> ROS/Transport context."
+    - "Efficiency: Use YAML examples, CLI help snippets, and clear lists for AI agents to parse requirements quickly."
+    - "ROS Context: Briefly explain the use of ROS 2 as the underlying transport and discovery system."
