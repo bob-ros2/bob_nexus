@@ -15,20 +15,37 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python Dependencies from the project
-# We'll assume the project is mounted at /app
-# But we can pre-install some common ones for speed
-RUN pip3 install --no-cache-dir \
-    pyyaml \
-    qdrant-client \
-    openai \
-    flask
-
 # Set Workspace
 WORKDIR /app
 
+# Copy Requirements first for better caching
+COPY requirements/ /app/requirements/
+
+# Install Python Dependencies from requirements files
+RUN pip3 install --no-cache-dir \
+    -r requirements/requirements.txt \
+    -r requirements/qdrant.txt
+
 # Setup ROS 2 Environment in bashrc
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
+RUN echo "if [ -f /app/ros2_ws/install/setup.bash ]; then source /app/ros2_ws/install/setup.bash; fi" >> /root/.bashrc
+
+# Copy the rest of the application
+COPY . /app/
+
+# Build ROS 2 Workspace (if src is not empty)
+RUN . /opt/ros/humble/setup.bash && \
+    if [ -d ros2_ws/src ] && [ "$(ls -A ros2_ws/src)" ]; then \
+    colcon build --symlink-install; \
+    fi
+
+# Ensure scripts are executable
+RUN chmod +x mastermind.sh \
+    && chmod +x master/cli.sh \
+    && chmod +x master/dashboard.sh \
+    && find master -name "*.sh" -o -name "*.py" -exec chmod +x {} + \
+    && find skills -name "*.sh" -o -name "*.py" -exec chmod +x {} + \
+    && chmod +x onboarding.sh
 
 # Default Command
 CMD ["/bin/bash"]
