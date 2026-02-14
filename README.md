@@ -140,7 +140,10 @@ Maintain the standards of the stack using the **Quality Suite**:
 ## 🗺️ Roadmap
 
 Future enhancements for the Mastermind:
+- **Polymorpher Swarm**: Expansion beyond ROS-only entities to include pure Inference (llama.cpp), Infrastructure (Qdrant), and Bridge (Zenoh) entities.
+- **Global Swarm (Bridge)**: Implementation of Zenoh-based encrypted tunnels for cross-network/internet ROS communication.
 - **User-per-Entity Prinzip**: Implementation of strict process isolation by creating dedicated system users for each spawned entity (Security Hardening).
+- **Perception Layer**: Dedicated entities for Vision-Language Models (Moondream) and sensory edge-processing.
 - **Integrated Memory Explorer**: Web-view for the shared vector database.
 - **Auto-Scale Swarm**: Dynamic spawning of assistants based on topic load.
 

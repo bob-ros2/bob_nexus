@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     libsdl2-ttf-dev \
     nlohmann-json3-dev \
     curl \
+    jq \
+    vim \
     git \
     sudo \
     && rm -rf /var/lib/apt/lists/*

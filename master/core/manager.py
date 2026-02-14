@@ -44,6 +44,13 @@ class EntityManager:
 
         os.makedirs(dest_dir, exist_ok=True)
 
+        # Update engine with local context for this spawn
+        self.engine.env_vars.update({
+            "NAME": entity_name,
+            "CATEGORY": category,
+            "ENTITY_DIR": dest_dir
+        })
+
         # Process all templates in the template category
         for root, dirs, files in os.walk(src_template_dir):
             rel_path = os.path.relpath(root, src_template_dir)

@@ -58,9 +58,15 @@ else
     echo -e "${YELLOW}[!] WARNING: requirements/ folder missing.${NC}"
 fi
 
-echo ""
 echo -e "${BOLD}Current Entities Status:${NC}"
 ./master/cli.sh status
+
+# Check if entities directory is empty or contains only .gitkeep
+ENTITY_COUNT=$(find entities -maxdepth 1 -not -path 'entities' -not -name '.gitkeep' | wc -l)
+if [ "$ENTITY_COUNT" -eq 0 ]; then
+    echo -e "${YELLOW}${BOLD}[!] ATTENTION: No entities found in the Swarm.${NC}"
+    echo -e "${YELLOW}Please run 'Entity Setup' (Option 6) to create your first Mastermind Core.${NC}"
+fi
 echo ""
 
 show_menu() {
@@ -81,9 +87,11 @@ show_menu() {
     echo "3) Enter Hive Logic (Manual CLI)"
     echo "4) Integrated Dashboard (Live View)"
     echo "5) Nexus Chat (OAI Mode)"
+    echo "6) Entity Setup (Guided Wizard)"
     echo "q) Exit to Void"
     echo ""
-    read -p "Select priority [1-5, q]: " choice
+    echo -e "${CYAN}---------------------------------------------${NC}"
+    read -p "Select priority [1-6, q]: " choice
 }
 
 while true; do
@@ -104,6 +112,12 @@ while true; do
             ;;
         3)
             echo -e "${CYAN}Entering Manual CLI Mode. Type 'exit' to return.${NC}"
+            echo -e "${YELLOW}Common Commands:${NC}"
+            echo -e "  cli status         - Show all entities"
+            echo -e "  cli up <name>      - Start an entity (e.g. cli up alice)"
+            echo -e "  cli down <name>    - Stop an entity"
+            echo -e "  cli refresh <name> - Regenerate system prompts"
+            echo ""
             /bin/bash
             ;;
         4)
@@ -114,6 +128,9 @@ while true; do
             echo -e "${CYAN}[*] Opening Nexus Chat Interface...${NC}"
             ./master/chat.sh --backend oai
             ;;
+        6)
+            ./master/entity_setup.sh
+            ;;
         q)
             echo -e "${YELLOW}Retreating to the shadows...${NC}"
             exit 0
@@ -122,5 +139,6 @@ while true; do
             echo -e "${RED}Invalid priority selection.${NC}"
             ;;
     esac
+    echo -e "${CYAN}=============================================${NC}"
     echo ""
 done

@@ -137,11 +137,12 @@ def main():
                             # Get actual status from driver
                             status = deployer.driver.get_status(m)
 
-                            # Identifier is PID or Container ID
-                            if m.get("pid"):
-                                identifier = f"PID:{m['pid']}"
-                            elif m.get("container_id"):
-                                identifier = f"CID:{m['container_id'][:12]}"  # Short CID
+                            # Identifier is PID or Container ID (only show if running)
+                            if status == "running":
+                                if m.get("pid"):
+                                    identifier = f"PID:{m['pid']}"
+                                elif m.get("container_id"):
+                                    identifier = f"CID:{m['container_id'][:12]}"  # Short CID
 
                     print(f"{cat:<15} {ent:<15} {status:<10} {identifier:<15}")
     except Exception as e:

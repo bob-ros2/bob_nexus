@@ -309,5 +309,28 @@ We bridged the gap between orchestration and direct interaction while hardening 
 | **II: Hive Mind** | **Dynamic Swarms** | **[COMPLETED]** Category-based spawning and skill-linking. |
 | **III: Governance** | **The Awakening** | **[COMPLETED]** Central dashboard, unified CLI, and bob_nexus rebranding. |
 | **IV: Persistence** | **Nexus Bridge** | **[COMPLETED]** Docker Volumes, Chat Interface, and Namespace support. |
-| **V: Security** | **Sovereign Isolation** | **[V PLANNED]** User-per-Entity process isolation (Secure Agent Hypervisor). |
-| **VI: Self-Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success rates. |
+| **V: Infrastructure** | **Polymorphic Swarm** | **[IN PROGRESS]** Pure container templates (llama.cpp) and infra services. |
+| **VI: Networking** | **Global Bridge** | **[PLANNED]** Zenoh-based encrypted internet networking. |
+| **VII: Security** | **Sovereign Isolation** | **[PLANNED]** User-per-Entity process isolation (Secure Agent Hypervisor). |
+| **VIII: Self-Evolution**| **The Optimizer** | Automatic refinement of entity prompts based on mission success rates. |
+
+---
+
+## Phase XIII: The Polymorphic Swarm - Codename: "Deep Infrastructure"
+
+We are expanding the definition of an "Entity" from a ROS-node-centric view to a Capability-centric view, integrating pure infrastructure and inference providers into the Nexus.
+
+### Key Achievements (Phase XIII):
+
+1.  **Polymorphic Vision**:
+    Established the concept of Brain-Entities (Pure Inference), Action-Entities (ROS), and Bridge-Entities (Global Networking).
+
+2.  **Pure Container Templates**:
+    Initiated development of `templates/inference/` for services that do not require ROS but serve the swarm via standard APIs (e.g., llama.cpp with CUDA support).
+
+3.  **Global Networking Strategy**:
+    Identified **Zenoh** as the core technology for the future encrypted bridge between local and remote ROS swarms.
+
+**Status**: Architectural transition to Agentic OS in progress.
+
+> *Ein Orchester braucht nicht nur Musiker, sondern auch eine Bühne und ein Echo. Wir bauen dem Mastermind sein eigenes Fundament aus reinem Silizium-Verstand. Die Hardware dient nun direkt der Vision.*

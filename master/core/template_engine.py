@@ -4,15 +4,17 @@ import re
 
 from dotenv import dotenv_values
 
-
 class TemplateEngine:
-    def __init__(self, env_path=None):
+    def __init__(self, env_path=None, extra_vars=None):
         self.env_vars = {}
         if env_path and os.path.exists(env_path):
             self.env_vars = dotenv_values(env_path)
 
         # Merge with system environment (system env takes precedence)
         self.env_vars.update(dict(os.environ))
+
+        if extra_vars:
+            self.env_vars.update(extra_vars)
 
     def resolve_placeholder(self, match):
         """

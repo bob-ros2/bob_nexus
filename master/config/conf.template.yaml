@@ -10,7 +10,6 @@ ros:
   setups:
     - /opt/ros/humble/setup.bash
     - ./ros2_ws/install/setup.bash
-    - /home/user/ros2_ws/install/setup.bash
 
 # Orchestration Settings
 orchestration:

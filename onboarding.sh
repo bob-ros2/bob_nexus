@@ -4,13 +4,21 @@ set -e
 # --- Experiment 7! Onboarding Script ---
 # This script initializes the bob_nexus environment inside the container.
 
-echo "██████╗  ██████╗ ██████╗     ███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗"
-echo "██╔══██╗██╔═══██╗██╔══██╗    ████╗  ██║██╔════╝╚██╗██╔╝██║   ██║██╔════╝"
-echo "██████╔╝██║   ██║██████╔╝    ██╔██╗ ██║█████╗   ╚███╔╝ ██║   ██║███████╗"
-echo "██╔══██╗██║   ██║██╔══██╗    ██║╚██╗██║██╔══╝   ██╔██╗ ██║   ██║╚════██║"
-echo "██████╔╝╚██████╔╝██████╔╝    ██║ ╚████║███████╗██╔╝ ██╗╚██████╔╝███████║"
-echo "╚═════╝  ╚═════╝ ╚═════╝     ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝"
-echo "                            INITIALIZING NEXUS"
+# Colors for the terminal
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+echo -e "${CYAN}${BOLD}██████╗  ██████╗ ██████╗     ███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗${NC}"
+echo -e "${CYAN}${BOLD}██╔══██╗██╔═══██╗██╔══██╗    ████╗  ██║██╔════╝╚██╗██╔╝██║   ██║██╔════╝${NC}"
+echo -e "${CYAN}${BOLD}██████╔╝██║   ██║██████╔╝    ██╔██╗ ██║█████╗   ╚███╔╝ ██║   ██║███████╗${NC}"
+echo -e "${CYAN}${BOLD}██╔══██╗██║   ██║██╔══██╗    ██║╚██╗██║██╔══╝   ██╔██╗ ██║   ██║╚════██║${NC}"
+echo -e "${CYAN}${BOLD}██████╔╝╚██████╔╝██████╔╝    ██║ ╚████║███████╗██╔╝ ██╗╚██████╔╝███████║${NC}"
+echo -e "${CYAN}${BOLD}╚═════╝  ╚═════╝ ╚═════╝     ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝${NC}"
+echo -e "                            ${GREEN}INITIALIZING NEXUS${NC}"
 echo ""
 
 # 0. Check for Git
@@ -72,7 +80,17 @@ cd ..
 echo ""
 echo "===================================================================="
 echo "ONBOARDING COMPLETE."
-echo "1. Run './mastermind.sh' to start the console."
-echo "2. Select 'AWAKENING' to start the Mastermind node."
-echo "3. Use './master/chat.sh --backend bob_llm' to chat with the Core."
+echo ""
+echo -e "${BOLD}Next Steps:${NC}"
+echo "1. Edit 'master/config/.env' to add your API keys."
+echo "2. Run './mastermind.sh' to start the console."
+echo "3. Inside the console, run 'Entity Setup' to create your Core."
 echo "===================================================================="
+echo ""
+
+read -p "Would you like to start 'mastermind.sh' now? (y/n): " start_mm
+if [[ $start_mm =~ ^[Yy]$ ]]; then
+    exec ./mastermind.sh
+else
+    echo "Goodbye! Run ./mastermind.sh whenever you are ready."
+fi
