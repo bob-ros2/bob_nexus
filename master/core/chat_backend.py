@@ -90,7 +90,7 @@ class OAIBackend(ChatBackend):
             yield f"\n[Error] OAI Backend: {str(e)}"
 
 class BobLLMBackend(ChatBackend):
-    def __init__(self, node_name="chat_client_node", input_topic="llm_prompt"):
+    def __init__(self, node_name="chat_client_node", input_topic="llm_prompt", output_topic="llm_stream"):
         if rclpy is None:
             raise ImportError("ROS 2 (rclpy) is required for bob_llm backend.")
         
@@ -99,16 +99,19 @@ class BobLLMBackend(ChatBackend):
             
         self.node = Node(node_name)
         self.input_topic = input_topic
-        self.publisher = self.node.create_publisher(String, input_topic, 10)
+        self.output_topic = output_topic
+        self.publisher = self.node.create_publisher(String, self.input_topic, 10)
         
         self.response_received = threading.Event()
         self.current_response = ""
-        self.is_streaming = False
         self.chunk_queue = []
         self.stream_finished = False
+        self.last_activity = 0
 
     def _stream_callback(self, msg):
-        # bob_llm usually sends empty string or special token to signal end of stream
+        import time
+        self.last_activity = time.time()
+        # bob_llm usually sends empty string or [DONE] to signal end of stream
         if not msg.data or msg.data == "[DONE]":
             self.stream_finished = True
         else:
@@ -116,53 +119,75 @@ class BobLLMBackend(ChatBackend):
         self.response_received.set()
 
     def _response_callback(self, msg):
+        import time
+        self.last_activity = time.time()
         self.current_response = msg.data
         self.response_received.set()
 
     def send_message(self, message: str, stream: bool = True):
+        import time
         self.chunk_queue = []
         self.current_response = ""
         self.response_received.clear()
         self.stream_finished = False
-        
-        output_topic = "llm_stream" if stream else "llm_response"
+        self.last_activity = time.time()
         
         if stream:
-            sub = self.node.create_subscription(String, output_topic, self._stream_callback, 10)
+            sub = self.node.create_subscription(String, self.output_topic, self._stream_callback, 10)
         else:
-            sub = self.node.create_subscription(String, output_topic, self._response_callback, 10)
+            sub = self.node.create_subscription(String, self.output_topic, self._response_callback, 10)
 
         # Publish the prompt
         msg = String()
         msg.data = message
         self.publisher.publish(msg)
 
-        # Process the response
+        # Process the response with timeouts
+        start_time = time.time()
+        activity_timeout = 5.0  # seconds
+        global_timeout = 30.0   # seconds
+        
         if stream:
             while not self.stream_finished:
-                # Spin once to process incoming messages
                 rclpy.spin_once(self.node, timeout_sec=0.1)
                 while self.chunk_queue:
                     yield self.chunk_queue.pop(0)
+                    self.last_activity = time.time()
+                
                 if self.stream_finished:
+                    break
+                    
+                now = time.time()
+                # If we got something but then silence for 5s, we assume end of stream/node finished
+                if (now - self.last_activity) > activity_timeout and (now - start_time > 1.0):
+                    break
+                if (now - start_time) > global_timeout:
+                    yield "\n[Timeout] No response from ROS node."
                     break
         else:
             while not self.response_received.is_set():
                 rclpy.spin_once(self.node, timeout_sec=0.1)
-            yield self.current_response
+                if (time.time() - start_time) > global_timeout:
+                    yield "\n[Timeout] No response on topic."
+                    break
+            if self.response_received.is_set():
+                yield self.current_response
 
         self.node.destroy_subscription(sub)
 
-def get_backend(type, **kwargs):
-    if type == "oai":
+def get_backend(backend_type, **kwargs):
+    if backend_type == "oai":
         return OAIBackend(
-            api_url=kwargs.get("api_url"),
-            api_key=kwargs.get("api_key"),
-            model=kwargs.get("model"),
+            api_url=kwargs.get("oai_api_url"),
+            api_key=kwargs.get("oai_api_key"),
+            model=kwargs.get("oai_api_model"),
             system_prompt=kwargs.get("system_prompt"),
             history_limit=kwargs.get("history_limit", 10)
         )
-    elif type == "bob_llm":
-        return BobLLMBackend()
+    elif backend_type == "bob_llm":
+        return BobLLMBackend(
+            input_topic=kwargs.get("topic_in", "llm_prompt"),
+            output_topic=kwargs.get("topic_out", "llm_stream")
+        )
     else:
-        raise ValueError(f"Unknown backend type: {type}")
+        raise ValueError(f"Unknown backend type: {backend_type}")

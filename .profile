@@ -8,4 +8,5 @@ fi
 
 export PATH=$PATH:$MMHOME:$MMHOME/master:$MMHOME/skills/core/send_matrix/scripts
 alias cli="$MMHOME/master/cli.sh"
+alias chat="$MMHOME/master/chat.sh"
 alias mm="$MMHOME/mastermind.sh"
