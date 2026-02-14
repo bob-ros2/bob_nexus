@@ -1,0 +1,16 @@
+.env
+master/config/.env
+.git
+entities/
+memory/
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+ros2_ws/src/*
+!ros2_ws/src/.gitkeep
+master/config/conf.yaml
+MASTERMINDLOG.md
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache

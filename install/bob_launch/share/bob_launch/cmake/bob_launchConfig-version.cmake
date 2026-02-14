@@ -1,0 +1,1 @@
+/blue/dev/skills/build/bob_launch/ament_cmake_core/bob_launchConfig-version.cmake

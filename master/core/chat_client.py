@@ -20,7 +20,13 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def main():
-    load_dotenv()
+    # Load .env from master/config (standard for persistence)
+    config_env = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", ".env")
+    
+    if os.path.exists(config_env):
+        load_dotenv(config_env)
+    else:
+        load_dotenv() # Fallback to standard (.env in current dir)
 
     parser = argparse.ArgumentParser(description="Experiment 7! Generic Chat Client")
     parser.add_argument("--backend", choices=["oai", "bob_llm"], default="oai", help="Chat backend to use")
@@ -34,10 +40,21 @@ def main():
     parser.add_argument("--oia_history", type=int, default=10, help="History length (number of messages to keep)")
 
     # bob_llm Specific
+    parser.add_argument("--root_ns", default=os.getenv("ROOT_NS", ""), help="Root namespace for ROS topics")
     parser.add_argument("--topic_in", default="llm_prompt", help="ROS Input topic for prompts")
     parser.add_argument("--topic_out", default="llm_stream", help="ROS Output topic for responses")
 
     args = parser.parse_args()
+
+    # Prepend ROOT_NS to topics if set
+    topic_in = args.topic_in
+    topic_out = args.topic_out
+    if args.root_ns:
+        ns = args.root_ns if args.root_ns.startswith("/") else f"/{args.root_ns}"
+        if not topic_in.startswith("/"):
+            topic_in = f"{ns}/{topic_in}".replace("//", "/")
+        if not topic_out.startswith("/"):
+            topic_out = f"{ns}/{topic_out}".replace("//", "/")
 
     # Initialize Backend
     try:
@@ -48,8 +65,8 @@ def main():
             oai_api_model=args.oai_api_model,
             system_prompt=args.aoi_system_prompt,
             history_limit=args.oia_history,
-            topic_in=args.topic_in,
-            topic_out=args.topic_out
+            topic_in=topic_in,
+            topic_out=topic_out
         )
     except Exception as e:
         print(f"\033[91m[Error] Failed to initialize backend: {e}\033[0m")
@@ -71,7 +88,7 @@ def main():
                 break
 
             # Response Display
-            print("\033[1;34mBob: \033[0m", end="", flush=True)
+            print("\033[1;34mLLM: \033[0m", end="", flush=True)
             
             # Use Backend
             full_content = ""

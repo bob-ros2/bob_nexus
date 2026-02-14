@@ -1,0 +1,1 @@
+/blue/dev/skills/ros2_ws/src/bob_launch/launch/generic.launch.py

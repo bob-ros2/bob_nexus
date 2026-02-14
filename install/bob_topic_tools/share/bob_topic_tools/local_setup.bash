@@ -1,0 +1,1 @@
+/blue/dev/skills/build/bob_topic_tools/ament_cmake_environment_hooks/local_setup.bash

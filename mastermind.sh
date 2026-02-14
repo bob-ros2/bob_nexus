@@ -23,15 +23,16 @@ echo "  ╚═════╝  ╚═════╝ ╚═════╝     �
 echo -e "                            ${GREEN}EXPERIMENT 7! - THE AWAKENING${NC}"
 echo ""
 
-# 1. Source Environment
-if [ -f .env ]; then
-    echo -e "[*] Loading environment from .env..."
-    # Source .env but keep it simple
+# 1. Source Environment (located in master/config/ for persistence)
+ENV_FILE="master/config/.env"
+
+if [ -f "$ENV_FILE" ]; then
+    echo -e "[*] Loading environment from $ENV_FILE..."
     set -a
-    source .env
+    source "$ENV_FILE"
     set +a
 else
-    echo -e "${RED}[!] WARNING: .env file not found. Have you created it?${NC}"
+    echo -e "${RED}[!] WARNING: master/config/.env not found. Have you created it?${NC}"
 fi
 
 # 2. Source ROS 2 Environment
@@ -79,9 +80,10 @@ show_menu() {
     echo "2) Collective Status"
     echo "3) Enter Hive Logic (Manual CLI)"
     echo "4) Integrated Dashboard (Live View)"
+    echo "5) Nexus Chat (OAI Mode)"
     echo "q) Exit to Void"
     echo ""
-    read -p "Select priority [1-4, q]: " choice
+    read -p "Select priority [1-5, q]: " choice
 }
 
 while true; do
@@ -107,6 +109,10 @@ while true; do
         4)
             echo -e "${CYAN}[*] Connecting to Hive Dashboard...${NC}"
             ./master/dashboard.sh
+            ;;
+        5)
+            echo -e "${CYAN}[*] Opening Nexus Chat Interface...${NC}"
+            ./master/chat.sh --backend oai
             ;;
         q)
             echo -e "${YELLOW}Retreating to the shadows...${NC}"

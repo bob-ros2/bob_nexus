@@ -2,8 +2,10 @@
 
 # Core Secrets & Local Configs
 .env
+master/config/.env
 master/config/conf.yaml
 !master/config/conf.template.yaml
+!master/config/.env.template
 !.env.template
 
 # Entity Runtime (The Swarm)

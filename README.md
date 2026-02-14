@@ -17,7 +17,7 @@ For a fresh setup (native or inside a container), use the automated onboarding s
 ```
 
 ### 2. Configure your Environment
-Edit the generated `.env` file and add your API keys (e.g., DeepSeek, OpenAI, or Matrix).
+Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSeek, OpenAI, or Matrix).
 
 ### 3. Wake Up the Mastermind
 ```bash
@@ -134,6 +134,15 @@ Maintain the standards of the stack using the **Quality Suite**:
 - `make lint`: Static analysis with **Ruff**.
 - `make format`: Consistent code formatting.
 - `make test`: Global integrity checks (YAML validity, Symlink health, Docker network availability).
+
+---
+
+## 🗺️ Roadmap
+
+Future enhancements for the Mastermind:
+- **User-per-Entity Prinzip**: Implementation of strict process isolation by creating dedicated system users for each spawned entity (Security Hardening).
+- **Integrated Memory Explorer**: Web-view for the shared vector database.
+- **Auto-Scale Swarm**: Dynamic spawning of assistants based on topic load.
 
 ---
 

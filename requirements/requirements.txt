@@ -1,7 +1,4 @@
 # Mastermind Framework Base Dependencies
-rclpy
 pyyaml
 python-dotenv
-argparse
-shlex
 requests

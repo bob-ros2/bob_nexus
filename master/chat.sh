@@ -6,10 +6,12 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( dirname "$SCRIPT_DIR" )"
 
-# 1. Load Environment Variables from project root
-if [ -f "$PROJECT_ROOT/.env" ]; then
+# 1. Load Environment Variables (located in master/config/ for persistence)
+ENV_FILE="$SCRIPT_DIR/config/.env"
+
+if [ -f "$ENV_FILE" ]; then
     set -a
-    source "$PROJECT_ROOT/.env"
+    source "$ENV_FILE"
     set +a
 fi
 

@@ -1,0 +1,1 @@
+/blue/dev/skills/build/bob_topic_tools/ament_cmake_python/bob_topic_tools/bob_topic_tools.egg-info/top_level.txt

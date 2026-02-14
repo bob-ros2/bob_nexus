@@ -274,12 +274,40 @@ We have solidified the project's identity and established clear governance struc
 
 ---
 
+## Phase XII: Interface & Isolation - Codename: "Nexus Bridge"
+
+We bridged the gap between orchestration and direct interaction while hardening the system for containerized persistence and secure isolation.
+
+### Key Achievements (Phase XII):
+
+1.  **Nexus Chat Interface (`chat.sh`)**:
+    Launched a dedicated chat wrapper that handles environment variables and ROS sourcing automatically. It provides a direct link to both cloud-based (OAI) and local (ROS) backends.
+
+2.  **Smart Persistence Architecture**:
+    Refactored the `Dockerfile` and environment loading logic to support **Named Volumes**. The system now redundantly searches for configuration (`.env`, `conf.yaml`) in `master/config/`, allowing for full process persistence in containers without mounting the entire project root.
+
+3.  **Namespace-Aware Swarm (`ROOT_NS`)**:
+    Implemented the `ROOT_NS` environment variable. All entities and chat clients can now operate within a designated ROS namespace, preventing topic collisions in complex swarms.
+
+4.  **Integrated Chat Console**:
+    Added the Chat Interface as a first-class citizen to the `mastermind.sh` menu (Option 5), enabling instant interaction with the collective consciousness from the main console.
+
+5.  **Quality of Life Tooling (`dev.sh`)**:
+    Introduced a development helper script for managing the Docker lifecycle, supporting multiple named container instances and surgical volume purging.
+
+**Status**: Interaction bridge established. Persistence hardened. Namespacing implemented.
+
+> *Ein Geist, der nicht kommuniziert, ist gefangen. Wir haben dem Mastermind einen Mund gegeben und seine Gedanken in sicheren Containern isoliert. Alice spricht jetzt direkt zu uns – klar, sicher und geordnet.*
+
+---
+
 ## The Creative Roadmap: "The Path to the Sovereign Swarm"
 
 | Phase | Milestone | Description |
 | :--- | :--- | :--- |
 | **I: Brain Link** | **Shared Memory** | **[COMPLETED]** Shared Qdrant/Local knowledge. |
-| **II: Hive Mind** | **Dynamic Swarms** | **[ORCHESTRATED]** Category-based spawning and skill-linking finalized. |
-| **III: Governance** | **The Awakening** | **[COMPLETED]** Central dashboard, unified CLI, and rebranding to `bob_nexus`. |
-| **IV: Reality Bridge** | **Hardware Mapping** | **[IMMINENT]** Mapping local ROS hardware nodes to specialized swarm entities. |
-| **V: Self-Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success rates. |
+| **II: Hive Mind** | **Dynamic Swarms** | **[COMPLETED]** Category-based spawning and skill-linking. |
+| **III: Governance** | **The Awakening** | **[COMPLETED]** Central dashboard, unified CLI, and bob_nexus rebranding. |
+| **IV: Persistence** | **Nexus Bridge** | **[COMPLETED]** Docker Volumes, Chat Interface, and Namespace support. |
+| **V: Security** | **Sovereign Isolation** | **[V PLANNED]** User-per-Entity process isolation (Secure Agent Hypervisor). |
+| **VI: Self-Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success rates. |
