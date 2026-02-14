@@ -6,7 +6,34 @@
 
 ---
 
-## 🛠️ System Overview
+## � Quick Start & Onboarding
+
+For a fresh setup (native or inside a container), use the automated onboarding script to initialize your environment, download core ROS 2 dependencies, and build the workspace.
+
+### 1. Initialize the Nexus
+```bash
+# This will clone bob_llm, bob_launch, and bob_topic_tools and build the ros2_ws
+./onboarding.sh
+```
+
+### 2. Configure your Environment
+Edit the generated `.env` file and add your API keys (e.g., DeepSeek, OpenAI, or Matrix).
+
+### 3. Wake Up the Mastermind
+```bash
+./mastermind.sh
+# Select [1] AWAKENING to start the core management entity.
+```
+
+### 4. Create your first Assistant
+```bash
+./master/cli.sh spawn assistant alice bob_llm
+./master/cli.sh up alice
+```
+
+---
+
+## �🛠️ System Overview
 
 `bob_nexus` leverages **ROS 2 (Humble)** as its underlying transport and discovery mechanism. While most entities are high-level agents, the communication backbone relies on the resilience of the ROS 2 ecosystem.
 
