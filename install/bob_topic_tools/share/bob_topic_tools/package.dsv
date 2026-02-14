@@ -1,8 +1,0 @@
-source;share/bob_topic_tools/hook/cmake_prefix_path.ps1
-source;share/bob_topic_tools/hook/cmake_prefix_path.dsv
-source;share/bob_topic_tools/hook/cmake_prefix_path.sh
-source;share/bob_topic_tools/local_setup.bash
-source;share/bob_topic_tools/local_setup.dsv
-source;share/bob_topic_tools/local_setup.ps1
-source;share/bob_topic_tools/local_setup.sh
-source;share/bob_topic_tools/local_setup.zsh

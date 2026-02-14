@@ -1,1 +1,0 @@
-/blue/dev/skills/build/bob_topic_tools/ament_cmake_core/bob_topic_toolsConfig-version.cmake

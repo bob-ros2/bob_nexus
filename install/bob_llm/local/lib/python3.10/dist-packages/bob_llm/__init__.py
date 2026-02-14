@@ -1,1 +1,0 @@
-/blue/dev/skills/ros2_ws/src/bob_llm/bob_llm/__init__.py

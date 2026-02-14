@@ -1,1 +1,0 @@
-/blue/dev/skills/ros2_ws/src/bob_llm/config/qdrant_tools.py

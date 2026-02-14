@@ -1,2 +1,0 @@
-[console_scripts]
-llm = bob_llm.llm_node:main

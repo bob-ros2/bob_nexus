@@ -1,1 +1,0 @@
-/blue/dev/skills/ros2_ws/src/bob_topic_tools/bob_topic_tools/__init__.py
