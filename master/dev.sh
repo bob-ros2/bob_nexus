@@ -51,10 +51,10 @@ case "$1" in
         fi
         ;;
     *)
-        echo "Usage: ./master/dev.sh {rebuild|start|purge}"
+        echo "Usage: ./master/dev.sh {rebuild|start|enter|purge}"
         echo ""
-        echo "  rebuild : Replays the docker build process."
-        echo "  start   : Start a new or enter an existing container by name."
-        echo "  purge   : Deletes container and its associated volumes."
+        echo "  rebuild     : Replays the docker build process."
+        echo "  start/enter : Start a new or enter an existing container by name."
+        echo "  purge       : Deletes container and its associated volumes."
         ;;
 esac
