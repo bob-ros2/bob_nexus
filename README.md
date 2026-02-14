@@ -31,6 +31,15 @@ Edit the generated `.env` file and add your API keys (e.g., DeepSeek, OpenAI, or
 ./master/cli.sh up alice
 ```
 
+### 5. Chat with the Swarm
+```bash
+# Connect to the local bob_llm assistant
+./master/chat.sh --backend bob_llm
+
+# Or use the cloud backend (OAI)
+./master/chat.sh --backend oai
+```
+
 ---
 
 ## �🛠️ System Overview
@@ -59,6 +68,11 @@ Real-time awareness of the Swarm.
 - **Terminal Mode** (`./dashboard.sh`): A high-performance cyberpunk terminal dashboard with live CPU/MEM/Entity stats.
 - **Status Mode** (`./dashboard.sh status`): Instant one-time status dump.
 - **Window Mode** (`./dashboard.sh window`): A native high-contrast OS GUI (Tkinter) with copyable paths and auto-refresh.
+
+### 3. The Nexus Chat Interface (`./master/chat.sh`)
+The direct communication link to your entities.
+- **Backend OAI**: Direct link to your cloud LLM (DeepSeek, OpenAI, etc.).
+- **Backend Bob**: Interactive ROS 2 link to your local `bob_llm` node.
 
 ---
 
