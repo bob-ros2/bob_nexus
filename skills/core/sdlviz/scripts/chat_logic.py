@@ -1,5 +1,4 @@
-import os
-import subprocess
+
 
 def update_dashboard(message: str, category: str = "INFO"):
     """
@@ -10,6 +9,7 @@ def update_dashboard(message: str, category: str = "INFO"):
     print(f"[SDLViz] Node Update: [{category}] {message}")
     # In a real Swarm, we would publish to a ROS 2 topic here.
     return f"Dashboard updated with {category} message."
+
 
 def set_swarm_mood(mood: str):
     """

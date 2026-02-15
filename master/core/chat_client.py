@@ -26,7 +26,7 @@ def str2bool(v):
 def main():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_dir = os.path.join(root_dir, "config")
-    
+
     # Load .env
     config_env = os.path.join(config_dir, ".env")
     if os.path.exists(config_env):
@@ -46,7 +46,7 @@ def main():
                 oai_conf = conf.get("chat", {}).get("oai", {})
                 max_tool_calls_default = oai_conf.get("max_tool_calls", 5)
                 oai_interfaces = oai_conf.get("tool_interfaces", [])
-                
+
                 # Master skills are lists like ["category", "name"]
                 for skill_pair in conf.get("skills", {}).get("master", []):
                     if len(skill_pair) >= 2:
@@ -108,6 +108,7 @@ def main():
 
     if args.debug:
         import logging
+
         logging.basicConfig(level=logging.DEBUG)
         logging.getLogger("urllib3").setLevel(logging.DEBUG)
         logging.getLogger("requests").setLevel(logging.DEBUG)
