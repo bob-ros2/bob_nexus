@@ -56,12 +56,22 @@ class OAIBackend(ChatBackend):
         self.history = []
         self.persistent_path = persistent_history_path
         self.max_tool_calls = max_tool_calls
-        self.tools = None
+        self.tools = []
 
         if enable_tools:
-            self.tools = skill_tools.get_tools_from_skills()
+            # 1. Load Core Orchestration Tools (skill_tools.py functions)
+            self.tools.extend(skill_tools.get_orchestrator_tools())
+            
+            # 2. Load Tools from specifically enabled skills (logic.py only)
+            enabled_skills = kwargs.get("enabled_skills")
+            skill_tools_list = skill_tools.get_tools_from_skills(enabled_skills)
+            self.tools.extend(skill_tools_list)
+            
             if self.tools:
-                print(f"\033[94m[*] Tools enabled: {len(self.tools)} skills loaded.\033[0m")
+                print(f"\033[94m[*] Tools enabled: {len(self.tools)} functions (Orchestrator + Master Skills) available.\033[0m")
+            else:
+                self.tools = None # OpenAI expects None or non-empty list
+                print("\033[33m[!] Tools requested but no functions found.\033[0m")
 
         # Initial structure based on user rules or default identity
         sys_p = system_prompt if system_prompt else DEFAULT_IDENTITY
@@ -319,6 +329,7 @@ def get_backend(backend_type, **kwargs):
             persistent_history_path=kwargs.get("persistent_history_path"),
             enable_tools=kwargs.get("enable_tools", False),
             max_tool_calls=kwargs.get("max_tool_calls", 5),
+            enabled_skills=kwargs.get("enabled_skills"),
         )
     elif backend_type == "bob_llm":
         return BobLLMBackend(

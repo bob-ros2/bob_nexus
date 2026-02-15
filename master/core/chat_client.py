@@ -34,14 +34,19 @@ def main():
     else:
         load_dotenv()
 
-    # Load conf.yaml for chat settings
+    # Load conf.yaml for chat settings and skills
     conf_path = os.path.join(config_dir, "conf.yaml")
     max_tool_calls_default = 5
+    master_skills = []
     if os.path.exists(conf_path):
         try:
             with open(conf_path, "r") as f:
                 conf = yaml.safe_load(f)
                 max_tool_calls_default = conf.get("chat", {}).get("oai", {}).get("max_tool_calls", 5)
+                # Master skills are lists like ["category", "name"]
+                for skill_pair in conf.get("skills", {}).get("master", []):
+                    if len(skill_pair) >= 2:
+                        master_skills.append(skill_pair[1])
         except Exception:
             pass
 
@@ -116,6 +121,7 @@ def main():
             persistent_history_path=args.persistent_history,
             enable_tools=args.tools,
             max_tool_calls=args.max_tool_calls,
+            enabled_skills=master_skills,
             topic_in=topic_in,
             topic_out=topic_out,
         )
