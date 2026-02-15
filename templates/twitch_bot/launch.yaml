@@ -1,0 +1,47 @@
+# Twitch Bot Template - Combined Brain & Vision
+# Includes nested namespaces:
+# - Viz: ${COMMON_NS:-/bob}/${NAME}
+# - LLM: ${COMMON_NS:-/bob}/${NAME}/llm
+
+- &entity_ns "__ns:=${COMMON_NS:-/bob}/${NAME}"
+- &llm_ns "__ns:=${COMMON_NS:-/bob}/${NAME}/llm"
+
+# 1. The Dashboard (Visual Head)
+- name: viz
+  package: bob_sdlviz
+  executable: sdlviz
+  output: screen
+  arguments:
+    - --ros-args
+    - -p
+    - show_window:=${SHOW_WINDOW:-false}
+    - -p
+    - stream_to_twitch:=${TWITCH_STREAM_ACTIVE:-true}
+    - -p
+    - stream_key:=${TWITCH_STREAM_KEY:-'YOUR_KEY_HERE'}
+    - -p
+    - screen_width:=854
+    - -p
+    - screen_height:=480
+    - -r
+    - *entity_ns
+
+# 2. The Agent Logic (Cognitive Core)
+- name: brain
+  package: bob_llm
+  executable: llm
+  output: screen
+  arguments:
+    - --ros-args
+    - -p
+    - api_url:=${API_URL:-${MASTER_API_URL}}
+    - -p
+    - api_key:=${API_KEY:-${MASTER_API_KEY}}
+    - -p
+    - api_model:=${API_MODEL:-${MASTER_API_MODEL}}
+    - -p
+    - "system_prompt:=${SYSTEM_PROMPT:-'You are Alice, a Twitch host. Keep viewers engaged.'}"
+    - -p
+    - "tool_interfaces:=${TOOL_INTERFACES:-['${BOB_LLM_DIR}/config/qdrant_tools.py', '${BOB_NEXUS_DIR}/master/core/skill_tools.py']}"
+    - -r
+    - *llm_ns

@@ -23,6 +23,14 @@ class BaseDriver:
 class HostDriver(BaseDriver):
     def up(self, entity_dir, config_path, ros_source):
         env = os.environ.copy()
+        
+        # Load entity-specific .env if it exists
+        local_env_path = os.path.join(entity_dir, ".env")
+        if os.path.exists(local_env_path):
+            from dotenv import dotenv_values
+            local_vars = dotenv_values(local_env_path)
+            env.update({k: v for k, v in local_vars.items() if v is not None})
+
         # Build source prefix
         source_prefix = f"{ros_source} && " if ros_source else ""
         command = [
@@ -141,6 +149,16 @@ class DockerDriver(BaseDriver):
 
             # Forward environment for the compose context
             env = os.environ.copy()
+            
+            # Load entity-specific .env if it exists
+            local_env_path = os.path.join(entity_dir, ".env")
+            if os.path.exists(local_env_path):
+                print(f"[*] Orchestration: Loading local environment from {local_env_path}")
+                from dotenv import dotenv_values
+                local_vars = dotenv_values(local_env_path)
+                # Filter out None values and update
+                env.update({k: v for k, v in local_vars.items() if v is not None})
+
             env["BOB_LAUNCH_CONFIG"] = config_path
             env["ROS_DOMAIN_ID"] = str(self.config.get("domain_id", 42))
             ds = self.config.get("discovery_server")

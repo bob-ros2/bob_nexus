@@ -1,0 +1,17 @@
+# Twitch Bot Composer (Viz-Heavy)
+services:
+  agent:
+    build:
+      context: ${BOB_NEXUS_DIR}
+      dockerfile: Dockerfile
+    image: ${image:-mastermind:latest}
+    network_mode: host
+    environment:
+      - BOB_LAUNCH_CONFIG=${BOB_LAUNCH_CONFIG}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+      - ROS_DISCOVERY_SERVER=${ROS_DISCOVERY_SERVER}
+      - TWITCH_STREAM_KEY=${TWITCH_STREAM_KEY}
+      - SHOW_WINDOW=${SHOW_WINDOW:-false}
+    volumes:
+      - ${BOB_NEXUS_DIR}:/app
+    command: /bin/bash -c "source /opt/ros/humble/setup.bash && source /app/ros2_ws/install/setup.bash && ros2 launch bob_launch generic.launch.py"

@@ -53,7 +53,7 @@ cd ros2_ws/src
 
 echo "[*] Cleaning up workspace and checking for core repositories..."
 # Remove broken symlinks or external links to ensure we have local copies for the container
-for repo in bob_llm bob_launch bob_topic_tools; do
+for repo in bob_llm bob_launch bob_topic_tools bob_sdlviz; do
     if [ -L "$repo" ]; then
         echo "    [!] Removing symlink for $repo to ensure local clone..."
         rm "$repo"
