@@ -31,7 +31,7 @@ jobs:
     # Create dummy config and .env for integrity tests
       run: |
         cp master/config/conf.template.yaml master/config/conf.yaml
-        cp .env.template .env
+        cp master/config/.env.template master/config/.env
         mkdir -p entities
 
     - name: Run Linter (Ruff)

@@ -12,7 +12,7 @@ class EntityManager:
         self.entities_dir = os.path.join(self.root_dir, "entities")
         self.templates_dir = os.path.join(self.root_dir, "templates")
         self.skills_dir = os.path.join(self.root_dir, "skills")
-        self.env_path = os.path.join(self.root_dir, ".env")
+        self.env_path = os.path.join(self.master_dir, "config", ".env")
         self.conf_path = os.path.join(self.master_dir, "config", "conf.yaml")
 
         self.engine = TemplateEngine(self.env_path)
