@@ -1,0 +1,21 @@
+# --- Nexus Mastermind Shell Configuration ---
+
+# 1. Source user profile if it exists (as requested: before ./.profile)
+if [ -f .profile ]; then
+    . ./.profile
+fi
+
+# 2. Source system and user bashrc to maintain aliases and standard colors
+if [ -f /etc/bash.bashrc ]; then
+    . /etc/bash.bashrc
+fi
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+
+# 3. The Magic Mastermind Prompt
+# Format: [🤖] user@host:path $
+# Using Cyan for NEXUS, Green for user@host, and Blue for path.
+export PS1="\[\e[1;36m\][🤖]\[\e[0m\]\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ "
+
+echo -e "\e[1;36m[*] Nexus Magic Shell initialized.\e[0m"

@@ -11,9 +11,14 @@ ros:
     - /opt/ros/humble/setup.bash
     - ./ros2_ws/install/setup.bash
 
+# Chat Settings
+chat:
+  oai:
+    max_tool_calls: 5
+
 # Orchestration Settings
 orchestration:
-  mode: "host"         # Options: host, swarm
+  mode: host         # Options: host, swarm
   image: "mastermind:latest"
   network: "mastermind_net"
   discovery_server: null # e.g., "172.18.0.2:11811" if using a Discovery Server

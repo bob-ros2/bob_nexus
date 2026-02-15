@@ -118,7 +118,7 @@ while true; do
             echo -e "  cli down <name>    - Stop an entity"
             echo -e "  cli refresh <name> - Regenerate system prompts"
             echo ""
-            /bin/bash
+            /bin/bash --rcfile master/nexus_shell.rc
             ;;
         4)
             echo -e "${CYAN}[*] Connecting to Hive Dashboard...${NC}"

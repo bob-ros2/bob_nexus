@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 
+import yaml
 from dotenv import load_dotenv
 
 # Add project root to path for imports
@@ -23,15 +24,26 @@ def str2bool(v):
 
 
 def main():
-    # Load .env from master/config (standard for persistence)
-    config_env = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", ".env"
-    )
-
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    config_dir = os.path.join(root_dir, "config")
+    
+    # Load .env
+    config_env = os.path.join(config_dir, ".env")
     if os.path.exists(config_env):
         load_dotenv(config_env)
     else:
-        load_dotenv()  # Fallback to standard (.env in current dir)
+        load_dotenv()
+
+    # Load conf.yaml for chat settings
+    conf_path = os.path.join(config_dir, "conf.yaml")
+    max_tool_calls_default = 5
+    if os.path.exists(conf_path):
+        try:
+            with open(conf_path, "r") as f:
+                conf = yaml.safe_load(f)
+                max_tool_calls_default = conf.get("chat", {}).get("oai", {}).get("max_tool_calls", 5)
+        except Exception:
+            pass
 
     parser = argparse.ArgumentParser(description="Experiment 7! Generic Chat Client")
     parser.add_argument(
@@ -51,9 +63,26 @@ def main():
     parser.add_argument(
         "--oai_api_model", default=os.getenv("MASTER_API_MODEL", "gpt-4o"), help="Model name"
     )
-    parser.add_argument("--aoi_system_prompt", help="System prompt for OAI backend")
+    parser.add_argument("--oai_system_prompt", help="System prompt for OAI backend")
     parser.add_argument(
-        "--oia_history", type=int, default=10, help="History length (number of messages to keep)"
+        "--oai_history", type=int, default=10, help="History length (number of messages to keep)"
+    )
+    parser.add_argument(
+        "--persistent_history",
+        default=os.getenv("NEXUS_CHAT_HISTORY"),
+        help="Path to persistent history file",
+    )
+    parser.add_argument(
+        "--tools",
+        type=str2bool,
+        default=str2bool(os.getenv("NEXUS_CHAT_TOOLS", "False")),
+        help="Enable/disable skill-based tools",
+    )
+    parser.add_argument(
+        "--max_tool_calls",
+        type=int,
+        default=max_tool_calls_default,
+        help="Maximum consecutive tool calls",
     )
 
     # bob_llm Specific
@@ -82,8 +111,11 @@ def main():
             oai_api_url=args.oai_api_url,
             oai_api_key=args.oai_api_key,
             oai_api_model=args.oai_api_model,
-            system_prompt=args.aoi_system_prompt,
-            history_limit=args.oia_history,
+            system_prompt=args.oai_system_prompt,
+            history_limit=args.oai_history,
+            persistent_history_path=args.persistent_history,
+            enable_tools=args.tools,
+            max_tool_calls=args.max_tool_calls,
             topic_in=topic_in,
             topic_out=topic_out,
         )

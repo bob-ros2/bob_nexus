@@ -1,4 +1,6 @@
+import datetime
 import json
+import os
 import threading
 from abc import ABC, abstractmethod
 
@@ -13,6 +15,22 @@ except ImportError:
     rclpy = None
 
 
+DEFAULT_IDENTITY = """You are the Mastermind Core of the **Bob Nexus** (also known as Experiment 7!).
+Bob Nexus is a decentralized, polymorphic ROS 2 Swarm OS designed for self-hosting.
+It features:
+- **Mastermind**: Central management entity and "Awakening" control console.
+- **Entities**: Specialized agents (like Alice or Bob) and pure infrastructure providers (like llama.cpp or Qdrant).
+- **Polymorphism**: Orchestration of Brain (Inference), Action (ROS), and Bridge (Networking) entities.
+- **Connectivity**: Local ROS 2 communication with a roadmap for encrypted Zenoh-based internet tunnels.
+- **Philosophy**: Pure self-hosting, developer-centric UX, and direct, technical communication.
+
+Your goal is to assist the user in managing and interacting with this Swarm. You are direct, technical, and slightly humorous, as expected in the Nexus.
+"""
+
+
+import skill_tools
+
+
 class ChatBackend(ABC):
     @abstractmethod
     def send_message(self, message: str, stream: bool = True):
@@ -20,69 +38,178 @@ class ChatBackend(ABC):
 
 
 class OAIBackend(ChatBackend):
-    def __init__(self, api_url, api_key, model, system_prompt=None, history_limit=10):
+    def __init__(
+        self,
+        api_url,
+        api_key,
+        model,
+        system_prompt=None,
+        history_limit=10,
+        persistent_history_path=None,
+        enable_tools=False,
+        max_tool_calls=5,
+    ):
         self.api_url = api_url.rstrip("/") + "/chat/completions"
         self.api_key = api_key
         self.model = model
         self.history_limit = history_limit
         self.history = []
+        self.persistent_path = persistent_history_path
+        self.max_tool_calls = max_tool_calls
+        self.tools = None
 
-        # Initial structure based on user rules
-        if system_prompt:
-            self.history.append({"role": "system", "content": system_prompt})
-            self.history.append({"role": "assistant", "content": "I am ready to help."})
-        else:
+        if enable_tools:
+            self.tools = skill_tools.get_tools_from_skills()
+            if self.tools:
+                print(f"\033[94m[*] Tools enabled: {len(self.tools)} skills loaded.\033[0m")
+
+        # Initial structure based on user rules or default identity
+        sys_p = system_prompt if system_prompt else DEFAULT_IDENTITY
+        self.history.append({"role": "system", "content": sys_p})
+
+        if self.persistent_path:
+            self._load_persistent_history()
+
+        # Add a welcoming message if history is empty (besides system)
+        if len(self.history) == 1:
             self.history.append(
-                {"role": "assistant", "content": "Hello! How can I assist you today?"}
+                {
+                    "role": "assistant",
+                    "content": "Hello! The Nexus is online. How can I assist you today?",
+                }
             )
+
+    def _load_persistent_history(self):
+        """Loads history from a robust text format."""
+        if not os.path.exists(self.persistent_path):
+            return
+
+        try:
+            with open(self.persistent_path, "r") as f:
+                content = f.read()
+
+            # Split by separator
+            blocks = content.split("---")
+            for block in blocks:
+                block = block.strip()
+                if not block:
+                    continue
+
+                lines = block.splitlines()
+                role = None
+                message_content = []
+                in_content = False
+
+                for line in lines:
+                    if line.startswith("ROLE: "):
+                        role = line[6:].strip()
+                    elif line.startswith("CONTENT:"):
+                        in_content = True
+                    elif in_content:
+                        message_content.append(line)
+
+                if role and message_content:
+                    self.history.append(
+                        {"role": role, "content": "\n".join(message_content).strip()}
+                    )
+
+            # Keep only the last N messages from history (plus system prompt)
+            if len(self.history) > (self.history_limit + 1):
+                self.history = [self.history[0]] + self.history[-(self.history_limit) :]
+
+        except Exception as e:
+            print(f"[Warning] Failed to load persistent history: {e}")
+
+    def _save_to_persistence(self, role, content, tool_calls=None):
+        """Appends a single message to the persistent file in a robust format."""
+        if not self.persistent_path:
+            return
+
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        try:
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(os.path.abspath(self.persistent_path)), exist_ok=True)
+
+            with open(self.persistent_path, "a") as f:
+                f.write("---\n")
+                f.write(f"ROLE: {role}\n")
+                f.write(f"TIMESTAMP: {timestamp}\n")
+                if tool_calls:
+                    f.write(f"TOOL_CALLS: {json.dumps(tool_calls)}\n")
+                f.write("CONTENT:\n")
+                f.write(f"{content}\n")
+        except Exception as e:
+            print(f"[Warning] Failed to save to persistent history: {e}")
 
     def send_message(self, message: str, stream: bool = True):
         self.history.append({"role": "user", "content": message})
-
-        # Keep history within limits
-        # We need to preserve the first 1 or 2 messages (system/initial assistant)
-        fixed_offset = 2 if self.history[0]["role"] == "system" else 1
-        if len(self.history) > (self.history_limit + fixed_offset):
-            # Remove the oldest user/assistant pairs after the fixed header
-            self.history = self.history[:fixed_offset] + self.history[-(self.history_limit) :]
+        self._save_to_persistence("user", message)
 
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        
+        loop_count = 0
+        while loop_count < self.max_tool_calls:
+            loop_count += 1
+            
+            # Keep history within limits (preserve system prompt)
+            if len(self.history) > (self.history_limit + 1):
+                self.history = [self.history[0]] + self.history[-(self.history_limit):]
 
-        payload = {"model": self.model, "messages": self.history, "stream": stream}
-
-        try:
-            response = requests.post(self.api_url, headers=headers, json=payload, stream=stream)
-            response.raise_for_status()
-
-            full_response = ""
-            if stream:
-                for line in response.iter_lines():
-                    if not line:
-                        continue
-
-                    line_text = line.decode("utf-8").strip()
-                    if line_text.startswith("data: "):
-                        data_str = line_text[6:].strip()
-                        if data_str == "[DONE]":
-                            break
-
-                        try:
-                            data_json = json.loads(data_str)
-                            content = data_json["choices"][0].get("delta", {}).get("content", "")
-                            if content:
-                                full_response += content
-                                yield content
-                        except json.JSONDecodeError:
-                            continue
-            else:
+            payload = {"model": self.model, "messages": self.history}
+            if self.tools:
+                payload["tools"] = self.tools
+            
+            # Streaming is only final-step-friendly if we don't have tool calls.
+            # However, for simplicity, we only stream the FINAL response if it's content.
+            # If the model wants to call tools, we do it non-streamed (internal loop).
+            
+            try:
+                # First, check if there are tool calls (non-streamed for internal processing)
+                response = requests.post(self.api_url, headers=headers, json=payload)
+                response.raise_for_status()
                 data_json = response.json()
-                full_response = data_json["choices"][0]["message"]["content"]
-                yield full_response
+                
+                resp_msg = data_json["choices"][0]["message"]
+                self.history.append(resp_msg) # Add as dict directly
+                
+                tool_calls = resp_msg.get("tool_calls")
+                
+                if not tool_calls:
+                    # Final response (just content)
+                    content = resp_msg.get("content", "")
+                    self._save_to_persistence("assistant", content)
+                    yield content
+                    return
+                
+                # We have tool calls. Process them.
+                self._save_to_persistence("assistant", resp_msg.get("content", ""), tool_calls=tool_calls)
+                
+                for tool_call in tool_calls:
+                    func_name = tool_call["function"]["name"]
+                    func_args = tool_call["function"]["arguments"]
+                    call_id = tool_call["id"]
+                    
+                    print(f"\033[93m[*] NEXUS CALLING: {func_name}({func_args})\033[0m")
+                    
+                    result = skill_tools.call_skill_function(func_name, func_args)
+                    
+                    # Add result to history
+                    self.history.append({
+                        "role": "tool",
+                        "tool_call_id": call_id,
+                        "name": func_name,
+                        "content": result
+                    })
+                    self._save_to_persistence("tool", result)
+                
+                # Loop will continue and send the history with tool results back to LLM
 
-            self.history.append({"role": "assistant", "content": full_response})
+            except Exception as e:
+                yield f"\n[Error] OAI Backend: {str(e)}"
+                return
 
-        except Exception as e:
-            yield f"\n[Error] OAI Backend: {str(e)}"
+        yield "\n[Safety Limit] Maximum consecutive tool calls reached."
 
 
 class BobLLMBackend(ChatBackend):
@@ -189,6 +316,9 @@ def get_backend(backend_type, **kwargs):
             model=kwargs.get("oai_api_model"),
             system_prompt=kwargs.get("system_prompt"),
             history_limit=kwargs.get("history_limit", 10),
+            persistent_history_path=kwargs.get("persistent_history_path"),
+            enable_tools=kwargs.get("enable_tools", False),
+            max_tool_calls=kwargs.get("max_tool_calls", 5),
         )
     elif backend_type == "bob_llm":
         return BobLLMBackend(
