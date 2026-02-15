@@ -61,6 +61,9 @@ def main():
     parser.add_argument(
         "--stream", type=str2bool, default=True, help="Enable/disable streaming (default: True)"
     )
+    parser.add_argument(
+        "--debug", type=str2bool, default=False, help="Enable verbose debug logging"
+    )
 
     # OAI Specific
     parser.add_argument(
@@ -103,6 +106,13 @@ def main():
 
     args = parser.parse_args()
 
+    if args.debug:
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
+        logging.getLogger("urllib3").setLevel(logging.DEBUG)
+        logging.getLogger("requests").setLevel(logging.DEBUG)
+        print("\033[90m[Debug] Verbose logging enabled.\033[0m")
+
     # Prepend ROOT_NS to topics if set
     topic_in = args.topic_in
     topic_out = args.topic_out
@@ -127,6 +137,7 @@ def main():
             max_tool_calls=args.max_tool_calls,
             enabled_skills=master_skills,
             tool_interfaces=oai_interfaces,
+            debug=args.debug,
             topic_in=topic_in,
             topic_out=topic_out,
         )

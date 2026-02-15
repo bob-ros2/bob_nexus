@@ -50,23 +50,32 @@ class OAIBackend(ChatBackend):
         self.persistent_path = persistent_history_path
         self.max_tool_calls = max_tool_calls
         self.tools = []
+        self.debug = kwargs.get("debug", False)
 
         if enable_tools:
             # 1. Orchestrator Core Tools (prefix core)
             import skill_tools as st_mod
-            self.tools.extend(skill_tools.get_tools_from_module(st_mod, prefix="core"))
+            core_tools = skill_tools.get_tools_from_module(st_mod, prefix="core")
+            self.tools.extend(core_tools)
+            if self.debug: print(f"\033[90m[Debug] Loaded {len(core_tools)} core tools.\033[0m")
             
             # 2. Specific interfaces from config.yaml
             tool_interfaces = kwargs.get("tool_interfaces", [])
             for interface_file in tool_interfaces:
-                self.tools.extend(skill_tools.get_tools_from_file(interface_file))
+                iface_tools = skill_tools.get_tools_from_file(interface_file)
+                self.tools.extend(iface_tools)
+                if self.debug and iface_tools: 
+                    print(f"\033[90m[Debug] Loaded {len(iface_tools)} tools from interface: {interface_file}\033[0m")
             
             # 3. Enabled skills (from conf.yaml master section)
             enabled_skills = kwargs.get("enabled_skills", [])
-            self.tools.extend(skill_tools.get_tools_from_skills(enabled_skills))
+            skill_tools_list = skill_tools.get_tools_from_skills(enabled_skills)
+            self.tools.extend(skill_tools_list)
+            if self.debug and skill_tools_list:
+                print(f"\033[90m[Debug] Loaded {len(skill_tools_list)} tools from {len(enabled_skills)} master skills.\033[0m")
 
             if not self.tools: self.tools = None
-            else: print(f"\033[94m[*] OAI Tools enabled: {len(self.tools)} functions loaded.\033[0m")
+            else: print(f"\033[94m[*] OAI Tools enabled: {len(self.tools)} functions available.\033[0m")
 
         # Identity
         sys_p = system_prompt if system_prompt else DEFAULT_IDENTITY

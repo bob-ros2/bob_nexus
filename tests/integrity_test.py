@@ -6,6 +6,9 @@ import yaml
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+when "Entering Manual CLI Mode. Type 'exit' to return." coming from mastermind.sh it is opening a new shell, can we make it that
+- this new shell sources before the ./.profiler
+- that our 'special shell' has a prompt that indicates that we are the magic mastermind shell (the main shell prompt format user@host:/path shold remain, but could be slighly changed, use phantasy)
 
 def test_config_validity():
     """Check if the main configuration exists and is valid YAML."""
