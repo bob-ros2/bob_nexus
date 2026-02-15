@@ -78,7 +78,18 @@ rm -rf ros2_ws/build/ ros2_ws/install/ ros2_ws/log/
 
 # Switch to the workspace directory to build
 cd ros2_ws
-/bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install"
+
+# HACK: Clear existing ROS workspace variables from the environment to avoid 
+# annoying 'path doesn't exist' warnings from colcon build when we just deleted them.
+# We then source only the base ROS 2 setup.
+echo "    [*] Purging stale workspace variables for a clean build..."
+unset AMENT_PREFIX_PATH
+unset CMAKE_PREFIX_PATH
+unset COLCON_PREFIX_PATH
+unset PKG_CONFIG_PATH
+unset PYTHONPATH
+
+/bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --event-handlers console_cohesion+"
 cd ..
 
 echo ""

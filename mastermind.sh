@@ -52,39 +52,45 @@ fi
 # 3. Check Dependencies (Quick Check)
 echo -e "[*] Reviewing neural paths (dependencies)..."
 if [ -d requirements ]; then
-    # This is a bit complex for a shell script, so we just acknowledge it
     echo -e "${GREEN}[+] Requirements registry found.${NC}"
 else
     echo -e "${YELLOW}[!] WARNING: requirements/ folder missing.${NC}"
 fi
 
-echo -e "${BOLD}Current Entities Status:${NC}"
+# Fixed Entity Count: Look into category subfolders
+ENTITY_COUNT=$(find entities -mindepth 2 -maxdepth 2 -type d | wc -l)
+echo -e "${BOLD}Current Swarm Status (${ENTITY_COUNT} Entities):${NC}"
 ./master/cli.sh status
 
-# Check if entities directory is empty or contains only .gitkeep
-ENTITY_COUNT=$(find entities -maxdepth 1 -not -path 'entities' -not -name '.gitkeep' | wc -l)
 if [ "$ENTITY_COUNT" -eq 0 ]; then
     echo -e "${YELLOW}${BOLD}[!] ATTENTION: No entities found in the Swarm.${NC}"
-    echo -e "${YELLOW}Please run 'Entity Setup' (Option 6) to create your first Mastermind Core.${NC}"
+    echo -e "${YELLOW}Please run 'Entity Setup' (Option 6) to spawn your first Mastermind Core.${NC}"
 fi
 echo ""
 
 show_menu() {
-    # Check Mastermind Status
+    # Check Mastermind Existence and Status
+    local mm_exists=false
+    if [ -d "entities/master/mastermind" ]; then
+        mm_exists=true
+    fi
+
     local mm_status="OFFLINE"
     local mm_manifest="entities/master/mastermind/manifest.json"
-    if [ -f "$mm_manifest" ] && grep -q '"status": "running"' "$mm_manifest"; then
+    if [ "$mm_exists" = true ] && [ -f "$mm_manifest" ] && grep -q '"status": "running"' "$mm_manifest"; then
         mm_status="RUNNING"
     fi
 
     echo -e "${CYAN}--- Control Console ---${NC}"
-    if [ "$mm_status" == "OFFLINE" ]; then
+    if [ "$mm_exists" = false ]; then
+        echo -e "1) ${YELLOW}[COGNITIVE GAP]${NC}: Core not spawned (Run Option 6 first)"
+    elif [ "$mm_status" == "OFFLINE" ]; then
         echo -e "1) ${GREEN}AWAKENING${NC}: Launch Mastermind (Start Core)"
     else
         echo -e "1) ${RED}SILENCE${NC}: Stop Mastermind (Stop Core)"
     fi
     echo "2) Collective Status"
-    echo "3) Enter Hive Logic (Manual CLI)"
+    echo "3) Manual Command Bridge (Advanced CLI)"
     echo "4) Integrated Dashboard (Live View)"
     echo "5) Nexus Chat (OAI Mode)"
     echo "6) Entity Setup (Guided Wizard)"
@@ -98,6 +104,14 @@ while true; do
     show_menu
     case $choice in
         1)
+            # Safety Check: Does the Mastermind entity even exist?
+            if [ ! -d "entities/master/mastermind" ]; then
+                 echo -e "${RED}[!] ERROR: The entity 'mastermind' does not exist yet.${NC}"
+                 echo -e "${YELLOW}Please go to Option 6 and spawn a 'master' named 'mastermind'.${NC}"
+                 sleep 2
+                 continue
+            fi
+
             mm_manifest="entities/master/mastermind/manifest.json"
             if [ -f "$mm_manifest" ] && grep -q '"status": "running"' "$mm_manifest"; then
                 echo -e "${RED}[*] Silencing Mastermind...${NC}"
