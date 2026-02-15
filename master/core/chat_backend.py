@@ -54,8 +54,7 @@ class OAIBackend(ChatBackend):
 
         if enable_tools:
             # 1. Orchestrator Core Tools (prefix core)
-            import skill_tools as st_mod
-            core_tools = skill_tools.get_tools_from_module(st_mod, prefix="core")
+            core_tools = skill_tools.get_orchestrator_tools()
             self.tools.extend(core_tools)
             if self.debug: print(f"\033[90m[Debug] Loaded {len(core_tools)} core tools.\033[0m")
             

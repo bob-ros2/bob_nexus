@@ -161,3 +161,8 @@ def call_tool(full_name, args_json):
         return f"Error: Tool '{full_name}' not found."
     except Exception as e:
         return f"Error calling {full_name}: {str(e)}"
+
+def get_orchestrator_tools():
+    """Returns core orchestration tools (the functions in this file) for the LLM."""
+    import skill_tools
+    return get_tools_from_module(skill_tools, prefix="core")
