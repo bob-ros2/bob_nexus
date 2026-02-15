@@ -53,13 +53,14 @@ class HostDriver(BaseDriver):
             try:
                 pgid = os.getpgid(pid)
             except ProcessLookupError:
-                return True # Process group already gone
+                return True  # Process group already gone
 
         try:
             # 1. Be polite: SIGINT (ROS likes this)
             os.killpg(pgid, signal.SIGINT)
 
             import time
+
             time.sleep(0.5)
 
             # Check if leader still exists

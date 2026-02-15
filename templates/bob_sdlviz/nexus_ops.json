@@ -1,0 +1,154 @@
+[
+    {
+        "type": "MarkerLayer",
+        "topic": "/bob/marker_array",
+        "area": [
+            0,
+            0,
+            854,
+            408
+        ],
+        "scale": 1200.0,
+        "offset_x": 50.0,
+        "offset_y": -120.0,
+        "exclude_ns": "face_0_0,face_0_1"
+    },
+    {
+        "topic": "/bob/nexus/id",
+        "area": [
+            10,
+            10,
+            200,
+            30
+        ],
+        "align": "left",
+        "text_color": [
+            0,
+            255,
+            230,
+            255
+        ],
+        "bg_color": [
+            0,
+            0,
+            0,
+            200
+        ]
+    },
+    {
+        "topic": "/bob/llm_stream",
+        "area": [
+            220,
+            10,
+            414,
+            300
+        ],
+        "line_limit": 10,
+        "wrap_width": 45,
+        "text_color": [
+            255,
+            255,
+            255,
+            255
+        ],
+        "bg_color": [
+            0,
+            40,
+            40,
+            100
+        ]
+    },
+    {
+        "topic": "/bob/vision/status",
+        "area": [
+            10,
+            50,
+            200,
+            80
+        ],
+        "line_limit": 3,
+        "wrap_width": 25,
+        "text_color": [
+            0,
+            180,
+            255,
+            255
+        ],
+        "bg_color": [
+            0,
+            0,
+            0,
+            150
+        ]
+    },
+    {
+        "topic": "/bob/audio/status",
+        "area": [
+            10,
+            140,
+            200,
+            80
+        ],
+        "line_limit": 3,
+        "wrap_width": 25,
+        "text_color": [
+            0,
+            180,
+            255,
+            255
+        ],
+        "bg_color": [
+            0,
+            0,
+            0,
+            150
+        ]
+    },
+    {
+        "topic": "/bob/network/uplink",
+        "area": [
+            10,
+            230,
+            200,
+            80
+        ],
+        "line_limit": 3,
+        "wrap_width": 25,
+        "text_color": [
+            0,
+            180,
+            255,
+            255
+        ],
+        "bg_color": [
+            0,
+            0,
+            0,
+            150
+        ]
+    },
+    {
+        "topic": "/bob/log_messages",
+        "area": [
+            10,
+            320,
+            834,
+            150
+        ],
+        "line_limit": 6,
+        "wrap_width": 120,
+        "append_newline": true,
+        "text_color": [
+            100,
+            255,
+            200,
+            255
+        ],
+        "bg_color": [
+            0,
+            20,
+            20,
+            200
+        ]
+    }
+]

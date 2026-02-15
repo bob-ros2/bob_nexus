@@ -14,7 +14,7 @@ class DashboardService:
     def _load_conf(self):
         conf_path = os.path.join(self.root_dir, "master", "config", "conf.yaml")
         if os.path.exists(conf_path):
-            with open(conf_path, 'r') as f:
+            with open(conf_path, "r") as f:
                 return yaml.safe_load(f)
         return {}
 
@@ -39,7 +39,7 @@ class DashboardService:
                     status = "stopped"
                     identifier = "-"
                     if os.path.exists(manifest_path):
-                        with open(manifest_path, 'r') as f:
+                        with open(manifest_path, "r") as f:
                             m = json.load(f)
                             # Simple check for now, can be improved to use Deployer logic
                             if m.get("status") == "running":
@@ -49,12 +49,9 @@ class DashboardService:
                                 elif m.get("container_id"):
                                     identifier = f"CID:{m['container_id'][:12]}"
 
-                    entities_list.append({
-                        "category": category,
-                        "name": ent,
-                        "status": status,
-                        "id": identifier
-                    })
+                    entities_list.append(
+                        {"category": category, "name": ent, "status": status, "id": identifier}
+                    )
 
                     if status == "running":
                         if category == "master":
@@ -71,7 +68,7 @@ class DashboardService:
             load = os.getloadavg()[0]
             cpu = f"{load:.1f}"
             # Memory %
-            with open('/proc/meminfo', 'r') as f:
+            with open("/proc/meminfo", "r") as f:
                 lines = f.readlines()
                 total = int(lines[0].split()[1])
                 avail = int(lines[2].split()[1])
@@ -90,11 +87,12 @@ class DashboardService:
             "paths": {
                 "root": self.root_dir,
                 "config": os.path.join(self.root_dir, "master/config/conf.yaml"),
-                "entities": self.entities_dir
+                "entities": self.entities_dir,
             },
             "entities": entities_list,
-            "timestamp": datetime.now().strftime("%H:%M:%S")
+            "timestamp": datetime.now().strftime("%H:%M:%S"),
         }
+
 
 if __name__ == "__main__":
     # Test output

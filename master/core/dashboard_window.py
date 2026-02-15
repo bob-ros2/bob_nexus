@@ -36,7 +36,9 @@ class NexusDashboardWindow:
             font=("Helvetica", 11, "bold"),
             relief="flat",
         )
-        style.map("Treeview", background=[("selected", "#00ffff")], foreground=[("selected", "black")])
+        style.map(
+            "Treeview", background=[("selected", "#00ffff")], foreground=[("selected", "black")]
+        )
 
         self._setup_ui()
         self.update_data()
@@ -83,7 +85,11 @@ class NexusDashboardWindow:
 
         # Master Label (Not copyable)
         tk.Label(
-            self.paths_frame, text="MASTER:", font=("Helvetica", 10, "bold"), fg="#888888", bg="#000000"
+            self.paths_frame,
+            text="MASTER:",
+            font=("Helvetica", 10, "bold"),
+            fg="#888888",
+            bg="#000000",
         ).grid(row=0, column=0, sticky="w")
         self.master_label = tk.Label(
             self.paths_frame, text="", font=("Consolas", 11), fg="#ffffff", bg="#000000"
@@ -92,7 +98,11 @@ class NexusDashboardWindow:
 
         def create_copy_row(parent, label_text, row):
             tk.Label(
-                parent, text=f"{label_text}:", font=("Helvetica", 10, "bold"), fg="#888888", bg="#000000"
+                parent,
+                text=f"{label_text}:",
+                font=("Helvetica", 10, "bold"),
+                fg="#888888",
+                bg="#000000",
             ).grid(row=row, column=0, sticky="w", pady=5)
             var = tk.StringVar()
             ent = tk.Entry(
@@ -194,11 +204,14 @@ class NexusDashboardWindow:
 
         sorted_ents = sorted(data["entities"], key=lambda x: (x["category"] != "master", x["name"]))
         for ent in sorted_ents:
-            self.tree.insert("", tk.END, values=(ent["category"], ent["name"], ent["status"], ent["id"]))
+            self.tree.insert(
+                "", tk.END, values=(ent["category"], ent["name"], ent["status"], ent["id"])
+            )
 
         # Schedule next update
         if self.auto_refresh_var.get():
             self.root.after(5000, self.update_data)
+
 
 if __name__ == "__main__":
     root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))

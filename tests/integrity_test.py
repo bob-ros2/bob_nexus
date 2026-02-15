@@ -22,16 +22,27 @@ def test_config_validity():
 
 
 def test_templates_integrity():
-    """Verify that all folders in templates/ are valid templates (contain a .yaml file)."""
+    """Verify that all template leaf folders contain a valid configuration."""
     templates_dir = os.path.join(ROOT_DIR, "templates")
     if not os.path.exists(templates_dir):
         pytest.skip("Templates directory not found")
 
-    for item in os.listdir(templates_dir):
-        path = os.path.join(templates_dir, item)
-        if os.path.isdir(path) and item != "composers":
-            yamls = glob.glob(os.path.join(path, "*.yaml"))
-            assert len(yamls) > 0, f"Template '{item}' contains no .yaml configuration"
+    for root, dirs, files in os.walk(templates_dir):
+        if "composers" in root:
+            continue
+        if root == templates_dir:
+            continue
+
+        # If it's a leaf directory (no subdirectories), it must be a template
+        if not dirs:
+            yamls = glob.glob(os.path.join(root, "*.yaml"))
+            # Support both ROS launch/params and pure Docker Compose templates
+            if not yamls:
+                yamls = glob.glob(os.path.join(root, "docker-compose.yaml"))
+
+            assert len(yamls) > 0, (
+                f"Template leaf folder '{root}' contains no configuration (.yaml or docker-compose.yaml)"
+            )
 
 
 def test_skills_integrity():
@@ -117,9 +128,9 @@ def test_docker_network_integrity():
             )
             if res.returncode == 0:
                 found_networks = res.stdout.strip().split("\n")
-                assert (
-                    network_name in found_networks
-                ), f"Docker network '{network_name}' not found. Create it: docker network create {network_name}"
+                assert network_name in found_networks, (
+                    f"Docker network '{network_name}' not found. Create it: docker network create {network_name}"
+                )
             else:
                 pytest.skip(f"Docker command failed (permissions?): {res.stderr}")
         except (subprocess.TimeoutExpired, FileNotFoundError):
