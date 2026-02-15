@@ -32,9 +32,11 @@ RUN pip3 install --no-cache-dir \
     -r requirements/requirements.txt \
     -r requirements/qdrant.txt
 
-# Setup ROS 2 Environment in bashrc
+# Setup ROS 2 Environment and PATH in bashrc
+ENV PATH="/app/master:${PATH}"
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc \
-    && echo "if [ -f /app/ros2_ws/install/setup.bash ]; then source /app/ros2_ws/install/setup.bash; fi" >> /root/.bashrc
+    && echo "if [ -f /app/ros2_ws/install/setup.bash ]; then source /app/ros2_ws/install/setup.bash; fi" >> /root/.bashrc \
+    && echo 'export PATH="/app/master:$PATH"' >> /root/.bashrc
 
 # Copy the framework code
 # Note: .dockerignore ensures secrets (entities, .env, conf.yaml) are NOT copied.

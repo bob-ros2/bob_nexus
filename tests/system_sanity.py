@@ -92,10 +92,14 @@ def run_mock_server():
 
 # --- Test Suite ---
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 class NexusIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Change working directory to project root for consistent paths
+        os.chdir(PROJECT_ROOT)
+
         # Start mock server
         cls.server_thread = Thread(target=run_mock_server, daemon=True)
         cls.server_thread.start()
@@ -110,7 +114,7 @@ class NexusIntegrationTests(unittest.TestCase):
 
     def test_01_onboarding(self):
         """Onboarding script sanity check (non-interactive)."""
-        process = subprocess.run(["./onboarding.sh"], input="n\n", text=True, capture_output=True)
+        process = subprocess.run([os.path.join(PROJECT_ROOT, "onboarding.sh")], input="n\n", text=True, capture_output=True)
         self.assertTrue(
             os.path.exists("master/config/.env"),
             msg=f"Onboarding failed to create .env. Out: {process.stdout} Err: {process.stderr}",
@@ -120,6 +124,7 @@ class NexusIntegrationTests(unittest.TestCase):
     def test_02_cli_infrastructure(self):
         """CLI tool and entity operations."""
         import shutil
+        cli_bin = os.path.join(PROJECT_ROOT, "master", "cli.sh")
 
         # Cleanup previously failed runs
         for p in ["entities/master/test_mastermind", "entities/assistant/test_alice"]:
@@ -127,18 +132,18 @@ class NexusIntegrationTests(unittest.TestCase):
                 shutil.rmtree(p)
 
         # Help check
-        res = subprocess.run(["./cli.sh", "-h"], capture_output=True, text=True)
+        res = subprocess.run([cli_bin, "-h"], capture_output=True, text=True)
         self.assertEqual(res.returncode, 0, msg=f"cli.sh -h failed. Err: {res.stderr}")
-
+        
         # Status check
-        res = subprocess.run(["./cli.sh", "status"], capture_output=True, text=True)
+        res = subprocess.run([cli_bin, "status"], capture_output=True, text=True)
         self.assertEqual(
             res.returncode, 0, msg=f"cli.sh status failed. Out: {res.stdout} Err: {res.stderr}"
         )
 
         # Spawn Mastermind Entity
         res = subprocess.run(
-            ["./cli.sh", "spawn", "master", "test_mastermind", "bob_llm"],
+            [cli_bin, "spawn", "master", "test_mastermind", "bob_llm"],
             capture_output=True,
             text=True,
         )
@@ -152,7 +157,7 @@ class NexusIntegrationTests(unittest.TestCase):
 
         # Spawn Assistant Entity
         res = subprocess.run(
-            ["./cli.sh", "spawn", "assistant", "test_alice", "bob_llm"],
+            [cli_bin, "spawn", "assistant", "test_alice", "bob_llm"],
             capture_output=True,
             text=True,
         )
@@ -169,7 +174,7 @@ class NexusIntegrationTests(unittest.TestCase):
         # Note: We use chat_client.py directly to avoid TTY issues with chat.sh
         chat_cmd = [
             sys.executable,
-            "master/core/chat_client.py",
+            os.path.join(PROJECT_ROOT, "master/core/chat_client.py"),
             "--tools",
             "True",
             "--max_tool_calls",
@@ -198,7 +203,7 @@ class NexusIntegrationTests(unittest.TestCase):
 
     def test_04_bob_llm_backend_init(self):
         """Check if bob_llm backend is importable and initializes (dry run)."""
-        sys.path.append(os.path.join(os.getcwd(), "master/core"))
+        sys.path.append(os.path.join(PROJECT_ROOT, "master/core"))
         try:
             import chat_backend
 
