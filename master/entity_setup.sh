@@ -50,7 +50,6 @@ create_assistant() {
         echo -e "${RED}[!] Failed to create assistant.${NC}"
     fi
 }
-
 create_inference() {
     read -p "Enter inference entity name [default: brain]: " INF_NAME
     INF_NAME=${INF_NAME:-brain}

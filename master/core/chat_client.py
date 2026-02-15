@@ -38,11 +38,15 @@ def main():
     conf_path = os.path.join(config_dir, "conf.yaml")
     max_tool_calls_default = 5
     master_skills = []
+    oai_interfaces = []
     if os.path.exists(conf_path):
         try:
             with open(conf_path, "r") as f:
                 conf = yaml.safe_load(f)
-                max_tool_calls_default = conf.get("chat", {}).get("oai", {}).get("max_tool_calls", 5)
+                oai_conf = conf.get("chat", {}).get("oai", {})
+                max_tool_calls_default = oai_conf.get("max_tool_calls", 5)
+                oai_interfaces = oai_conf.get("tool_interfaces", [])
+                
                 # Master skills are lists like ["category", "name"]
                 for skill_pair in conf.get("skills", {}).get("master", []):
                     if len(skill_pair) >= 2:
@@ -122,6 +126,7 @@ def main():
             enable_tools=args.tools,
             max_tool_calls=args.max_tool_calls,
             enabled_skills=master_skills,
+            tool_interfaces=oai_interfaces,
             topic_in=topic_in,
             topic_out=topic_out,
         )

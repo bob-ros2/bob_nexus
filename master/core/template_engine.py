@@ -4,7 +4,6 @@ import re
 
 from dotenv import dotenv_values
 
-
 class TemplateEngine:
     def __init__(self, env_path=None, extra_vars=None):
         self.env_vars = {}
