@@ -82,6 +82,7 @@ The direct communication link to your entities.
 ```yaml
 .
 ├── master/          # Core orchestration logic (Python) & Dashboard
+│   └── config/      # Central persistent configuration (.env, conf.yaml)
 ├── skills/          # Reusable skill modules (e.g., memory, vision)
 ├── templates/       # Entity blueprints and Docker Composers
 │   └── composers/   # Reusable Docker Compose templates for groups/swarms
