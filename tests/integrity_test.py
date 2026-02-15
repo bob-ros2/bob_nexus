@@ -6,6 +6,7 @@ import yaml
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+
 def test_config_validity():
     """Check if the main configuration exists and is valid YAML."""
     conf_path = os.path.join(ROOT_DIR, "master", "config", "conf.yaml")

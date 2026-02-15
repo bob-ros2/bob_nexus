@@ -1,5 +1,3 @@
-
-
 def update_dashboard(message: str, category: str = "INFO"):
     """
     Updates the SDLViz dashboard with a status message.

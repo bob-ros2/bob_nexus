@@ -242,11 +242,11 @@ class Deployer:
     def __init__(self, root_dir):
         self.root_dir = os.path.abspath(root_dir)
         self.conf = self._load_conf()
-        
+
         orch = self.conf.get("orchestration", {})
         self.host_driver = HostDriver(self.root_dir)
         self.docker_driver = DockerDriver(self.root_dir, orch)
-        
+
         # Default driver for legacy property access
         self.default_driver = self.host_driver
         if orch.get("mode") == "swarm":
@@ -279,7 +279,7 @@ class Deployer:
         """
         # Determine driver for this entity
         local_compose = os.path.join(entity_dir, "docker-compose.yaml")
-        
+
         # Priority:
         # 1. If docker-compose.yaml exists -> Always use Docker (Pure Container)
         # 2. Global mode
@@ -292,6 +292,7 @@ class Deployer:
         config_path = os.path.join(entity_dir, "llm.yaml")
         if not os.path.exists(config_path):
             import glob
+
             yamls = glob.glob(os.path.join(entity_dir, "*.yaml"))
             # Skip docker-compose from being treated as ROS config if possible
             other_yamls = [y for y in yamls if "docker-compose" not in os.path.basename(y)]
@@ -303,6 +304,7 @@ class Deployer:
                 config_path = local_compose if os.path.exists(local_compose) else None
 
         from env_helper import get_ros_setup_cmd
+
         ros_source = get_ros_setup_cmd(self.root_dir)
 
         try:
@@ -312,7 +314,7 @@ class Deployer:
             manifest_path = os.path.join(entity_dir, "manifest.json")
             manifest_type = "host"
             if active_driver == self.docker_driver:
-                manifest_type = "swarm" # Basic docker run
+                manifest_type = "swarm"  # Basic docker run
                 if result.get("type") == "swarm-compose":
                     manifest_type = "swarm-compose"
 

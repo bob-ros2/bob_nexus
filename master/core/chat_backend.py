@@ -23,7 +23,6 @@ Bob Nexus is a decentralized ROS 2 Swarm OS.
 """
 
 
-
 class ChatBackend(ABC):
     @abstractmethod
     def send_message(self, message: str, stream: bool = True):

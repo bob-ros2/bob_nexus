@@ -94,6 +94,7 @@ def run_mock_server():
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+
 class NexusIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -114,7 +115,12 @@ class NexusIntegrationTests(unittest.TestCase):
 
     def test_01_onboarding(self):
         """Onboarding script sanity check (non-interactive)."""
-        process = subprocess.run([os.path.join(PROJECT_ROOT, "onboarding.sh")], input="n\n", text=True, capture_output=True)
+        process = subprocess.run(
+            [os.path.join(PROJECT_ROOT, "onboarding.sh")],
+            input="n\n",
+            text=True,
+            capture_output=True,
+        )
         self.assertTrue(
             os.path.exists("master/config/.env"),
             msg=f"Onboarding failed to create .env. Out: {process.stdout} Err: {process.stderr}",
@@ -124,6 +130,7 @@ class NexusIntegrationTests(unittest.TestCase):
     def test_02_cli_infrastructure(self):
         """CLI tool and entity operations."""
         import shutil
+
         cli_bin = os.path.join(PROJECT_ROOT, "master", "cli.sh")
 
         # Cleanup previously failed runs
@@ -134,7 +141,7 @@ class NexusIntegrationTests(unittest.TestCase):
         # Help check
         res = subprocess.run([cli_bin, "-h"], capture_output=True, text=True)
         self.assertEqual(res.returncode, 0, msg=f"cli.sh -h failed. Err: {res.stderr}")
-        
+
         # Status check
         res = subprocess.run([cli_bin, "status"], capture_output=True, text=True)
         self.assertEqual(
