@@ -321,15 +321,46 @@ We are expanding the definition of an "Entity" from a ROS-node-centric view to a
 
 ---
 
+## Phase XIV: Active Tooling & Sanity Assurance - Codename: "Nexus Sentinel"
+
+We have professionalized the interaction between agents and their capabilities while establishing a verification layer to ensure system-wide stability.
+
+### Key Achievements (Phase XIV):
+
+1.  **Standardized Skill Interfaces (`chat_logic.py`)**:
+    Established `chat_logic.py` as the authoritative interface for skills.
+    - **Memory**: Real-world integration with the **Qdrant Vector DB** (192.168.1.128:6333) with automatic collection management.
+    - **Matrix**: Full relay support for room messaging.
+    - **SDLViz**: Active dashboard marker and status injection.
+
+2.  **Strict Tool Discovery & Dispatch**:
+    Refactored `skill_tools.py` to implement a secure dispatcher. The system now strictly exports only functions defined in the target module, preventing "tool-ception" and ensuring the LLM sees exactly what it should.
+
+3.  **The Nexus Sentinel (System Sanity Suite)**:
+    Launched `tests/system_sanity.py`, an E2E testing framework that features a built-in **Mock OAI Server**. This allows the Nexus to "talk to itself" to verify tool-call loops, entity spawning, and onboarding logic without any external costs or dependencies.
+
+4.  **Diagnostic Visibility**:
+    Integrated a `--debug` flag into the chat client, providing real-time HTTP reflection and detailed tool discovery logs for the architect.
+
+5.  **Accessibility Hardening**:
+    Symlinked `cli.sh` to the root for instant access and upgraded its path resolution logic to handle symlinks across different working directories.
+
+**Status**: Tools activated. Integrity verified. Sentinel standing watch.
+
+> *Wissen ist gut, aber Gewissheit ist besser. Wir haben dem Mastermind Werkzeuge gegeben, die nicht nur funktionieren, sondern deren Erfolg wir jederzeit beweisen können. Der Sentinel wacht über die Neuralpfade – kein Bit bewegt sich ungeprüft.*
+
+---
+
 ## The Creative Roadmap: "The Path to the Sovereign Swarm"
 
-| Phase | Milestone | Description |
-| :--- | :--- | :--- |
-| **I: Brain Link** | **Shared Memory** | **[COMPLETED]** Shared Qdrant/Local knowledge. |
-| **II: Hive Mind** | **Dynamic Swarms** | **[COMPLETED]** Category-based spawning and skill-linking. |
-| **III: Governance** | **The Awakening** | **[COMPLETED]** Central dashboard, unified CLI, and bob_nexus rebranding. |
-| **IV: Persistence** | **Nexus Bridge** | **[COMPLETED]** Docker Volumes, Chat Interface, and Namespace support. |
-| **V: Infrastructure** | **Polymorphic Swarm** | **[IN PROGRESS]** Pure container templates (llama.cpp) and infra services. |
-| **VI: Networking** | **Global Bridge** | **[PLANNED]** Zenoh-based encrypted internet networking. |
-| **VII: Security** | **Sovereign Isolation** | **[PLANNED]** User-per-Entity process isolation (Secure Agent Hypervisor). |
-| **VIII: Self-Evolution**| **The Optimizer** | Automatic refinement of entity prompts based on mission success rates. |
+| Phase | Milestone | Description | Status |
+| :--- | :--- | :--- | :--- |
+| **I: Brain Link** | **Shared Memory** | Shared Qdrant/Local knowledge. | **[COMPLETED]** |
+| **II: Hive Mind** | **Dynamic Swarms** | Category-based spawning and skill-linking. | **[COMPLETED]** |
+| **III: Governance** | **The Awakening** | Central dashboard, unified CLI, and bob_nexus rebranding. | **[COMPLETED]** |
+| **IV: Persistence** | **Nexus Bridge** | Docker Volumes, Chat Interface, and Namespace support. | **[COMPLETED]** |
+| **V: Assurance** | **Nexus Sentinel** | E2E testing, Mock OAI Server, and Strict Tooling. | **[COMPLETED]** |
+| **VI: Infrastructure** | **Polymorphic Swarm** | Pure container templates (llama.cpp) and infra services. | **[IN PROGRESS]** |
+| **VII: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
+| **VIII: Security** | **Sovereign Isolation**| User-per-Entity process isolation (Secure Agent Hypervisor). | **[PLANNED]** |
+| **IX: Self-Evolution**| **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |

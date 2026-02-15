@@ -27,8 +27,9 @@ Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSe
 
 ### 4. Create your first Assistant
 ```bash
-./master/cli.sh spawn assistant alice bob_llm
-./master/cli.sh up alice
+# cli.sh is now conveniently available in the root!
+./cli.sh spawn assistant alice bob_llm
+./cli.sh up alice
 ```
 
 ### 5. Chat with the Swarm
@@ -92,16 +93,16 @@ The direct communication link to your entities.
 ```
 
 ### The Mastermind CLI
-The `cli.sh` (wrapper for `cli.py`) is the primary interface for entity lifecycles.
+The `cli.sh` is your scalpel for entity lifecycles. It is symlinked to the root for easy access.
 
 | Command | Description | Example |
 | :--- | :--- | :--- |
-| `spawn` | Create a new entity from a template | `spawn assistant bob bob_launch` |
-| `up` | Start an entity (Host, Docker, or Compose) | `up bob` |
-| `down` | Gracefully stop an entity | `down bob` |
-| `status` | List all entities, their status, and PIDs/CIDs | `status` |
-| `link` | Attach a shared skill to an entity | `link bob memory` |
-| `refresh` | Re-generate entity system prompt | `refresh bob` |
+| `spawn` | Create a new entity from a template | `./cli.sh spawn assistant bob bob_launch` |
+| `up` | Start an entity (Host, Docker, or Compose) | `./cli.sh up bob` |
+| `down` | Gracefully stop an entity | `./cli.sh down bob` |
+| `status` | List all entities, their status, and PIDs/CIDs | `./cli.sh status` |
+| `link` | Attach a shared skill to an entity | `./cli.sh link bob memory` |
+| `refresh` | Re-generate entity system prompt | `./cli.sh refresh bob` |
 
 ---
 
@@ -134,7 +135,21 @@ skills:
 Maintain the standards of the stack using the **Quality Suite**:
 - `make lint`: Static analysis with **Ruff**.
 - `make format`: Consistent code formatting.
-- `make test`: Global integrity checks (YAML validity, Symlink health, Docker network availability).
+- `make test`: Global integrity checks (YAML validity, Symlink health).
+- **System Sanity Checks**: Verified E2E testing of the whole stack.
+
+### 🧪 System Sanity Tests
+The Nexus includes a dedicated integration suite that mocks the OAI environment to verify tool execution and entity lifecycles without any cost.
+
+**Run locally:**
+```bash
+python3 tests/system_sanity.py -v
+```
+
+**Run in an isolated Docker environment:**
+```bash
+cd tests && docker compose -f docker-compose.test.yaml up --build
+```
 
 ---
 
