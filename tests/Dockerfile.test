@@ -1,0 +1,29 @@
+FROM ros:humble-ros-base
+
+ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    git \
+    sudo \
+    curl \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements/ /app/requirements/
+RUN pip3 install --no-cache-dir \
+    -r requirements/requirements.txt \
+    flask
+
+# Copy the framework
+COPY . /app/
+
+# Setup executables
+RUN chmod +x *.sh master/*.sh cli.sh
+
+# Run tests with ROS environment sourced
+CMD source /opt/ros/humble/setup.bash && python3 tests/system_sanity.py -v

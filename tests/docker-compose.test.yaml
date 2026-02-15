@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  nexus-test:
+    build:
+      context: ..
+      dockerfile: tests/Dockerfile.test
+    environment:
+      - MASTER_API_URL=http://localhost:8080/v1
+      - MASTER_API_KEY=mock-key
+      - MASTER_API_MODEL=mock-model
+      - NEXUS_CHAT_TOOLS=True
+    # We might need to run as root to perform onboarding (sudo/git/mkdir)
+    user: root

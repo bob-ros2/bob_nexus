@@ -43,7 +43,11 @@ if [ ! -f master/config/conf.yaml ]; then
     cp master/config/conf.template.yaml master/config/conf.yaml
 fi
 
-# 2. Clone Core ROS 2 Packages
+# 2. Prepare Directories
+mkdir -p entities
+mkdir -p skills
+
+# 3. Clone Core ROS 2 Packages
 mkdir -p ros2_ws/src
 cd ros2_ws/src
 

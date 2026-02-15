@@ -15,6 +15,10 @@ class EntityManager:
         self.env_path = os.path.join(self.master_dir, "config", ".env")
         self.conf_path = os.path.join(self.master_dir, "config", "conf.yaml")
 
+        # Ensure base directories exist
+        os.makedirs(self.entities_dir, exist_ok=True)
+        os.makedirs(self.skills_dir, exist_ok=True)
+
         self.engine = TemplateEngine(self.env_path)
         self.conf = self._load_conf()
 

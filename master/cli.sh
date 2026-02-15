@@ -1,3 +1,4 @@
 #!/bin/bash
 # Mastermind CLI Wrapper
-python3 "$(dirname "$0")/cli/cli.py" "$@"
+REAL_SCRIPTPATH=$(dirname "$(readlink -f "$0")")
+python3 "$REAL_SCRIPTPATH/cli/cli.py" "$@"
