@@ -139,7 +139,7 @@ class OAIBackend(ChatBackend):
                 for call in tool_calls:
                     f_name, f_args = call["function"]["name"], call["function"]["arguments"]
                     print(f"\033[93m[*] NEXUS CALLING: {f_name}({f_args})\033[0m")
-                    res = skill_tools.call_tool(f_name, f_args)
+                    res = skill_tools.dispatch_tool(f_name, f_args)
                     self.history.append({"role": "tool", "tool_call_id": call["id"], "name": f_name, "content": res})
                     self._save_to_persistence("tool", res)
             except Exception as e:

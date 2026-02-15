@@ -15,10 +15,6 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SELF_DIR, "..", ".."))
 def get_entity_skills_dir():
     """
     Intelligently find the skills directory of the current entity.
-    Priority:
-    1. A directory named 'skills' in the Current Working Directory.
-    2. A directory named 'skills' in any parent directory (up to project root).
-    3. Fallback to global project 'skills' folder.
     """
     curr = os.getcwd()
     while curr and curr != "/":
@@ -38,15 +34,18 @@ def resolve_skill_path(skill_name):
         p = os.path.join(base, skill_name)
         if os.path.exists(p): return os.path.abspath(p)
     
-    # Global fallback
+    # Global fallback (Nexus Pool)
     matches = glob.glob(os.path.join(PROJECT_ROOT, "skills", "**", skill_name, "SKILL.md"), recursive=True)
     if matches: return os.path.dirname(os.path.abspath(matches[0]))
     return None
 
-# --- Core LLM Support ---
+# --- Orchestrator Core Tools (Exposed to LLM) ---
 
 def list_available_skills():
-    """Lists skills available in the current context."""
+    """
+    Returns a list of all functional skills available in the Nexus.
+    Use this to identify capabilities like memory, vision, or communication.
+    """
     base = get_entity_skills_dir()
     if not base: return []
     
@@ -63,14 +62,30 @@ def list_available_skills():
     return skills
 
 def load_skill_md(skill_name: str):
-    """Loads SKILL.md for LLM context."""
+    """
+    Loads the detailed documentation (SKILL.md) for a specific skill.
+    Use this if you are unsure how to use a specific skill or what parameters it expects.
+    """
     root = resolve_skill_path(skill_name)
     if not root: return f"Error: Skill '{skill_name}' not found."
     try:
         with open(os.path.join(root, "SKILL.md"), "r") as f: return f.read()
     except Exception as e: return str(e)
 
-# --- Dynamic Tool Discovery ---
+def read_skill_resource(skill_name: str, resource_path: str):
+    """
+    Reads a specific resource file (e.g. template, config, JSON) from a skill's directory.
+    """
+    root = resolve_skill_path(skill_name)
+    if not root: return f"Error: Skill '{skill_name}' not found."
+    full_path = os.path.join(root, resource_path)
+    if not os.path.exists(full_path): return f"Error: Resource '{resource_path}' not found."
+    try:
+        with open(full_path, "r") as f: return f.read()
+    except Exception as e: return str(e)
+
+
+# --- Modular Tool Discovery & Execution ---
 
 def _get_json_type(annotation):
     if annotation == str: return "string"
@@ -80,10 +95,11 @@ def _get_json_type(annotation):
     return "string"
 
 def get_tools_from_module(module, prefix=""):
-    """Extracts suitable functions from a module to OAI tool format."""
+    """Extracts functions from a module. STRICT: Only functions defined IN the module."""
     tools = []
-    for name, func in inspect.getmembers(module, inspect.isfunction):
-        if name.startswith("_") or name == "main": continue
+    # FIX: Filter by __module__ to avoid exporting imported functions/classes
+    for name, func in inspect.getmembers(module, lambda x: inspect.isfunction(x) and x.__module__ == module.__name__):
+        if name.startswith("_") or name == "main" or name.startswith("get_tools"): continue
         doc = inspect.getdoc(func)
         if not doc: continue
             
@@ -106,11 +122,11 @@ def get_tools_from_module(module, prefix=""):
     return tools
 
 def get_tools_from_file(py_file, prefix=""):
-    """Loads a file and extracts tools."""
+    """Loads a tool interface file and extracts functions."""
     abs_path = os.path.abspath(os.path.join(PROJECT_ROOT, py_file)) if not os.path.isabs(py_file) else py_file
     if not os.path.exists(abs_path): return []
     try:
-        spec = importlib.util.spec_from_file_location("dynamic_mod", abs_path)
+        spec = importlib.util.spec_from_file_location("tool_interface", abs_path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         return get_tools_from_module(mod, prefix=prefix)
@@ -119,12 +135,11 @@ def get_tools_from_file(py_file, prefix=""):
         return []
 
 def get_tools_from_skills(skill_names):
-    """Loads tools from 'chat_logic.py' in the given skills."""
+    """Loads tools from 'chat_logic.py' in enabled skills."""
     tools = []
     for name in (skill_names or []):
         root = resolve_skill_path(name)
         if not root: continue
-        # Only support chat_logic.py for clean OAI interfaces
         for candidate in ["chat_logic.py", "scripts/chat_logic.py"]:
             path = os.path.join(root, candidate)
             if os.path.exists(path):
@@ -132,20 +147,25 @@ def get_tools_from_skills(skill_names):
                 break
     return tools
 
-def call_tool(full_name, args_json):
-    """Executes a tool call."""
+def get_orchestrator_tools():
+    """Public tools from THIS file."""
+    import skill_tools
+    return get_tools_from_module(skill_tools, prefix="core")
+
+def dispatch_tool(full_name, args_json):
+    """The central execution gate for all LLM tool calls."""
     try:
         kwargs = json.loads(args_json) if isinstance(args_json, str) else args_json
         prefix, func_name = full_name.split("__", 1) if "__" in full_name else ("", full_name)
 
-        # 1. Check Orchestrator tools (this file)
+        # 1. Core Tools
         if prefix == "core" or not prefix:
             import skill_tools
             if hasattr(skill_tools, func_name):
                 res = getattr(skill_tools, func_name)(**kwargs)
                 return json.dumps(res) if isinstance(res, (dict, list)) else str(res)
 
-        # 2. Check Skill tools
+        # 2. Skill Tools
         root = resolve_skill_path(prefix)
         if root:
             for candidate in ["chat_logic.py", "scripts/chat_logic.py"]:
@@ -160,9 +180,4 @@ def call_tool(full_name, args_json):
         
         return f"Error: Tool '{full_name}' not found."
     except Exception as e:
-        return f"Error calling {full_name}: {str(e)}"
-
-def get_orchestrator_tools():
-    """Returns core orchestration tools (the functions in this file) for the LLM."""
-    import skill_tools
-    return get_tools_from_module(skill_tools, prefix="core")
+        return f"Error executing {full_name}: {str(e)}"
