@@ -134,15 +134,17 @@ def main():
                     if os.path.exists(manifest_path):
                         with open(manifest_path, "r") as f:
                             m = json.load(f)
-                            # Get actual status from driver
-                            status = deployer.driver.get_status(m)
+                            # Get actual status from driver (smart delegation)
+                            status = deployer.get_status(m)
 
                             # Identifier is PID or Container ID (only show if running)
                             if status == "running":
                                 if m.get("pid"):
                                     identifier = f"PID:{m['pid']}"
                                 elif m.get("container_id"):
-                                    identifier = f"CID:{m['container_id'][:12]}"  # Short CID
+                                    identifier = f"CID:{m['container_id'][:12]}"
+                                elif m.get("type") == "swarm-compose":
+                                    identifier = "DOCKER"
 
                     print(f"{cat:<15} {ent:<15} {status:<10} {identifier:<15}")
     except Exception as e:

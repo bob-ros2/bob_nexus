@@ -242,51 +242,85 @@ class Deployer:
     def __init__(self, root_dir):
         self.root_dir = os.path.abspath(root_dir)
         self.conf = self._load_conf()
-        self.driver = self._init_driver()
+        
+        orch = self.conf.get("orchestration", {})
+        self.host_driver = HostDriver(self.root_dir)
+        self.docker_driver = DockerDriver(self.root_dir, orch)
+        
+        # Default driver for legacy property access
+        self.default_driver = self.host_driver
+        if orch.get("mode") == "swarm":
+            self.default_driver = self.docker_driver
 
     def _load_conf(self):
         conf_path = os.path.join(self.root_dir, "master", "config", "conf.yaml")
         if os.path.exists(conf_path):
             with open(conf_path, "r") as f:
-                return yaml.safe_load(f)
+                return yaml.safe_load(f) or {}
         return {"orchestration": {"mode": "host"}}
 
-    def _init_driver(self):
-        orch = self.conf.get("orchestration", {})
-        mode = orch.get("mode", "host")
-        if mode == "swarm":
-            return DockerDriver(self.root_dir, orch)
-        return HostDriver(self.root_dir)
+    @property
+    def driver(self):
+        """Returns the default driver. Maintained for legacy CLI access."""
+        return self.default_driver
+
+    def get_status(self, manifest):
+        """
+        Returns the status of an entity by delegating to the correct driver.
+        """
+        driver_type = manifest.get("type", "host")
+        if driver_type in ["swarm", "swarm-compose"]:
+            return self.docker_driver.get_status(manifest)
+        return self.host_driver.get_status(manifest)
 
     def up_local(self, entity_dir):
         """
-        Starts an entity locally or via Docker depending on driver.
+        Starts an entity locally or via Docker depending on configuration.
         """
+        # Determine driver for this entity
+        local_compose = os.path.join(entity_dir, "docker-compose.yaml")
+        
+        # Priority:
+        # 1. If docker-compose.yaml exists -> Always use Docker (Pure Container)
+        # 2. Global mode
+        if os.path.exists(local_compose):
+            active_driver = self.docker_driver
+        else:
+            active_driver = self.default_driver
+
         # Find a suitable config file. Prioritize llm.yaml
         config_path = os.path.join(entity_dir, "llm.yaml")
         if not os.path.exists(config_path):
             import glob
-
             yamls = glob.glob(os.path.join(entity_dir, "*.yaml"))
-            if yamls:
+            # Skip docker-compose from being treated as ROS config if possible
+            other_yamls = [y for y in yamls if "docker-compose" not in os.path.basename(y)]
+            if other_yamls:
+                config_path = other_yamls[0]
+            elif yamls:
                 config_path = yamls[0]
             else:
-                return {"error": f"No .yaml config found in {entity_dir}"}
+                config_path = local_compose if os.path.exists(local_compose) else None
 
         from env_helper import get_ros_setup_cmd
-
         ros_source = get_ros_setup_cmd(self.root_dir)
 
         try:
-            result = self.driver.up(entity_dir, config_path, ros_source)
+            result = active_driver.up(entity_dir, config_path, ros_source)
 
             # Save manifest
             manifest_path = os.path.join(entity_dir, "manifest.json")
+            manifest_type = "host"
+            if active_driver == self.docker_driver:
+                manifest_type = "swarm" # Basic docker run
+                if result.get("type") == "swarm-compose":
+                    manifest_type = "swarm-compose"
+
             manifest = {
                 "name": os.path.basename(entity_dir),
                 "status": "running",
                 "config": config_path,
-                "type": self.conf.get("orchestration", {}).get("mode", "host"),
+                "type": manifest_type,
                 **result,
             }
             with open(manifest_path, "w") as f:
@@ -298,7 +332,7 @@ class Deployer:
 
     def down_local(self, entity_dir):
         """
-        Stops an entity.
+        Stops an entity by delegating to the correct driver.
         """
         manifest_path = os.path.join(entity_dir, "manifest.json")
         if not os.path.exists(manifest_path):
@@ -307,9 +341,16 @@ class Deployer:
         with open(manifest_path, "r") as f:
             manifest = json.load(f)
 
-        if self.driver.down(manifest):
+        driver_type = manifest.get("type", "host")
+        active_driver = self.host_driver
+        if driver_type in ["swarm", "swarm-compose"]:
+            active_driver = self.docker_driver
+
+        if active_driver.down(manifest):
             manifest["status"] = "stopped"
+            # Clear identifiers
             manifest["pid"] = None
+            manifest["pgid"] = None
             manifest["container_id"] = None
             with open(manifest_path, "w") as f:
                 json.dump(manifest, f, indent=2)
