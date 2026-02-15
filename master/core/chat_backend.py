@@ -32,9 +32,9 @@ class ChatBackend(ABC):
 class OAIBackend(ChatBackend):
     def __init__(
         self,
-        api_url,
-        api_key,
-        model,
+        oai_api_url,
+        oai_api_key,
+        oai_api_model,
         system_prompt=None,
         history_limit=10,
         persistent_history_path=None,
@@ -42,9 +42,9 @@ class OAIBackend(ChatBackend):
         max_tool_calls=5,
         **kwargs
     ):
-        self.api_url = api_url.rstrip("/") + "/chat/completions"
-        self.api_key = api_key
-        self.model = model
+        self.api_url = oai_api_url.rstrip("/") + "/chat/completions"
+        self.api_key = oai_api_key
+        self.model = oai_api_model
         self.history_limit = history_limit
         self.history = []
         self.persistent_path = persistent_history_path
