@@ -140,7 +140,7 @@ class DockerDriver(BaseDriver):
                 "-p",
                 entity_name,
                 "--project-directory",
-                self.root_dir,
+                entity_dir,
                 "-f",
                 compose_path,
                 "up",
@@ -150,6 +150,10 @@ class DockerDriver(BaseDriver):
             # Forward environment for the compose context
             env = os.environ.copy()
             
+            # SAE Permission Fix: Map host user to container
+            env["HOST_UID"] = str(os.getuid())
+            env["HOST_GID"] = str(os.getgid())
+
             # Load entity-specific .env if it exists
             local_env_path = os.path.join(entity_dir, ".env")
             if os.path.exists(local_env_path):
@@ -198,6 +202,7 @@ class DockerDriver(BaseDriver):
         entity_name = manifest.get("name")  # Ensure we have the project name
         if manifest.get("type") == "swarm-compose":
             compose_path = manifest.get("compose_file")
+            entity_dir = os.path.dirname(compose_path)
             print(f"[*] Orchestration: Stopping compose project {entity_name}")
             subprocess.run(
                 [
@@ -206,7 +211,7 @@ class DockerDriver(BaseDriver):
                     "-p",
                     entity_name,
                     "--project-directory",
-                    self.root_dir,
+                    entity_dir,
                     "-f",
                     compose_path,
                     "down",
@@ -291,10 +296,54 @@ class Deployer:
             return self.docker_driver.get_status(manifest)
         return self.host_driver.get_status(manifest)
 
+    def _pre_start_assemble(self, entity_dir):
+        """
+        Runs the TemplateEngine on entity files just before starting to ensure
+        that .env changes are respected.
+        """
+        from template_engine import TemplateEngine
+        
+        local_env = os.path.join(entity_dir, ".env")
+        global_env = os.path.join(self.root_dir, "master", "config", ".env")
+        
+        # We need the absolute path on the HOST for volume mounting
+        # root_dir is already absolute from __init__
+        
+        engine = TemplateEngine(global_env, extra_vars={
+            "HOST_NEXUS_DIR": self.root_dir,
+            "HOST_ENTITY_DIR": os.path.abspath(entity_dir),
+            "NAME": os.path.basename(entity_dir),
+            "ENTITY_DIR": entity_dir # Backward compat
+        })
+        
+        if os.path.exists(local_env):
+            from dotenv import dotenv_values
+            engine.env_vars.update(dotenv_values(local_env))
+
+        # Re-process core config files
+        targets = ["docker-compose.yaml", "llm.yaml", "launch.yaml"]
+        import glob
+        all_yamls = glob.glob(os.path.join(entity_dir, "*.yaml"))
+        for y in all_yamls:
+            bname = os.path.basename(y)
+            if bname not in targets:
+                targets.append(bname)
+
+        for t in targets:
+            path = os.path.join(entity_dir, t)
+            if os.path.exists(path) and not os.path.islink(path):
+                try:
+                    engine.process_file(path, path)
+                except Exception as e:
+                    print(f"    [!] SAE Warning: Failed to assemble {t}: {e}")
+
     def up_local(self, entity_dir):
         """
         Starts an entity locally or via Docker depending on configuration.
         """
+        # 1. Self-Assembly: Refresh configuration from .env before up
+        self._pre_start_assemble(entity_dir)
+
         # Determine driver for this entity
         local_compose = os.path.join(entity_dir, "docker-compose.yaml")
 

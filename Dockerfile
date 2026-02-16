@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     libsdl2-dev \
     libsdl2-ttf-dev \
     nlohmann-json3-dev \
+    ffmpeg \
+    v4l-utils \
     curl \
     jq \
     vim \

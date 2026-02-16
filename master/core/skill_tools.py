@@ -128,7 +128,7 @@ def get_tools_from_module(module, prefix=""):
     for name, func in inspect.getmembers(
         module, lambda x: inspect.isfunction(x) and x.__module__ == module.__name__
     ):
-        if name.startswith("_") or name == "main" or name.startswith("get_tools"):
+        if name.startswith("_") or name == "main" or name.startswith("get_tools") or name == "register":
             continue
         doc = inspect.getdoc(func)
         if not doc:

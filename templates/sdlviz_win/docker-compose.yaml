@@ -2,7 +2,6 @@
 services:
   agent:
     image: ${image:-bob-nexus:latest}
-    user: "${HOST_UID}:${HOST_GID}" # Permission Fix: Run as host user
     network_mode: host
     env_file:
       - .env

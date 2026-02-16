@@ -14,6 +14,8 @@ services:
       - NAME=${NAME}
       - CATEGORY=${CATEGORY}
       - BOB_NEXUS_DIR=/app
+      - HOME=/app/entities/${CATEGORY}/${NAME}
+      - ROS_HOME=/app/entities/${CATEGORY}/${NAME}/.ros
       # Path pointers for internal resolving
       - BOB_LLM_DIR=/app/ros2_ws/src/bob_llm
       - BOB_SDLVIZ_DIR=/app/ros2_ws/src/bob_sdlviz
@@ -27,4 +29,4 @@ services:
         echo '[*] SAE: Core packages not found. Building...' &&
         cd /app && echo n | ./onboarding.sh;
         source /app/ros2_ws/install/setup.bash;
-      fi && echo '[*] SAE: Launching Twitch Bot ${NAME} (Stream-Heavy)...' && ros2 launch bob_launch generic.launch.py config:=/app/entities/${CATEGORY}/${NAME}/launch.yaml "
+      fi && cd /app/entities/${CATEGORY}/${NAME} && echo '[*] SAE: Launching Twitch Bot ${NAME} (Stream-Heavy)...' && ros2 launch bob_launch generic.launch.py config:=./launch.yaml "

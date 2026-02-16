@@ -14,6 +14,12 @@ This skill allows the Mastermind to control the visual output layer (`bob_sdlviz
 3. **Get Info**: Call `run_skill_script('sdlviz', 'scripts/manage.py', ['info'])`. 
    - This uses `ros2 node info /bob/sdlviz` to retrieve parameters and topic mappings.
 
+## Dashboard Interface Tools
+
+- **`update_viz_layout(layers: list)`**: Use this to define the layout of the dashboard (where windows/terminals are).
+- **`send_viz_message(topic: str, text: str)`**: Push text content to a specific area/topic.
+- **`set_viz_status(status_text: str, category: str)`**: Update a quick status indicator (mood, activity).
+
 ## Usage Guidelines
-- Use this when you want to change what is being displayed to the audience.
-- Always check `info` if you are unsure about which topics the visualizer is currently listening to.
+- Use these tools to dynamically change Alice's appearance or the dashboard layout during a stream.
+- The `viz` node is typically located at `/bob/${NAME}/viz`.

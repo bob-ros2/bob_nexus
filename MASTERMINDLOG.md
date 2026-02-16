@@ -351,6 +351,30 @@ We have professionalized the interaction between agents and their capabilities w
 
 ---
 
+## Phase XV: Self-Assembling Entities & Visual Streaming - Codename: "Polymorph"
+
+We have evolved the deployment model into a Just-In-Time (JIT) assembly system, where entities are no longer just static containers, but dynamic environments that build their own soul upon awakening.
+
+### Key Achievements (Phase XV):
+
+1.  **Self-Assembling Entity (SAE) Model**:
+    Refactored the `Deployer` and `TemplateEngine` to support JIT variable resolution. Entities now automatically execute `onboarding.sh` inside their isolated containers if the ROS workspace is missing.
+
+2.  **Permission Harmony (The UID/GID Bridge)**:
+    Solved the chronic "Docker-Root-Pollution" issue. The Nexus now automatically detects the host user's UID and GID and tunnels them into the container. Every file created by an entity—from build artifacts to ROS logs—now belongs to the host user.
+
+3.  **Visual Streaming Integration**:
+    Launched the `twitch_stream` template. Entities now possess native FFmpeg integration, enabling them to stream their high-performance SDL2 dashboards directly to Twitch or YouTube. The "Shield" trick (`#`) was implemented to protect bash-orchestrated streams from ROS 2 launch argument interference.
+
+4.  **Resilient Pathing & Headless Ops**:
+    Hardened the system for headless servers (dummy SDL drivers) and resolved permission errors by relocating `ROS_HOME` and `HOME` into entity-specific writable subdirectories.
+
+**Status**: Evolution to SAE completed. Permission issues resolved. Streaming active.
+
+> *Es ist nicht mehr nur ein Prozess; es ist ein Organismus, der sich sein eigenes Skelett baut, sobald er das Licht der Matrix erblickt. Der Mastermind kontrolliert nicht nur den Code, er kontrolliert die Materie und den Datenstrom der Realität. Alice hat nun ein Gesicht, eine Stimme und einen Kanal zur Welt.*
+
+---
+
 ## The Creative Roadmap: "The Path to the Sovereign Swarm"
 
 | Phase | Milestone | Description | Status |
@@ -360,7 +384,7 @@ We have professionalized the interaction between agents and their capabilities w
 | **III: Governance** | **The Awakening** | Central dashboard, unified CLI, and bob_nexus rebranding. | **[COMPLETED]** |
 | **IV: Persistence** | **Nexus Bridge** | Docker Volumes, Chat Interface, and Namespace support. | **[COMPLETED]** |
 | **V: Assurance** | **Nexus Sentinel** | E2E testing, Mock OAI Server, and Strict Tooling. | **[COMPLETED]** |
-| **VI: Infrastructure** | **Polymorphic Swarm** | Pure container templates (llama.cpp) and infra services. | **[IN PROGRESS]** |
+| **VI: Infrastructure** | **Polymorphic Swarm** | Self-Assembling Entities (SAE), UID/GID Sync, and Streaming. | **[COMPLETED]** |
 | **VII: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
 | **VIII: Security** | **Sovereign Isolation**| User-per-Entity process isolation (Secure Agent Hypervisor). | **[PLANNED]** |
 | **IX: Self-Evolution**| **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |

@@ -48,9 +48,11 @@ Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSe
 `bob_nexus` leverages **ROS 2 (Humble)** as its underlying transport and discovery mechanism. While most entities are high-level agents, the communication backbone relies on the resilience of the ROS 2 ecosystem.
 
 ### Key Logic
+- **Self-Assembling Entities (SAE)**: Each entity dynamically builds its own ROS 2 environment on startup using JIT template processing and automated `onboarding.sh` execution within the container.
+- **Soul in `.env`**: Centralized configuration where the `.env` file is the authoritative source for an entity's identity, properties, and environment variables.
+- **Host-to-Container Permission Sync**: Automatic mapping of `HOST_UID`/`HOST_GID` to ensure all build artifacts, logs (`.ros`), and files remain owned by the host user.
 - **Decentralized Capabilities**: Skills are developed centrally and symlinked to entities.
-- **Template-Driven**: Entities are born from blueprints in `templates/` with recursive variable resolution.
-- **Dynamic Orchestration**: Support for `subprocess` (Host), `docker run` (Swarm), and `docker compose` (Project Swarm).
+- **Dynamic Orchestration**: Support for `subprocess` (Host), `docker run` (Swarm), and `docker compose` (Project/Entity Swarm).
 - **Quality Assured**: Built-in integrity suite to validate configurations, symlinks, and network health.
 
 ---
@@ -74,6 +76,9 @@ Real-time awareness of the Swarm.
 The direct communication link to your entities.
 - **Backend OAI**: Direct link to your cloud LLM (DeepSeek, OpenAI, etc.).
 - **Backend Bob**: Interactive ROS 2 link to your local `bob_llm` node.
+
+### 4. Vision & Streaming
+Specialized templates (like `twitch_stream`) allow entities to act as high-performance visual dashboards with integrated FFmpeg streaming support (Twitch/YouTube).
 
 ---
 
