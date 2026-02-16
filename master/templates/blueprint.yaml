@@ -1,0 +1,30 @@
+services:
+  mastermind:
+    image: ${IMAGE_NAME:-bob-nexus:latest}
+    container_name: ${NAME:-mastermind_core}
+    network_mode: host # Or use a bridge and a discovery server
+    volumes:
+      - ${HOST_NEXUS_DIR}:/app
+      # Explicitly mount sub-dirs to prevent image VOLUME shadowing
+      - ${HOST_NEXUS_DIR}/entities:/app/entities:rw
+      - ${HOST_NEXUS_DIR}/master:/app/master:rw
+      - ${HOST_NEXUS_DIR}/memory:/app/memory:rw
+      # Global workspace mount with variable permissions (ro/rw)
+      - ${HOST_NEXUS_DIR}/ros2_ws:/app/ros2_ws:${WORKSPACE_MODE:-ro}
+      # Allow local workspace overlay if it exists
+      - ${HOST_NEXUS_DIR}/entities/${ENTITY_CATEGORY:-assistant}/${NAME}/ros2_ws:/app/ros2_ws_local:rw
+      # Secure Secrets Vault Mount
+      - ${HOST_NEXUS_DIR}/entities/${ENTITY_CATEGORY:-assistant}/${NAME}/secrets:/run/secrets:ro
+      - /var/run/docker.sock:/var/run/docker.sock # Required if entity manages other containers
+    environment:
+      - BOB_LAUNCH_CONFIG
+      - NAME
+      - HOST_UID
+      - HOST_GID
+      - WORKSPACE_POLICY
+      - ENTITY_CATEGORY
+      - WORKSPACE_MODE
+      - ROS_DOMAIN_ID
+      - ROS_DISCOVERY_SERVER
+    command: /app/master/core/entrypoint.sh
+    restart: unless-stopped

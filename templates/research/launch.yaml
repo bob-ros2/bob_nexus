@@ -1,0 +1,5 @@
+# Research Node Configuration
+# This entity is in isolated mode and builds its own packages.
+/**:
+  ros__parameters:
+    node_name: "researcher_${NAME}"

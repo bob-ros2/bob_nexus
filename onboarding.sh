@@ -48,40 +48,91 @@ mkdir -p entities
 mkdir -p skills
 
 # 3. Clone Core ROS 2 Packages
-mkdir -p ros2_ws/src
-cd ros2_ws/src
+echo "[*] Workspace Repository Discovery..."
 
-echo "[*] Cleaning up workspace and checking for core repositories..."
-# Remove broken symlinks or external links to ensure we have local copies for the container
-for repo in bob_llm bob_launch bob_topic_tools bob_sdlviz; do
-    if [ -L "$repo" ]; then
-        echo "    [!] Removing symlink for $repo to ensure local clone..."
-        rm "$repo"
-    fi
-    
-    if [ ! -d "$repo" ]; then
-        echo "    [*] Cloning $repo..."
-        git clone https://github.com/bob-ros2/$repo.git
-    else
-        echo "    [ok] $repo already exists."
-    fi
-done
+# Fallback to local if we are in an isolated context
+TARGET_WS="ros2_ws"
+if [ -d "/app/ros2_ws_local" ]; then
+    TARGET_WS="/app/ros2_ws_local"
+fi
 
-cd ../..
+mkdir -p "$TARGET_WS/src"
+cd "$TARGET_WS"
+
+# 3.1 Global Repos (only if building global ws)
+if [ "$TARGET_WS" = "ros2_ws" ]; then
+    echo "    [*] Checking core repositories..."
+    for repo in bob_llm bob_launch bob_topic_tools bob_sdlviz; do
+        if [ ! -d "src/$repo" ]; then
+            echo "        [+] Cloning core: $repo..."
+            git clone --depth 1 "https://github.com/bob-ros2/$repo.git" "src/$repo"
+        fi
+    done
+fi
+
+# 3.2 Dynamic Repos (repos.yaml)
+REPOS_FILE="repos.yaml"
+if [ -n "$ENTITY_CATEGORY" ] && [ -n "$NAME" ]; then
+    # In container context, look where the entity root is
+    POTENTIAL_REPOS="/app/entities/${ENTITY_CATEGORY}/${NAME}/repos.yaml"
+    if [ -f "$POTENTIAL_REPOS" ]; then
+        REPOS_FILE="$POTENTIAL_REPOS"
+    fi
+fi
+
+if [ -f "$REPOS_FILE" ]; then
+    echo "    [*] Processing dynamic repositories from $REPOS_FILE..."
+    # Simple line-by-line parsing: "name: url"
+    while IFS=": " read -r name url || [ -n "$name" ]; do
+        # Skip comments and empty lines
+        [[ "$name" =~ ^#.*$ ]] && continue
+        [[ -z "$name" ]] && continue
+        
+        # Clean whitespace and trailing colons
+        name=$(echo "$name" | tr -d '[:space:]' | tr -d ':')
+        url=$(echo "$url" | tr -d '[:space:]' | sed 's/\r//g')
+        
+        if [ -n "$name" ] && [ -n "$url" ]; then
+            if [ ! -d "src/$name" ]; then
+                echo "        [+] Cloning dynamic: $name from $url..."
+                git clone --depth 1 "$url" "src/$name"
+            else
+                echo "        [ok] $name already exists."
+            fi
+        fi
+    done < "$REPOS_FILE"
+fi
+
+cd - > /dev/null
 
 # 3. Build Workspace
-echo "[*] Building ROS 2 workspace (this might take a while)..."
-# Clean up stale host-build artifacts if they exist in the root or workspace
-echo "    [*] Removing stale build/install/log artifacts to prevent path conflicts..."
-rm -rf build/ install/ log/
-rm -rf ros2_ws/build/ ros2_ws/install/ ros2_ws/log/
+echo "[*] Workspace Governance Check..."
 
-# Switch to the workspace directory to build
-cd ros2_ws
+# Determine target workspace
+WS_DIR="ros2_ws"
+IS_OVERLAY=false
 
-# HACK: Clear existing ROS workspace variables from the environment to avoid 
-# annoying 'path doesn't exist' warnings from colcon build when we just deleted them.
-# We then source only the base ROS 2 setup.
+if [ -d "/app/ros2_ws_local" ]; then
+    echo "    [*] Isolated Context Detected: Preparing local overlay build..."
+    WS_DIR="/app/ros2_ws_local"
+    IS_OVERLAY=true
+fi
+
+# Check writability
+if [ ! -w "$WS_DIR" ]; then
+    if [ "$IS_OVERLAY" = true ]; then
+        echo -e "${RED}[!] Local workspace $WS_DIR is NOT writable. Building aborted.${NC}"
+        exit 1
+    else
+        echo -e "${YELLOW}[*] Global workspace $WS_DIR is read-only. Skipping master build (Consumer Mode).${NC}"
+        exit 0
+    fi
+fi
+
+echo "[*] Building ROS 2 workspace: $WS_DIR..."
+rm -rf "$WS_DIR/build/" "$WS_DIR/install/" "$WS_DIR/log/"
+
+# Build
 echo "    [*] Purging stale workspace variables for a clean build..."
 unset AMENT_PREFIX_PATH
 unset CMAKE_PREFIX_PATH
@@ -89,8 +140,18 @@ unset COLCON_PREFIX_PATH
 unset PKG_CONFIG_PATH
 unset PYTHONPATH
 
-/bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --event-handlers console_cohesion+"
-cd ..
+BUILD_CMD="source /opt/ros/humble/setup.bash"
+if [ "$IS_OVERLAY" = true ] && [ -f "/app/ros2_ws/install/setup.bash" ]; then
+    echo "    [*] Using global workspace as underlay..."
+    BUILD_CMD="$BUILD_CMD && source /app/ros2_ws/install/setup.bash"
+fi
+# 3.4 Python Requirements
+if [ -d "$WS_DIR/src" ]; then
+    echo "[*] Checking for Python requirements in $WS_DIR/src..."
+    find "$WS_DIR/src" -maxdepth 2 -name "requirements.txt" -exec pip install --no-cache-dir -r {} \;
+fi
+
+/bin/bash -c "$BUILD_CMD && cd $WS_DIR && colcon build --event-handlers console_cohesion+"
 
 echo ""
 echo "===================================================================="
@@ -103,9 +164,14 @@ echo "3. Inside the console, run 'Entity Setup' to create your Core."
 echo "===================================================================="
 echo ""
 
-read -p "Would you like to start 'mastermind.sh' now? (y/n): " start_mm
-if [[ $start_mm =~ ^[Yy]$ ]]; then
-    exec ./mastermind.sh
+# Non-interactive check (skip read if not in a TTY)
+if [ -t 0 ]; then
+    read -p "Would you like to start 'mastermind.sh' now? (y/n): " start_mm
+    if [[ $start_mm =~ ^[Yy]$ ]]; then
+        exec ./mastermind.sh
+    else
+        echo "Goodbye! Run ./mastermind.sh whenever you are ready."
+    fi
 else
-    echo "Goodbye! Run ./mastermind.sh whenever you are ready."
+    echo "[*] Non-interactive mode: Skipping manual terminal launch."
 fi

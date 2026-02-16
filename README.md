@@ -52,6 +52,8 @@ cli up alice
 - **Soul in `.env`**: Centralized configuration where the `.env` file is the authoritative source for an entity's identity, properties, and environment variables.
 - **Host-to-Container Permission Sync**: Automatic mapping of `HOST_UID`/`HOST_GID` to ensure all build artifacts, logs (`.ros`), and files remain owned by the host user.
 - **Decentralized Capabilities**: Skills are developed centrally and symlinked to entities.
+- **Hierarchical Orchestration**: Layered Docker Compose support—merge global blueprints with entity-specific overrides for surgical customization.
+- **Secrets Vault**: Secure credential management via read-only Docker mounts, ensuring sensitive keys never touch environment variables or logs.
 - **Dynamic Orchestration**: Support for `subprocess` (Host), `docker run` (Swarm), and `docker compose` (Project/Entity Swarm).
 - **Quality Assured**: Built-in integrity suite to validate configurations, symlinks, and network health.
 
@@ -125,6 +127,12 @@ Custom orchestration and behavioral logic is defined in `master/config/conf.yaml
 - **Host**: Entities run as local processes.
 - **Swarm**: Entities run as Docker containers or Compose projects.
 - **Networking**: Support for custom Docker networks and ROS Discovery Servers.
+
+### Entity Categories & Workspace Governance
+The Nexus enforces a three-tier governance model to ensure stability and isolation:
+- **Infrastructure/Assistant**: Global `ros2_ws` is mounted as **Read-Only**. Stable and non-volatile.
+- **Master**: Full **Read-Write** access to the global workspace. For creating the bridge.
+- **Isolated (Research)**: Each entity receives a private, writable workspace overlay. Safely clone and build custom repositories (`repos.yaml`) without side effects.
 
 ### Default Skill Policy
 Manage entity "weaponry" by category. Spawning an entity automatically links skills defined here:

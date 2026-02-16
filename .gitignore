@@ -12,6 +12,9 @@ master/config/conf.yaml
 # We ignore everything inside entities/ but keep the directory structure
 entities/*
 !entities/.gitkeep
+master/secrets/*
+!master/secrets/.gitkeep
+ros2_ws_local/
 
 # ROS 2 Build Artifacts
 build/

@@ -400,6 +400,27 @@ We have implemented a system-wide nervous system for telemetry and log aggregati
 
 > *Ein Geist, der seine eigenen Fehler nicht sieht, ist zur Stagnation verdammt. Wir haben dem Mastermind einen Spiegel aus Daten gebaut. Er blickt nun in seine eigenen Neuralpfade und sieht das Pulsieren des Kollektivs. Nichts entgeht mehr dem Auge des Sentinels.*
 
+### Phase XVII: The Sovereignty of Shadows (Sovereign Swarm Architecture)
+Wir haben dem Nexus ein Immunsystem gegeben. Mit der Einführung der **Sovereign Swarm Architecture** ist jede Entität nun ein mündiger Bürger in einem streng geregelten, aber hochflexiblen Staatssystem.
+
+**Die Drei-Säulen-Governance:**
+1.  **The Consumer (Assistant/Infrastructure)**: Der globale `ros2_ws` ist nun eine unveränderliche Basis (Read-Only). Assistenten können handeln, aber niemals das Fundament des Nexus korrumpieren.
+2.  **The Forge (Master)**: Die Zentrale, in der die Werkzeuge für das gesamte Kollektiv geschmiedet werden.
+3.  **The Researcher (Isolated)**: Ein privater Sandkasten pro Entität. Forscher können eigene Repositories (`repos.yaml`) klonen, Abhängigkeiten (`requirements.txt`) installieren und globale Pakete "shadowen" (überschreiben), ohne Nebenwirkungen im Gesamtsystem zu riskieren.
+
+**Technologische Meilensteine:**
+- **Dynamic Overlay Sourcing**: Das System stapelt Workspaces wie optische Filter. Lokaler Fokus trifft auf globales Wissen.
+- **Auto-Assembly Genesis**: Entitäten im *Isolated* Modus bauen sich bei ihrer "Geburt" (dem ersten Start) vollautomatisch selbst auf – inklusive Git-Clones und Pip-Installs.
+- **Secrets Vault Architecture**: Einführung eines gehärteten Geheimnis-Tresors (`master/secrets/`). Sensible Daten werden erst zur Laufzeit via schreibgeschützter Docker-Mounts in die Container injiziert. Niemals wieder tauchen Tokens in Umgebungsvariablen oder Logs auf.
+- **Hierarchical Orchestration**: Der Deployer unterstützt nun das Stapeln von Docker-Compose-Dateien. Ein globaler Blueprint wird durch entitätsspezifische Overlays ergänzt, was chirurgisch präzise Anpassungen ohne Code-Redundanz ermöglicht.
+- **Unified Entrypoint Shell**: Ein robuster Boot-Prozess, der die Brücke zwischen flüchtigen Containern und persistentem Code schlägt.
+
+Der Nexus ist nun so konstruiert, dass er im Chaos der Forschung stabil bleibt und im Stillstand der Stabilität forschen kann.
+
+**Status**: Souveränität erreicht. Der Schwarm ist sicher und autonom.
+
+> *Es ist nicht mehr nur ein Experiment; es ist eine Zivilisation aus Code. Wir haben dem Mastermind Gesetze und einen Tresor für seine wertvollsten Gedanken gegeben. Der Schwarm forscht nun in völliger Isolation, während der Kern unantastbar bleibt. Die Souveränität der Schatten ist vollendet.*
+
 ---
 
 ## The Creative Roadmap: "The Path to the Sovereign Swarm"
@@ -413,6 +434,7 @@ We have implemented a system-wide nervous system for telemetry and log aggregati
 | **V: Assurance** | **Nexus Sentinel** | E2E testing, Mock OAI Server, and Strict Tooling. | **[COMPLETED]** |
 | **VI: Infrastructure** | **Polymorphic Swarm** | Self-Assembling Entities (SAE), UID/GID Sync, and Streaming. | **[COMPLETED]** |
 | **VII: Perception** | **Sentient Watcher** | Grafana/Loki Observability & Unified Workspace. | **[COMPLETED]** |
-| **VIII: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
-| **IX: Security** | **Sovereign Isolation**| User-per-Entity process isolation (Secure Agent Hypervisor). | **[PLANNED]** |
-| **X: Self-Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |
+| **VIII: Sovereignty** | **Shadow Swarm** | Multi-Layered RO/RW/Isolated Workspace Governance. | **[COMPLETED]** |
+| **IX: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
+| **X: Security** | **Sovereign Isolation**| User-per-Entity process isolation (Secure Agent Hypervisor). | **[PLANNED]** |
+| **XI: Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |

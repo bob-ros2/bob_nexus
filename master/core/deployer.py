@@ -10,7 +10,7 @@ class BaseDriver:
     def __init__(self, root_dir):
         self.root_dir = root_dir
 
-    def up(self, entity_dir, config_path, ros_source):
+    def up(self, entity_dir, config_path, ros_source, category="assistant", policy="ro"):
         raise NotImplementedError()
 
     def down(self, manifest):
@@ -21,7 +21,7 @@ class BaseDriver:
 
 
 class HostDriver(BaseDriver):
-    def up(self, entity_dir, config_path, ros_source):
+    def up(self, entity_dir, config_path, ros_source, category="assistant", policy="ro"):
         env = os.environ.copy()
 
         # Load entity-specific .env if it exists
@@ -105,36 +105,105 @@ class HostDriver(BaseDriver):
             return "stopped"
 
 
+import yaml
+
 class DockerDriver(BaseDriver):
     def __init__(self, root_dir, config):
         super().__init__(root_dir)
         self.config = config
-        self.image = config.get("image", "mastermind:latest")
+        self.image = config.get("image", "bob-nexus:latest")
         self.network = config.get("network", "mastermind_net")
         self.global_compose_file = config.get("compose_file", "docker-compose.yaml")
 
-    def up(self, entity_dir, config_path, ros_source):
+    def _prepare_secrets(self, entity_dir, config_path):
+        """
+        Scans the config for any occurrence of '/run/secrets/' strings 
+        and prepares the local secrets directory.
+        """
+        if not config_path or not os.path.exists(config_path):
+            return []
+
+        import yaml
+        secrets_identified = []
+        
+        try:
+            with open(config_path, "r") as f:
+                # We load it and search recursively for strings starting with /run/secrets/
+                content = yaml.safe_load(f)
+                
+                def find_secret_refs(data):
+                    refs = []
+                    if isinstance(data, dict):
+                        for v in data.values():
+                            refs.extend(find_secret_refs(v))
+                    elif isinstance(data, list):
+                        for item in data:
+                            refs.extend(find_secret_refs(item))
+                    elif isinstance(data, str) and data.startswith("/run/secrets/"):
+                        # Extract the filename
+                        refs.append(os.path.basename(data))
+                    return refs
+
+                secrets_identified = find_secret_refs(content)
+        except Exception as e:
+            print(f"[!] Warning: Failed to scan config for secret references: {e}")
+
+        if not secrets_identified:
+            return []
+
+        local_secrets_dir = os.path.join(entity_dir, "secrets")
+        if not os.path.exists(local_secrets_dir):
+            os.makedirs(local_secrets_dir, exist_ok=True)
+        
+        vault_dir = os.path.join(self.root_dir, "master", "secrets")
+        valid_count = 0
+
+        for secret_file in set(secrets_identified):
+            vault_path = os.path.join(vault_dir, secret_file)
+            # Support fuzzy extension matching if requested file lacks it
+            if not os.path.exists(vault_path):
+                for ext in [".json", ".jsonc", ".yaml", ".yml", ".txt"]:
+                    if os.path.exists(vault_path + ext):
+                        vault_path += ext
+                        break
+            
+            if os.path.exists(vault_path):
+                target_path = os.path.join(local_secrets_dir, secret_file)
+                if os.path.exists(target_path) or os.path.islink(target_path):
+                    os.remove(target_path)
+                os.symlink(vault_path, target_path)
+                valid_count += 1
+            else:
+                print(f"[!] Warning: Secret file '{secret_file}' not found in {vault_dir}")
+
+        return secrets_identified
+
+    def up(self, entity_dir, config_path, ros_source, category="assistant", policy="ro"):
         entity_name = os.path.basename(entity_dir)
+        
+        # Prepare Secrets
+        self._prepare_secrets(entity_dir, config_path)
 
-        # 1. Search for a compose file
-        # Priority: Entity-local > Global/Template from conf.yaml
+        # 1. Search for compose files
+        # We use a layered approach: Global Blueprint + Local Override
         local_compose = os.path.join(entity_dir, "docker-compose.yaml")
-        compose_path = None
+        compose_files = []
+        
+        # Global path
+        g_path = self.global_compose_file
+        if not os.path.isabs(g_path):
+            g_path = os.path.join(self.root_dir, g_path)
+        if os.path.exists(g_path):
+            compose_files.append(g_path)
 
+        # Local override
         if os.path.exists(local_compose):
-            compose_path = local_compose
-        else:
-            # Check global path (resolve relative to root if needed)
-            g_path = self.global_compose_file
-            if not os.path.isabs(g_path):
-                g_path = os.path.join(self.root_dir, g_path)
+            compose_files.append(local_compose)
 
-            if os.path.exists(g_path):
-                compose_path = g_path
-
-        if compose_path:
+        if compose_files:
             # Use Docker Compose
-            print(f"[*] Orchestration: Using compose file {compose_path}")
+            print(f"[*] Orchestration: Using compose layers: "
+                  f"{', '.join(compose_files)}")
             command = [
                 "docker",
                 "compose",
@@ -142,11 +211,11 @@ class DockerDriver(BaseDriver):
                 entity_name,
                 "--project-directory",
                 entity_dir,
-                "-f",
-                compose_path,
-                "up",
-                "-d",
             ]
+            for cf in compose_files:
+                command.extend(["-f", cf])
+            
+            command.extend(["up", "-d"])
 
             # Forward environment for the compose context
             env = os.environ.copy()
@@ -154,28 +223,46 @@ class DockerDriver(BaseDriver):
             # SAE Permission Fix: Map host user to container
             env["HOST_UID"] = str(os.getuid())
             env["HOST_GID"] = str(os.getgid())
+            env["HOST_NEXUS_DIR"] = self.root_dir
 
             # Load entity-specific .env if it exists
             local_env_path = os.path.join(entity_dir, ".env")
             if os.path.exists(local_env_path):
-                print(f"[*] Orchestration: Loading local environment from {local_env_path}")
+                print(f"[*] Orchestration: Loading local environment from "
+                      f"{local_env_path}")
                 from dotenv import dotenv_values
 
                 local_vars = dotenv_values(local_env_path)
                 # Filter out None values and update
                 env.update({k: v for k, v in local_vars.items() if v is not None})
 
-            env["BOB_LAUNCH_CONFIG"] = config_path
+            # Translate config_path to container path
+            rel_config = os.path.relpath(config_path, self.root_dir)
+            env["BOB_LAUNCH_CONFIG"] = os.path.join("/app", rel_config)
+            env["IMAGE_NAME"] = self.image
+            env["NAME"] = entity_name
             env["ROS_DOMAIN_ID"] = str(self.config.get("domain_id", 42))
             ds = self.config.get("discovery_server")
             if ds:
                 env["ROS_DISCOVERY_SERVER"] = ds
 
+            # Workspace Policy Forwarding
+            env["WORKSPACE_POLICY"] = policy
+            env["ENTITY_CATEGORY"] = category
+            # Map policy to mount mode for volumes
+            env["WORKSPACE_MODE"] = "rw" if policy == "rw" else "ro"
+            local_ws = os.path.join(entity_dir, "ros2_ws")
+            env["HAS_LOCAL_WS"] = "true" if os.path.exists(local_ws) else "false"
+
             result = subprocess.run(command, env=env, capture_output=True, text=True)
             if result.returncode != 0:
                 raise Exception(f"Docker Compose failed: {result.stderr}")
 
-            return {"type": "swarm-compose", "compose_file": compose_path, "status": "running"}
+            return {
+                "type": "swarm-compose",
+                "compose_files": compose_files,
+                "status": "running"
+            }
 
         # 2. Fallback to Docker Run
         # Cleanup existing container with same name
@@ -201,25 +288,25 @@ class DockerDriver(BaseDriver):
         return {"container_id": container_id, "status": "running"}
 
     def down(self, manifest):
-        entity_name = manifest.get("name")  # Ensure we have the project name
+        entity_name = manifest.get("name")
         if manifest.get("type") == "swarm-compose":
-            compose_path = manifest.get("compose_file")
-            entity_dir = os.path.dirname(compose_path)
+            c_files = manifest.get("compose_files", [])
+            if not c_files and manifest.get("compose_file"):
+                c_files = [manifest.get("compose_file")]
+            # Use the first file to find the directory context
+            entity_dir = os.path.dirname(c_files[0]) if c_files \
+                else os.getcwd()
+            
             print(f"[*] Orchestration: Stopping compose project {entity_name}")
-            subprocess.run(
-                [
-                    "docker",
-                    "compose",
-                    "-p",
-                    entity_name,
-                    "--project-directory",
-                    entity_dir,
-                    "-f",
-                    compose_path,
-                    "down",
-                ],
-                capture_output=True,
-            )
+            cmd = [
+                "docker", "compose", "-p", entity_name,
+                "--project-directory", entity_dir
+            ]
+            for cf in c_files:
+                cmd.extend(["-f", cf])
+            cmd.append("down")
+            
+            subprocess.run(cmd, capture_output=True)
             return True
 
         container_id = manifest.get("container_id")
@@ -386,12 +473,19 @@ class Deployer:
             else:
                 config_path = local_compose if os.path.exists(local_compose) else None
 
-        from env_helper import get_ros_setup_cmd
+        # Determine category and policy for governance
+        # entity_dir is something like /app/entities/assistant/alice
+        category = os.path.basename(os.path.dirname(entity_dir))
+        
+        policies = self.conf.get("orchestration", {}).get("workspace_policies", {})
+        policy = policies.get(category, policies.get("defaults", "ro"))
 
+        from env_helper import get_ros_setup_cmd
+        
         ros_source = get_ros_setup_cmd(self.root_dir)
 
         try:
-            result = active_driver.up(entity_dir, config_path, ros_source)
+            result = active_driver.up(entity_dir, config_path, ros_source, category=category, policy=policy)
 
             # Save manifest
             manifest_path = os.path.join(entity_dir, "manifest.json")
