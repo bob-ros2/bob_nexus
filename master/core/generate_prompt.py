@@ -52,7 +52,10 @@ def generate_skills_prompt(entity_dir):
 def update_entity_yaml(entity_dir):
     yaml_file = os.path.join(entity_dir, "llm.yaml")
     if not os.path.exists(yaml_file):
-        sys.stderr.write(f"Error: {yaml_file} not found.\n")
+        yaml_file = os.path.join(entity_dir, "launch.yaml")
+    
+    if not os.path.exists(yaml_file):
+        sys.stderr.write(f"Error: No config file (llm.yaml/launch.yaml) found in {entity_dir}\n")
         return False
 
     prompt = generate_skills_prompt(entity_dir)
@@ -67,8 +70,8 @@ def update_entity_yaml(entity_dir):
     with open(yaml_file, "r") as f:
         content = f.read()
 
-    # Pattern for system_prompt:='...'
-    pattern = r'("system_prompt:=\')(.*?)(\'")'
+    # Pattern for system_prompt:='...' or "system_prompt:=${VAR:-'...'}"
+    pattern = r'(system_prompt:=.*?\')(.*?)(\'\}?\"?)'
 
     if re.search(pattern, content):
         new_content = re.sub(
