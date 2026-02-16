@@ -22,23 +22,23 @@ Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSe
 ### 3. Wake Up the Mastermind
 ```bash
 ./mastermind.sh
-# Select [1] AWAKENING to start the core management entity.
+# Select [1] to awaken the core management entity (Start Core).
 ```
 
 ### 4. Create your first Assistant
 ```bash
-# cli.sh is now conveniently available in the root!
-./cli.sh spawn assistant alice bob_llm
-./cli.sh up alice
+# cli is available in the global PATH after awakening
+cli spawn assistant alice bob_llm
+cli up alice
 ```
 
 ### 5. Chat with the Swarm
 ```bash
-# Connect to the local bob_llm assistant
-./master/chat.sh --backend bob_llm
-
-# Or use the cloud backend (OAI)
+# Connect via the cloud backend (OAI) - Default
 ./master/chat.sh --backend oai
+
+# Integrated ROS-Backend (via local bob_llm node)
+./master/chat.sh --backend bob_llm
 ```
 
 ---
@@ -98,16 +98,16 @@ Specialized templates (like `twitch_stream`) allow entities to act as high-perfo
 ```
 
 ### The Mastermind CLI
-The `cli.sh` is your scalpel for entity lifecycles. It is symlinked to the root for easy access.
+The `cli` tool is your scalpel for entity lifecycles. It is automatically available in your PATH once the Nexus environment is sourced (or can be called via `master/cli.sh`).
 
 | Command | Description | Example |
 | :--- | :--- | :--- |
-| `spawn` | Create a new entity from a template | `./cli.sh spawn assistant bob bob_launch` |
-| `up` | Start an entity (Host, Docker, or Compose) | `./cli.sh up bob` |
-| `down` | Gracefully stop an entity | `./cli.sh down bob` |
-| `status` | List all entities, their status, and PIDs/CIDs | `./cli.sh status` |
-| `link` | Attach a shared skill to an entity | `./cli.sh link bob memory` |
-| `refresh` | Re-generate entity system prompt | `./cli.sh refresh bob` |
+| `spawn` | Create a new entity from a template | `cli spawn assistant bob bob_launch` |
+| `up` | Start an entity (Host, Docker, or Compose) | `cli up bob` |
+| `down` | Gracefully stop an entity | `cli down bob` |
+| `status` | List all entities, their status, and PIDs/CIDs | `cli status` |
+| `link` | Attach a shared skill to an entity | `cli link bob memory` |
+| `refresh` | Re-generate entity system prompt | `cli refresh bob` |
 
 ---
 
