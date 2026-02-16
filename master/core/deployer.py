@@ -105,7 +105,6 @@ class HostDriver(BaseDriver):
             return "stopped"
 
 
-import yaml
 
 class DockerDriver(BaseDriver):
     def __init__(self, root_dir, config):
@@ -117,7 +116,7 @@ class DockerDriver(BaseDriver):
 
     def _prepare_secrets(self, entity_dir, config_path):
         """
-        Scans the config for any occurrence of '/run/secrets/' strings 
+        Scans the config for any occurrence of '/run/secrets/' strings
         and prepares the local secrets directory.
         """
         if not config_path or not os.path.exists(config_path):
@@ -125,12 +124,12 @@ class DockerDriver(BaseDriver):
 
         import yaml
         secrets_identified = []
-        
+
         try:
             with open(config_path, "r") as f:
                 # We load it and search recursively for strings starting with /run/secrets/
                 content = yaml.safe_load(f)
-                
+
                 def find_secret_refs(data):
                     refs = []
                     if isinstance(data, dict):
@@ -154,7 +153,7 @@ class DockerDriver(BaseDriver):
         local_secrets_dir = os.path.join(entity_dir, "secrets")
         if not os.path.exists(local_secrets_dir):
             os.makedirs(local_secrets_dir, exist_ok=True)
-        
+
         vault_dir = os.path.join(self.root_dir, "master", "secrets")
         valid_count = 0
 
@@ -166,7 +165,7 @@ class DockerDriver(BaseDriver):
                     if os.path.exists(vault_path + ext):
                         vault_path += ext
                         break
-            
+
             if os.path.exists(vault_path):
                 target_path = os.path.join(local_secrets_dir, secret_file)
                 if os.path.exists(target_path) or os.path.islink(target_path):
@@ -180,7 +179,7 @@ class DockerDriver(BaseDriver):
 
     def up(self, entity_dir, config_path, ros_source, category="assistant", policy="ro"):
         entity_name = os.path.basename(entity_dir)
-        
+
         # Prepare Secrets
         self._prepare_secrets(entity_dir, config_path)
 
@@ -188,7 +187,7 @@ class DockerDriver(BaseDriver):
         # We use a layered approach: Global Blueprint + Local Override
         local_compose = os.path.join(entity_dir, "docker-compose.yaml")
         compose_files = []
-        
+
         # Global path
         g_path = self.global_compose_file
         if not os.path.isabs(g_path):
@@ -214,7 +213,7 @@ class DockerDriver(BaseDriver):
             ]
             for cf in compose_files:
                 command.extend(["-f", cf])
-            
+
             command.extend(["up", "-d"])
 
             # Forward environment for the compose context
@@ -296,7 +295,7 @@ class DockerDriver(BaseDriver):
             # Use the first file to find the directory context
             entity_dir = os.path.dirname(c_files[0]) if c_files \
                 else os.getcwd()
-            
+
             print(f"[*] Orchestration: Stopping compose project {entity_name}")
             cmd = [
                 "docker", "compose", "-p", entity_name,
@@ -305,7 +304,7 @@ class DockerDriver(BaseDriver):
             for cf in c_files:
                 cmd.extend(["-f", cf])
             cmd.append("down")
-            
+
             subprocess.run(cmd, capture_output=True)
             return True
 
@@ -476,12 +475,12 @@ class Deployer:
         # Determine category and policy for governance
         # entity_dir is something like /app/entities/assistant/alice
         category = os.path.basename(os.path.dirname(entity_dir))
-        
+
         policies = self.conf.get("orchestration", {}).get("workspace_policies", {})
         policy = policies.get(category, policies.get("defaults", "ro"))
 
         from env_helper import get_ros_setup_cmd
-        
+
         ros_source = get_ros_setup_cmd(self.root_dir)
 
         try:

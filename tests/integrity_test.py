@@ -44,7 +44,7 @@ def test_templates_integrity():
         # We'll check folders that are either direct children or second-level children
         rel_path = os.path.relpath(root, templates_dir)
         depth = len(rel_path.split(os.sep))
-        
+
         if depth <= 2 and not dirs:
             yamls = glob.glob(os.path.join(root, "*.yaml"))
             if not yamls:
