@@ -65,18 +65,22 @@ class OAIBackend(ChatBackend):
                 iface_tools = skill_tools.get_tools_from_file(interface_file)
                 self.tools.extend(iface_tools)
                 if self.debug and iface_tools:
-                    print(
-                        f"\033[90m[Debug] Loaded {len(iface_tools)} tools from interface: {interface_file}\033[0m"
+                    msg = (
+                        f"\033[90m[Debug] Loaded {len(iface_tools)} tools "
+                        f"from interface: {interface_file}\033[0m"
                     )
+                    print(msg)
 
             # 3. Enabled skills (from conf.yaml master section)
             enabled_skills = kwargs.get("enabled_skills", [])
             skill_tools_list = skill_tools.get_tools_from_skills(enabled_skills)
             self.tools.extend(skill_tools_list)
             if self.debug and skill_tools_list:
-                print(
-                    f"\033[90m[Debug] Loaded {len(skill_tools_list)} tools from {len(enabled_skills)} master skills.\033[0m"
+                msg = (
+                    f"\033[90m[Debug] Loaded {len(skill_tools_list)} tools "
+                    f"from {len(enabled_skills)} master skills.\033[0m"
                 )
+                print(msg)
 
             if not self.tools:
                 self.tools = None

@@ -38,14 +38,18 @@ def print_dashboard(root_dir):
     p = data["paths"]
     print(f"{P}--- System Awareness --------------------------------------------------{NC}")
     print(
-        f" {B}MASTER:{NC} {Y}{data['master_name']}{NC} | {B}MODE:{NC} {data['cpu']} CPU / {data['mem']} MEM | {B}TIME:{NC} {data['timestamp']}"
+        f" {B}MASTER:{NC} {Y}{data['master_name']}{NC} | "
+        f"{B}MODE:{NC} {data['cpu']} CPU / {data['mem']} MEM | "
+        f"{B}TIME:{NC} {data['timestamp']}"
     )
     print(f" {B}PATH:{NC}   {p['root']}")
     print(f" {B}CONFIG:{NC} {p['config']}")
 
     # Counters Area
     print(
-        f" {B}SWARM:{NC}  {G}{data['running_masters']} Masters Running{NC} | {C}{data['running_others']} Others Running{NC} | {R}{data['stopped']} Stopped{NC}"
+        f" {B}SWARM:{NC}  {G}{data['running_masters']} Masters Running{NC} | "
+        f"{C}{data['running_others']} Others Running{NC} | "
+        f"{R}{data['stopped']} Stopped{NC}"
     )
     print(f"{P}----------------------------------------------------------------------{NC}")
 
@@ -59,7 +63,8 @@ def print_dashboard(root_dir):
     for ent in sorted_ents:
         status_color = G if ent["status"] == "running" else R
         print(
-            f"{ent['category']:<15} {ent['name']:<15} {status_color}{ent['status']:<10}{NC} {ent['id']:<15}"
+            f"{ent['category']:<15} {ent['name']:<15} "
+            f"{status_color}{ent['status']:<10}{NC} {ent['id']:<15}"
         )
 
     print(f"\n{Y}Press Ctrl+C to disconnect from Nexus.{NC}")

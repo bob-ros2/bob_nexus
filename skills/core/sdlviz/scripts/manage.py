@@ -19,9 +19,11 @@ def main():
 
     # In this stage, we are implementing high-level control via ROS 2 CLI
     if cmd_type == "up":
-        # Placeholder for starting the node - in a real scenario, this would trigger a systemd service or docker container
+        # Placeholder for starting the node:
+        # In a real scenario, this would trigger a systemd service or container
         print("Starting SDLViz node via Mastermind Orchestrator...")
-        # Example: subprocess.Popen(["ros2", "run", "bob_sdlviz", "sdlviz", "--ros-args", "-r", "__ns:=/bob"])
+        # Example: subprocess.Popen(["ros2", "run", "bob_sdlviz", "sdlviz",
+        #                            "--ros-args", "-r", "__ns:=/bob"])
         print("SDLViz is now UP (Logic simulation)")
 
     elif cmd_type == "down":

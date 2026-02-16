@@ -105,7 +105,6 @@ class HostDriver(BaseDriver):
             return "stopped"
 
 
-
 class DockerDriver(BaseDriver):
     def __init__(self, root_dir, config):
         super().__init__(root_dir)
@@ -123,6 +122,7 @@ class DockerDriver(BaseDriver):
             return []
 
         import yaml
+
         secrets_identified = []
 
         try:
@@ -201,8 +201,7 @@ class DockerDriver(BaseDriver):
 
         if compose_files:
             # Use Docker Compose
-            print(f"[*] Orchestration: Using compose layers: "
-                  f"{', '.join(compose_files)}")
+            print(f"[*] Orchestration: Using compose layers: {', '.join(compose_files)}")
             command = [
                 "docker",
                 "compose",
@@ -227,8 +226,7 @@ class DockerDriver(BaseDriver):
             # Load entity-specific .env if it exists
             local_env_path = os.path.join(entity_dir, ".env")
             if os.path.exists(local_env_path):
-                print(f"[*] Orchestration: Loading local environment from "
-                      f"{local_env_path}")
+                print(f"[*] Orchestration: Loading local environment from {local_env_path}")
                 from dotenv import dotenv_values
 
                 local_vars = dotenv_values(local_env_path)
@@ -257,11 +255,7 @@ class DockerDriver(BaseDriver):
             if result.returncode != 0:
                 raise Exception(f"Docker Compose failed: {result.stderr}")
 
-            return {
-                "type": "swarm-compose",
-                "compose_files": compose_files,
-                "status": "running"
-            }
+            return {"type": "swarm-compose", "compose_files": compose_files, "status": "running"}
 
         # 2. Fallback to Docker Run
         # Cleanup existing container with same name
@@ -293,14 +287,10 @@ class DockerDriver(BaseDriver):
             if not c_files and manifest.get("compose_file"):
                 c_files = [manifest.get("compose_file")]
             # Use the first file to find the directory context
-            entity_dir = os.path.dirname(c_files[0]) if c_files \
-                else os.getcwd()
+            entity_dir = os.path.dirname(c_files[0]) if c_files else os.getcwd()
 
             print(f"[*] Orchestration: Stopping compose project {entity_name}")
-            cmd = [
-                "docker", "compose", "-p", entity_name,
-                "--project-directory", entity_dir
-            ]
+            cmd = ["docker", "compose", "-p", entity_name, "--project-directory", entity_dir]
             for cf in c_files:
                 cmd.extend(["-f", cf])
             cmd.append("down")
@@ -484,7 +474,9 @@ class Deployer:
         ros_source = get_ros_setup_cmd(self.root_dir)
 
         try:
-            result = active_driver.up(entity_dir, config_path, ros_source, category=category, policy=policy)
+            result = active_driver.up(
+                entity_dir, config_path, ros_source, category=category, policy=policy
+            )
 
             # Save manifest
             manifest_path = os.path.join(entity_dir, "manifest.json")

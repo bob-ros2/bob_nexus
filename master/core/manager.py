@@ -43,7 +43,8 @@ class EntityManager:
 
         if not os.path.isdir(src_template_dir):
             raise ValueError(
-                f"Template path '{template_category}' is not a directory. Spawning requires a directory template."
+                f"Template path '{template_category}' is not a directory. "
+                "Spawning requires a directory template."
             )
 
         os.makedirs(dest_dir, exist_ok=True)

@@ -190,7 +190,12 @@ class NexusDashboardWindow:
         data = self.svc.get_stats()
 
         # Update Stats
-        stats_text = f"CPU: {data['cpu']} | MEM: {data['mem']} | MASTERS: {data['running_masters']} | OTHERS: {data['running_others']} | STOPPED: {data['stopped']}"
+        stats_text = (
+            f"CPU: {data['cpu']} | MEM: {data['mem']} | "
+            f"MASTERS: {data['running_masters']} | "
+            f"OTHERS: {data['running_others']} | "
+            f"STOPPED: {data['stopped']}"
+        )
         self.stats_label.config(text=stats_text)
 
         # Update Paths

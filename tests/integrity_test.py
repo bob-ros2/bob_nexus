@@ -36,7 +36,7 @@ def test_templates_integrity():
         if any(skip in root for skip in skip_list):
             # Special case: check subfolders of inference
             if "inference/" in root and not any(s in root for s in ["config", "dashboards"]):
-                pass # Continue to check actual templates inside inference
+                pass  # Continue to check actual templates inside inference
             else:
                 continue
 
@@ -139,7 +139,8 @@ def test_docker_network_integrity():
             if res.returncode == 0:
                 found_networks = res.stdout.strip().split("\n")
                 assert network_name in found_networks, (
-                    f"Docker network '{network_name}' not found. Create it: docker network create {network_name}"
+                    f"Docker network '{network_name}' not found. "
+                    f"Create it: docker network create {network_name}"
                 )
             else:
                 pytest.skip(f"Docker command failed (permissions?): {res.stderr}")

@@ -8,7 +8,11 @@ import yaml
 
 def generate_skills_prompt(entity_dir):
     prompt = "## Available Agent Skills\n"
-    prompt += "You have access to the following specialized skills. To use a skill, first call `load_skill(name)` to read its full instructions.\n\n"
+    prompt += (
+        "You have access to the following specialized skills. "
+        "To use a skill, first call `load_skill(name)` to read its full "
+        "instructions.\n\n"
+    )
 
     # Scan the entity's own skills directory (where skills are symlinked)
     skills_path = os.path.join(entity_dir, "skills")
@@ -38,7 +42,10 @@ def generate_skills_prompt(entity_dir):
     if not found:
         return None
 
-    prompt += "\nIf a user request matches a skill description, you SHOULD call `load_skill` to get detailed behavior instructions."
+    prompt += (
+        "\nIf a user request matches a skill description, you SHOULD call "
+        "`load_skill` to get detailed behavior instructions."
+    )
     return prompt
 
 
@@ -81,9 +88,11 @@ def update_entity_yaml(entity_dir):
             print(f"Successfully filled placeholder in {yaml_file}")
             return True
         else:
-            sys.stderr.write(
-                f"Error: Could not find system_prompt line or placeholder in {yaml_file}\n"
+            msg = (
+                f"Error: Could not find system_prompt line or placeholder "
+                f"in {yaml_file}\n"
             )
+            sys.stderr.write(msg)
             return False
 
 
