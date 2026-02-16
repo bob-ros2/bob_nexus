@@ -7,24 +7,22 @@ services:
     env_file:
       - .env
     environment:
-      - BOB_LAUNCH_CONFIG=/app/entities/${CATEGORY}/${NAME}/launch.yaml
+      - BOB_LAUNCH_CONFIG=${HOST_NEXUS_DIR}/entities/${CATEGORY}/${NAME}/launch.yaml
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
       - ROS_DISCOVERY_SERVER=${ROS_DISCOVERY_SERVER}
       # Internal engine variables
       - NAME=${NAME}
       - CATEGORY=${CATEGORY}
-      - BOB_NEXUS_DIR=/app
+      - BOB_NEXUS_DIR=${HOST_NEXUS_DIR}
       # Path pointers for internal resolving
-      - BOB_LLM_DIR=/app/ros2_ws/src/bob_llm
-      - BOB_SDLVIZ_DIR=/app/ros2_ws/src/bob_sdlviz
+      - BOB_LLM_DIR=${HOST_NEXUS_DIR}/ros2_ws/src/bob_llm
+      - BOB_SDLVIZ_DIR=${HOST_NEXUS_DIR}/ros2_ws/src/bob_sdlviz
     volumes:
-      - ${HOST_NEXUS_DIR}/ros2_ws:/app/ros2_ws:rw
-      - ${HOST_NEXUS_DIR}/master/config:/app/master/config:ro
-      - ${HOST_NEXUS_DIR}/memory:/app/memory:rw
-      - .:/app/entities/${CATEGORY}/${NAME}:rw
+      - ${HOST_NEXUS_DIR}:${HOST_NEXUS_DIR}:rw
+    working_dir: ${HOST_NEXUS_DIR}
     command: >
-      /bin/bash -c " source /opt/ros/humble/setup.bash && if [ -f /app/ros2_ws/install/setup.bash ]; then source /app/ros2_ws/install/setup.bash; fi && if ! ros2 pkg list | grep -q bob_launch; then
+      /bin/bash -c " source /opt/ros/humble/setup.bash && if [ -f ${HOST_NEXUS_DIR}/ros2_ws/install/setup.bash ]; then source ${HOST_NEXUS_DIR}/ros2_ws/install/setup.bash; fi && if [ ! -f ${HOST_NEXUS_DIR}/ros2_ws/install/setup.bash ]; then
         echo '[*] SAE: Core packages not found. Building...' &&
-        cd /app && echo n | ./onboarding.sh;
-        source /app/ros2_ws/install/setup.bash;
-      fi && echo '[*] SAE: Launching Twitch Bot ${NAME} (Stream-Heavy)...' && ros2 launch bob_launch generic.launch.py config:=/app/entities/${CATEGORY}/${NAME}/launch.yaml "
+        cd ${HOST_NEXUS_DIR} && echo n | ./onboarding.sh;
+        source ${HOST_NEXUS_DIR}/ros2_ws/install/setup.bash;
+      fi && echo '[*] SAE: Launching Twitch Bot ${NAME} (Stream-Heavy)...' && ros2 launch bob_launch generic.launch.py config:=${HOST_NEXUS_DIR}/entities/${CATEGORY}/${NAME}/launch.yaml "

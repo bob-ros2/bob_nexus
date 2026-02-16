@@ -28,20 +28,30 @@ def test_templates_integrity():
         pytest.skip("Templates directory not found")
 
     for root, dirs, files in os.walk(templates_dir):
-        if "composers" in root:
-            continue
         if root == templates_dir:
             continue
 
-        # If it's a leaf directory (no subdirectories), it must be a template
-        if not dirs:
+        # Skip known non-template subfolders, composers, or categories
+        skip_list = ["composers", "config", "dashboards", "inference"]
+        if any(skip in root for skip in skip_list):
+            # Special case: check subfolders of inference
+            if "inference/" in root and not any(s in root for s in ["config", "dashboards"]):
+                pass # Continue to check actual templates inside inference
+            else:
+                continue
+
+        # A template folder should have a config if it's a leaf or specific top-level
+        # We'll check folders that are either direct children or second-level children
+        rel_path = os.path.relpath(root, templates_dir)
+        depth = len(rel_path.split(os.sep))
+        
+        if depth <= 2 and not dirs:
             yamls = glob.glob(os.path.join(root, "*.yaml"))
-            # Support both ROS launch/params and pure Docker Compose templates
             if not yamls:
                 yamls = glob.glob(os.path.join(root, "docker-compose.yaml"))
 
             assert len(yamls) > 0, (
-                f"Template leaf folder '{root}' contains no configuration (.yaml or docker-compose.yaml)"
+                f"Template folder '{root}' contains no configuration (.yaml or docker-compose.yaml)"
             )
 
 

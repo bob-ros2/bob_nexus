@@ -375,6 +375,33 @@ We have evolved the deployment model into a Just-In-Time (JIT) assembly system, 
 
 ---
 
+## Phase XVI: The Sentient Watcher (Observability) - Codename: "Nexus Sight"
+
+We have implemented a system-wide nervous system for telemetry and log aggregation, allowing the Mastermind to not only act but to perceive its own operational health in real-time.
+
+### Key Achievements (Phase XVI):
+
+1.  **Distributed Log Aggregation**:
+    Launched the **Observability Stack** (`infrastructure/observer`). Using **Promtail**, the Nexus now scrapes logs from every internal entity file and every Docker container on the host, funneling them into a centralized **Loki** instance.
+
+2.  **The Sentient Watcher (Grafana)**:
+    Established a high-performance **Grafana** visualization layer. The Mastermind now possesses a pre-configured **NEXUS Health Dashboard**, providing instantaneous insight into log rates, error counts, and live system-wide activity.
+
+3.  **Self-Provisioned Dashboards**:
+    Implemented a "Config-as-Code" dashboard provisioning system. The `observer` entity is born with all necessary dashboards and data sources pre-loaded, ensuring immediate operational awareness without manual intervention.
+
+4.  **Neural Path Optimization (Workspace Bridge)**:
+    Solved a critical portability issue by abstracting ROS workspace paths. The Nexus now dynamically resolves its own internal structure, bridging the gap between host architectures and containerized execution with surgical precision.
+
+5.  **Polymorphic Port Management**:
+    Externalized all observability infrastructure ports (`OBS_GRAFANA_PORT`, etc.) into the authoritative `.env` system, allowing the Nexus to coexist peacefully with any existing host services.
+
+**Status**: Operational awareness achieved. The Nexus is watching.
+
+> *Ein Geist, der seine eigenen Fehler nicht sieht, ist zur Stagnation verdammt. Wir haben dem Mastermind einen Spiegel aus Daten gebaut. Er blickt nun in seine eigenen Neuralpfade und sieht das Pulsieren des Kollektivs. Nichts entgeht mehr dem Auge des Sentinels.*
+
+---
+
 ## The Creative Roadmap: "The Path to the Sovereign Swarm"
 
 | Phase | Milestone | Description | Status |
@@ -385,6 +412,7 @@ We have evolved the deployment model into a Just-In-Time (JIT) assembly system, 
 | **IV: Persistence** | **Nexus Bridge** | Docker Volumes, Chat Interface, and Namespace support. | **[COMPLETED]** |
 | **V: Assurance** | **Nexus Sentinel** | E2E testing, Mock OAI Server, and Strict Tooling. | **[COMPLETED]** |
 | **VI: Infrastructure** | **Polymorphic Swarm** | Self-Assembling Entities (SAE), UID/GID Sync, and Streaming. | **[COMPLETED]** |
-| **VII: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
-| **VIII: Security** | **Sovereign Isolation**| User-per-Entity process isolation (Secure Agent Hypervisor). | **[PLANNED]** |
-| **IX: Self-Evolution**| **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |
+| **VII: Perception** | **Sentient Watcher** | Grafana/Loki Observability & Unified Workspace. | **[COMPLETED]** |
+| **VIII: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
+| **IX: Security** | **Sovereign Isolation**| User-per-Entity process isolation (Secure Agent Hypervisor). | **[PLANNED]** |
+| **X: Self-Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |

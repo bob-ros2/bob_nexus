@@ -23,11 +23,12 @@ class BaseDriver:
 class HostDriver(BaseDriver):
     def up(self, entity_dir, config_path, ros_source):
         env = os.environ.copy()
-        
+
         # Load entity-specific .env if it exists
         local_env_path = os.path.join(entity_dir, ".env")
         if os.path.exists(local_env_path):
             from dotenv import dotenv_values
+
             local_vars = dotenv_values(local_env_path)
             env.update({k: v for k, v in local_vars.items() if v is not None})
 
@@ -149,7 +150,7 @@ class DockerDriver(BaseDriver):
 
             # Forward environment for the compose context
             env = os.environ.copy()
-            
+
             # SAE Permission Fix: Map host user to container
             env["HOST_UID"] = str(os.getuid())
             env["HOST_GID"] = str(os.getgid())
@@ -159,6 +160,7 @@ class DockerDriver(BaseDriver):
             if os.path.exists(local_env_path):
                 print(f"[*] Orchestration: Loading local environment from {local_env_path}")
                 from dotenv import dotenv_values
+
                 local_vars = dotenv_values(local_env_path)
                 # Filter out None values and update
                 env.update({k: v for k, v in local_vars.items() if v is not None})
@@ -237,11 +239,20 @@ class DockerDriver(BaseDriver):
             if res.returncode == 0 and res.stdout.strip():
                 # If there are any containers in the project, consider it running
                 try:
-                    data = json.loads(res.stdout)
-                    if isinstance(data, list) and len(data) > 0:
-                        return "running"
-                    if isinstance(data, dict):
-                        return "running"  # Some versions return a single dict
+                    # Some versions return a JSON array, others return one JSON object per line
+                    output = res.stdout.strip()
+                    if output.startswith("["):
+                        data = json.loads(output)
+                        if isinstance(data, list) and len(data) > 0:
+                            return "running"
+                    else:
+                        # Try to parse line by line (NDJSON)
+                        lines = output.splitlines()
+                        for line in lines:
+                            if line.strip():
+                                data = json.loads(line)
+                                if isinstance(data, dict):
+                                    return "running"
                 except Exception:
                     pass
             return "stopped"
@@ -302,27 +313,32 @@ class Deployer:
         that .env changes are respected.
         """
         from template_engine import TemplateEngine
-        
+
         local_env = os.path.join(entity_dir, ".env")
         global_env = os.path.join(self.root_dir, "master", "config", ".env")
-        
+
         # We need the absolute path on the HOST for volume mounting
         # root_dir is already absolute from __init__
-        
-        engine = TemplateEngine(global_env, extra_vars={
-            "HOST_NEXUS_DIR": self.root_dir,
-            "HOST_ENTITY_DIR": os.path.abspath(entity_dir),
-            "NAME": os.path.basename(entity_dir),
-            "ENTITY_DIR": entity_dir # Backward compat
-        })
-        
+
+        engine = TemplateEngine(
+            global_env,
+            extra_vars={
+                "HOST_NEXUS_DIR": self.root_dir,
+                "HOST_ENTITY_DIR": os.path.abspath(entity_dir),
+                "NAME": os.path.basename(entity_dir),
+                "ENTITY_DIR": entity_dir,  # Backward compat
+            },
+        )
+
         if os.path.exists(local_env):
             from dotenv import dotenv_values
+
             engine.env_vars.update(dotenv_values(local_env))
 
         # Re-process core config files
         targets = ["docker-compose.yaml", "llm.yaml", "launch.yaml"]
         import glob
+
         all_yamls = glob.glob(os.path.join(entity_dir, "*.yaml"))
         for y in all_yamls:
             bname = os.path.basename(y)

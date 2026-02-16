@@ -1,0 +1,40 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: bob_nexus_entities
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: entity_logs
+          __path__: ${HOST_NEXUS_DIR}/entities/*/*/*.log
+
+    pipeline_stages:
+      - regex:
+          # Extract category and name from the path
+          # Example: /blue/dev/skills/entities/assistant/streamer/stdout.log
+          source: filename
+          expression: ".*/entities/(?P<category>[^/]+)/(?P<entity_name>[^/]+)/(?P<log_file>[^/]+)$"
+      - labels:
+          category:
+          entity_name:
+          log_file:
+
+  - job_name: docker_containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'

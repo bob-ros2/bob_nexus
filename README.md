@@ -80,6 +80,12 @@ The direct communication link to your entities.
 ### 4. Vision & Streaming
 Specialized templates (like `twitch_stream`) allow entities to act as high-performance visual dashboards with integrated FFmpeg streaming support (Twitch/YouTube).
 
+### 5. Observability (Grafana & Loki)
+The Nexus includes a built-in observability stack (`infrastructure/observer`) based on Grafana, Loki, and Promtail.
+- **Real-time Logs**: Aggregates logs from all entities and Docker containers.
+- **NEXUS Health Dashboard**: Pre-configured Grafana dashboard for system-wide telemetry.
+- **Explore**: Direct query access to logs via Loki.
+
 ---
 
 ## 🏗️ Architecture

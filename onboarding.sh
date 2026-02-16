@@ -89,7 +89,7 @@ unset COLCON_PREFIX_PATH
 unset PKG_CONFIG_PATH
 unset PYTHONPATH
 
-/bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --event-handlers console_cohesion+"
+/bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --event-handlers console_cohesion+"
 cd ..
 
 echo ""

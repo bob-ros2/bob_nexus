@@ -16,7 +16,7 @@
     # We call the start_stream script directly from the source directory.
     # We explicitly provide the ROS_SETUP_PATH for the container environment (/app/...).
     # The '#' shield prevents unwanted --ros-args from appending.
-    - "export ROS_NAMESPACE=${COMMON_NS}/${NAME} && export ROS_SETUP_PATH=/app/ros2_ws/install/setup.bash && /app/ros2_ws/src/bob_sdlviz/scripts/start_stream.sh #"
+    - "export ROS_SETUP_PATH=${BOB_NEXUS_DIR}/ros2_ws/install/setup.bash && ${BOB_NEXUS_DIR}/ros2_ws/src/bob_sdlviz/scripts/start_stream.sh #"
 
 # 2. The Agent Logic (Cognitive Core)
 - name: brain
@@ -34,6 +34,6 @@
     - -p
     - "system_prompt:=${SYSTEM_PROMPT}"
     - -p
-    - "tool_interfaces:=['${BOB_LLM_DIR}/config/qdrant_tools.py', '/app/master/core/skill_tools.py']"
+    - "tool_interfaces:=['${BOB_LLM_DIR}/config/qdrant_tools.py', '${BOB_NEXUS_DIR}/master/core/skill_tools.py']"
     - -r
     - *llm_ns

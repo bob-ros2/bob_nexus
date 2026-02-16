@@ -21,11 +21,16 @@ def get_ros_setup_cmd(root_dir):
         # We only include files that actually exist to avoid bash errors
         valid_setups = []
         for s in setups:
-            if os.path.exists(s):
-                valid_setups.append(f"source {s}")
+            # Resolve relative paths relative to root_dir
+            full_path = s if os.path.isabs(s) else os.path.abspath(os.path.join(root_dir, s))
+
+            if os.path.exists(full_path):
+                valid_setups.append(f"source {full_path}")
             else:
                 # Log to stderr so we don't pollute the command output
-                sys.stderr.write(f"Warning: ROS setup path not found: {s}\n")
+                sys.stderr.write(
+                    f"Warning: ROS setup path not found: {s} (resolved: {full_path})\n"
+                )
 
         return " && ".join(valid_setups) if valid_setups else ""
     except Exception as e:
