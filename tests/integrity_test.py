@@ -32,7 +32,7 @@ def test_templates_integrity():
             continue
 
         # Skip known non-template subfolders, composers, or categories
-        skip_list = ["composers", "config", "dashboards", "inference"]
+        skip_list = ["composers", "config", "dashboards", "inference", "ros2_ws"]
         if any(skip in root for skip in skip_list):
             # Special case: check subfolders of inference
             if "inference/" in root and not any(s in root for s in ["config", "dashboards"]):
