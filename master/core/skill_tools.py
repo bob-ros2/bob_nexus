@@ -133,6 +133,14 @@ def get_tools_from_module(module, prefix=""):
             or name == "main"
             or name.startswith("get_tools")
             or name == "register"
+            or name
+            in [
+                "dispatch_tool",
+                "get_orchestrator_tools",
+                "get_tools_from_skills",
+                "resolve_skill_path",
+                "get_entity_skills_dir",
+            ]
         ):
             continue
         doc = inspect.getdoc(func)
@@ -152,17 +160,20 @@ def get_tools_from_module(module, prefix=""):
             if p.default == inspect.Parameter.empty:
                 required.append(p_name)
 
+        params = {
+            "type": "object",
+            "properties": properties,
+        }
+        if required:
+            params["required"] = required
+
         tools.append(
             {
                 "type": "function",
                 "function": {
                     "name": f"{prefix}__{name}" if prefix else name,
                     "description": doc,
-                    "parameters": {
-                        "type": "object",
-                        "properties": properties,
-                        "required": required,
-                    },
+                    "parameters": params,
                 },
             }
         )

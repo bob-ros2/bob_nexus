@@ -33,25 +33,31 @@ class EntityManager:
         Creates a new entity from a template category.
         """
         dest_dir = os.path.join(self.entities_dir, category, entity_name)
-        src_template_dir = os.path.join(self.templates_dir, template_category)
+        
+        # Check if template_category is a path or a name in templates/
+        if os.path.exists(template_category) and os.path.isdir(template_category):
+            src_template_dir = os.path.abspath(template_category)
+        else:
+            src_template_dir = os.path.join(self.templates_dir, template_category)
 
         if os.path.exists(dest_dir):
             raise FileExistsError(f"Entity '{entity_name}' already exists in '{category}'")
 
         if not os.path.exists(src_template_dir):
-            raise FileNotFoundError(f"Template category '{template_category}' not found")
-
-        if not os.path.isdir(src_template_dir):
-            raise ValueError(
-                f"Template path '{template_category}' is not a directory. "
-                "Spawning requires a directory template."
-            )
+            raise FileNotFoundError(f"Template source '{src_template_dir}' not found")
 
         os.makedirs(dest_dir, exist_ok=True)
 
         # Update engine with local context for this spawn
+        host_nexus = os.getenv("HOST_NEXUS_DIR", self.root_dir)
         self.engine.env_vars.update(
-            {"NAME": entity_name, "CATEGORY": category, "ENTITY_DIR": dest_dir}
+            {
+                "NAME": entity_name,
+                "ENTITY_CATEGORY": category,
+                "ENTITY_DIR": dest_dir,
+                "HOST_NEXUS_DIR": host_nexus,
+                "BOB_NEXUS_DIR": host_nexus,
+            }
         )
 
         # Process all templates in the template category
@@ -64,13 +70,28 @@ class EntityManager:
                 src_file = os.path.join(root, file)
                 dest_file = os.path.join(target_subdir, file)
 
-                # Check if it's a file we should process (YAML/JSON/Conf)
-                if file.endswith((".yaml", ".yml", ".json", ".conf", ".env")):
+                # Check if it's a file we should process (YAML/JSON/Conf/Env)
+                if file.endswith((".yaml", ".yml", ".json", ".conf", ".env", ".template")):
                     self.engine.process_file(src_file, dest_file)
                 else:
                     shutil.copy2(src_file, dest_file)
 
-        print(f"Entity '{entity_name}' spawned successfully at {dest_dir}")
+        # Ensure .env exists (mandatory for blueprint.yaml in Docker mode)
+        final_env = os.path.join(dest_dir, ".env")
+        if not os.path.exists(final_env):
+            # Check for .env.template
+            template_env = os.path.join(dest_dir, ".env.template")
+            if os.path.exists(template_env):
+                print(f"[*] auto-env: Initializing {entity_name}/.env from template...")
+                shutil.copy2(template_env, final_env)
+            else:
+                print(f"[*] auto-env: Creating default {entity_name}/.env...")
+                with open(final_env, "w") as f:
+                    # Basic identity variables
+                    f.write(f"# Entity Identity\n")
+                    f.write(f"NAME={entity_name}\n")
+                    f.write(f"ENTITY_CATEGORY={category}\n")
+                    f.write(f"HOST_NEXUS_DIR={os.getenv('HOST_NEXUS_DIR', self.root_dir)}\n")
 
         # Post-spawn: Linking Default Skills from config
         skill_conf = self.conf.get("skills", {})
@@ -83,12 +104,34 @@ class EntityManager:
                 try:
                     self.link_skill(category, entity_name, s_cat, s_name)
                 except Exception as e:
-                    print(f"    [!] Failed to link default skill {s_name}: {e}")
+                    print(f"    [!] Error linking skill {s_cat}/{s_name}: {e}")
 
         # Finally, refresh the prompt so the entity knows its skills
+        print(f"Entity '{entity_name}' spawned successfully at {dest_dir}")
         self._refresh_entity_prompt(category, entity_name)
 
         return dest_dir
+
+    def import_repository(self, name, url=None):
+        """
+        Clones a repository into the global ros2_ws/src directory.
+        """
+        src_dir = os.path.join(self.root_dir, "ros2_ws", "src")
+        os.makedirs(src_dir, exist_ok=True)
+        
+        target_dir = os.path.join(src_dir, name)
+        if os.path.exists(target_dir):
+            print(f"[*] Repository '{name}' already exists in global workspace.")
+            return True
+            
+        if not url:
+            # Default to bob-ros2 organization
+            url = f"https://github.com/bob-ros2/{name}"
+            
+        print(f"[*] Importing repository '{name}' from {url}...")
+        import subprocess
+        result = subprocess.run(["git", "clone", url, target_dir])
+        return result.returncode == 0
 
     def _refresh_entity_prompt(self, category, entity_name):
         """
@@ -102,8 +145,12 @@ class EntityManager:
 
         script_path = os.path.join(self.master_dir, "core", "generate_prompt.py")
         if os.path.exists(script_path):
-            # Only refresh if llm.yaml exists (not every entity is an LLM agent)
-            if os.path.exists(os.path.join(entity_dir, "llm.yaml")):
+            # Refresh if any valid config exists
+            has_config = os.path.exists(os.path.join(entity_dir, "llm.yaml")) or os.path.exists(
+                os.path.join(entity_dir, "agent.yaml")
+            )
+
+            if has_config:
                 print(f"[*] auto-refresh: Updating system prompt for {entity_name}...")
                 subprocess.run(["python3", script_path, entity_dir, "--update"])
 
@@ -145,10 +192,14 @@ class EntityManager:
         link_name = os.path.join(entity_skills_dir, skill_name)
 
         if os.path.exists(link_name):
-            os.remove(link_name)
+            if os.path.islink(link_name):
+                os.remove(link_name)
+            else:
+                shutil.rmtree(link_name)
 
-        os.symlink(skill_src, link_name)
-        print(f"Linked skill '{skill_name}' to entity '{entity_name}'")
+        # SWARM 3.0: Copy instead of symlink for strict isolation
+        shutil.copytree(skill_src, link_name)
+        print(f"[*] Bundled skill '{skill_name}' to entity '{entity_name}'")
 
         # Auto-refresh prompt after linking
         self._refresh_entity_prompt(category, entity_name)

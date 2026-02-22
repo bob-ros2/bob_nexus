@@ -1,7 +1,6 @@
-import subprocess
 import os
+import subprocess
 import sys
-import json
 import tempfile
 
 
@@ -12,16 +11,12 @@ def bash_run(command: str) -> str:
     """
     try:
         result = subprocess.run(
-            ["/bin/bash", "-c", command],
-            capture_output=True,
-            text=True,
-            timeout=60,
-            check=False
+            ["/bin/bash", "-c", command], capture_output=True, text=True, timeout=60, check=False
         )
         output = result.stdout
         if result.stderr:
             output += f"\n--- STDERR ---\n{result.stderr}"
-        
+
         status = f"[Exit Code: {result.returncode}]"
         return f"{status}\n{output}" if output else f"{status} (No output)"
     except Exception as e:
@@ -34,23 +29,19 @@ def python_run(code: str) -> str:
     Use this for data manipulation, testing logic, or running complex scripts.
     """
     try:
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as tmp:
             tmp.write(code)
             tmp_path = tmp.name
-        
+
         result = subprocess.run(
-            [sys.executable, tmp_path],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            check=False
+            [sys.executable, tmp_path], capture_output=True, text=True, timeout=30, check=False
         )
         os.unlink(tmp_path)
-        
+
         output = result.stdout
         if result.stderr:
             output += f"\n--- STDERR ---\n{result.stderr}"
-            
+
         status = f"[Exit Code: {result.returncode}]"
         return f"{status}\n{output}" if output else f"{status} (No output)"
     except Exception as e:

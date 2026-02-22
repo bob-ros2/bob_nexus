@@ -29,14 +29,12 @@ class TemplateEngine:
             default_value = ""
 
         value = self.env_vars.get(var_name)
-        if value is not None:
-            if value == "" and default_value:
-                return default_value
+        if value is not None and value != "":
             return value
 
-        # If not found, return original placeholder to allow later resolution
         if ":-" in full_var:
-            return f"${{{var_name}:-{default_value}}}"
+            return default_value
+
         return f"${{{var_name}}}"
 
     def process_content(self, content):

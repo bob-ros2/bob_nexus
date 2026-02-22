@@ -18,6 +18,12 @@ rules:
     - "Shared capabilities in skills/."
     - "Blueprints in templates/."
     - "Dependencies in requirements/."
+    - "Docker infrastructure in docker/."
+
+  docker_infrastructure:
+    - "Compose files MUST follow naming pattern: compose-<purpose>.yaml"
+    - "Dockerfiles MUST follow naming pattern: Dockerfile.<purpose>"
+    - "Context for docker-compose in docker/ should be project root (..)"
 
   entity_management:
     - "Entities should be spawned via the Mastermind CLI or mastermind.sh."

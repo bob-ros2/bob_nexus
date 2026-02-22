@@ -8,7 +8,7 @@ ros2_ws/install/
 ros2_ws/log/
 ros2_ws/src/*
 !ros2_ws/src/.gitkeep
-master/config/conf.yaml
+# master/config/conf.yaml (Removed to allow baking into image for Swarm 9.1)
 MASTERMINDLOG.md
 __pycache__
 *.pyc

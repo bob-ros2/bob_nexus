@@ -18,12 +18,12 @@ chat:
 
 # Orchestration Settings
 orchestration:
-  mode: host         # Options: host, swarm
-  image: "mastermind:latest"
-  network: "mastermind_net"
+  mode: "swarm"         # Options: host, swarm
+  image: "bob-nexus:latest"
+  network: "alpha"
   discovery_server: null # e.g., "172.18.0.2:11811" if using a Discovery Server
-  domain_id: 42
-  compose_file: "docker-compose.yaml" # Default compose file in root or path to a template
+  #domain_id: 42
+  compose_file: "master/templates/blueprint.yaml" # Default template for entities
 
 # Default Skills for entities by category
 skills:

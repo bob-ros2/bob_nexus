@@ -1,6 +1,6 @@
 [project]
 name = "bob_nexus"
-version = "0.1.0"
+version = "0.2.0"
 description = "The central nervous system and orchestration hub for the bob-ros2 ecosystem."
 dependencies = [
     "pyyaml",

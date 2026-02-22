@@ -1,0 +1,46 @@
+services:
+  nexus-isolated:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.nexus
+    image: bob-nexus-isolated:latest
+    container_name: bob_nexus_isolated
+    # Isolated bridge network to prevent host-leaks
+    network_mode: bridge
+    environment:
+      - NAME=isolated_master
+      - WORKSPACE_POLICY=isolated
+      - WORKSPACE_MODE=rw
+      - ENTITY_USE_ROS=false
+      - ENABLE_ONBOARDING=true
+      - HOST_NEXUS_DIR=${HOST_NEXUS_DIR:-${PWD}}
+      - REDIS_HOST=bob_nexus_redis
+    tty: true
+    volumes:
+      # PURE VOLUMES: Managed registry for orchestration blueprints
+      - nexus_entities:/app/entities:rw
+
+      # nur temporär!!!
+      - ../master/config/.env:/app/master/config/.env:ro
+
+      # INFRASTRUCTURE: DooD (Docker-outside-Docker)
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: /app/master/core/entrypoint.sh
+    restart: unless-stopped
+
+  nexus-redis:
+    image: redis:alpine
+    container_name: bob_nexus_redis
+    # Standard Redis port accessible within the bridge network
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+networks:
+  bridge:
+    name: bridge
+
+volumes:
+  redis_data:
+  nexus_entities:
+    name: nexus_entities

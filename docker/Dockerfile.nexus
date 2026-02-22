@@ -1,0 +1,8 @@
+FROM bob-nexus:latest
+
+# Isolated Nexus Environment Blueprint
+LABEL maintainer="Bob Nexus Architect"
+LABEL version="3.7-isolated"
+
+# Ensure the environment is ready for isolated execution
+WORKDIR /app

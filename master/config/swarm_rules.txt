@@ -1,0 +1,5 @@
+**Nexus Orchestration Rules**:
+- **CLI Tool**: Always use `./master/cli.sh` for lifecycle management.
+- **Commands**: `up`, `down`, `spawn`, `status`.
+- **Templates**: Reference blueprints in `./templates/` (e.g., `coder`, `bob_launch`).
+- **Isolation**: All spawns are isolated by default. Do not use direct `docker` commands unless authorized.

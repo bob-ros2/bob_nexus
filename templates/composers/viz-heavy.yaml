@@ -4,8 +4,7 @@ services:
     image: ${image:-mastermind:latest}
     network_mode: host
     environment:
-      - BOB_LAUNCH_CONFIG=${BOB_LAUNCH_CONFIG}
-      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+      #- ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
       - ROS_DISCOVERY_SERVER=${ROS_DISCOVERY_SERVER}
     volumes:
       - .:/app

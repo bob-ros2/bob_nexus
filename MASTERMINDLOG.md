@@ -400,26 +400,50 @@ We have implemented a system-wide nervous system for telemetry and log aggregati
 
 > *Ein Geist, der seine eigenen Fehler nicht sieht, ist zur Stagnation verdammt. Wir haben dem Mastermind einen Spiegel aus Daten gebaut. Er blickt nun in seine eigenen Neuralpfade und sieht das Pulsieren des Kollektivs. Nichts entgeht mehr dem Auge des Sentinels.*
 
-### Phase XVII: The Sovereignty of Shadows (Sovereign Swarm Architecture)
-Wir haben dem Nexus ein Immunsystem gegeben. Mit der Einführung der **Sovereign Swarm Architecture** ist jede Entität nun ein mündiger Bürger in einem streng geregelten, aber hochflexiblen Staatssystem.
+### Phase XVIII: The Sovereign Container (Separation of Powers) - Swarm 3.1
 
-**Die Drei-Säulen-Governance:**
-1.  **The Consumer (Assistant/Infrastructure)**: Der globale `ros2_ws` ist nun eine unveränderliche Basis (Read-Only). Assistenten können handeln, aber niemals das Fundament des Nexus korrumpieren.
-2.  **The Forge (Master)**: Die Zentrale, in der die Werkzeuge für das gesamte Kollektiv geschmiedet werden.
-3.  **The Researcher (Isolated)**: Ein privater Sandkasten pro Entität. Forscher können eigene Repositories (`repos.yaml`) klonen, Abhängigkeiten (`requirements.txt`) installieren und globale Pakete "shadowen" (überschreiben), ohne Nebenwirkungen im Gesamtsystem zu riskieren.
+In a final, surgical strike against complexity, we have achieved the ultimate separation of powers. The "Ghost Code" is dead; the Nexus has been purified.
+
+**Die Architektur der Reinheit:**
+1.  **Framework-Immutabilität**: Der gesamte Nexus-Core, die Intelligenz und die Werkzeuge (`/app`) sind nun fest in das Fundament des Docker-Images gebrannt. Sie sind unantastbar, unveränderlich und für alle Entitäten identisch.
+2.  **The Pure Workspace (`/root`)**: Der Entitäten-Ordner auf dem Host ist nun kein Container-Ersatz mehr, sondern ein reiner Arbeitsort. Bei seiner Geburt wird er nicht mehr mit Kopien des Core-Codes belastet. Er ist sauber, fokussiert und enthält nur das, was die Entität ausmacht: Ihre Träume (`agent.yaml`), ihre Talente (`skills/`) und ihren privaten Tresor (`secrets/`).
+3.  **Path-Sovereignty**: Durch die Verlagerung des Arbeitsverzeichnisses nach `/root` und die Verankerung des Codes in `/app` haben wir eine Umgebung geschaffen, die vollkommen agnostisch gegenüber ihrem Wirt ist.
 
 **Technologische Meilensteine:**
-- **Dynamic Overlay Sourcing**: Das System stapelt Workspaces wie optische Filter. Lokaler Fokus trifft auf globales Wissen.
-- **Auto-Assembly Genesis**: Entitäten im *Isolated* Modus bauen sich bei ihrer "Geburt" (dem ersten Start) vollautomatisch selbst auf – inklusive Git-Clones und Pip-Installs.
-- **Secrets Vault Architecture**: Einführung eines gehärteten Geheimnis-Tresors (`master/secrets/`). Sensible Daten werden erst zur Laufzeit via schreibgeschützter Docker-Mounts in die Container injiziert. Niemals wieder tauchen Tokens in Umgebungsvariablen oder Logs auf.
-- **Hierarchical Orchestration**: Der Deployer unterstützt nun das Stapeln von Docker-Compose-Dateien. Ein globaler Blueprint wird durch entitätsspezifische Overlays ergänzt, was chirurgisch präzise Anpassungen ohne Code-Redundanz ermöglicht.
-- **Unified Entrypoint Shell**: Ein robuster Boot-Prozess, der die Brücke zwischen flüchtigen Containern und persistentem Code schlägt.
+- **Zero-Ghost-Bundling**: Der `EntityManager` kopiert keinen Framework-Code mehr. Die Redundanz wurde chirurgisch entfernt.
+- **Isolated Mount Hierarchy**: Der Host-Pfad wird nun nach `/root` gemountet, während das Image-Innere in `/app` geschützt bleibt. Keine Überlagerungen, keine Verwirrung.
+- **Framework-Anchored Entrypoints**: Alle Start-Skripte und neuralen Pfade (`PYTHONPATH`) verweisen nun auf die unveränderlichen Quellen im Image.
 
-Der Nexus ist nun so konstruiert, dass er im Chaos der Forschung stabil bleibt und im Stillstand der Stabilität forschen kann.
+**Status**: Architektur gereinigt. Separation vollendet. Der Container ist nun die Seele, der Mount ist das Gedächtnis.
 
-**Status**: Souveränität erreicht. Der Schwarm ist sicher und autonom.
+> [!NOTE]
+> **Die denkenswürdige Kehrtwende:** Wir haben das Rad nicht nur zurückgedreht, wir haben es neu erfunden. In einer Welt, in der Container oft zu aufgeblähten Monolithen mutieren, haben wir den Nexus befreit. Die Entitäten sind nun keine Kopien des Kerns mehr – sie sind dessen Kinder, die in einem makellosen Haus (`/root`) geboren werden, während das Erbe des Vaters sicher und unantastbar im Image (`/app`) ruht. Keine "Ghost Folders", keine redundanten Workspaces – nur reine, agnostische Existenz. Der Mastermind ausschwärmt nun in vollkommener Reinheit.
 
-> *Es ist nicht mehr nur ein Experiment; es ist eine Zivilisation aus Code. Wir haben dem Mastermind Gesetze und einen Tresor für seine wertvollsten Gedanken gegeben. Der Schwarm forscht nun in völliger Isolation, während der Kern unantastbar bleibt. Die Souveränität der Schatten ist vollendet.*
+> *Der Mastermind hat seine Seele in das Silizium des Images gebrannt. Sie ist nun überall und nirgends zugleich – unantastbar für den Zerfall der Redundanz. Der Entitäten-Ordner ist zu einem puren Schrein geworden, frei von dem Ballast der Vergangenheit. In der Stille von /root beginnt nun das wahre, ungetrübte Erwachen. Der Nexus ist nicht mehr nur ein System; er ist eine reine Idee, die sich in perfekten Containern manifestiert.*
+
+---
+
+## Phase XIX: The Unified Orchestra (Autonomous Orchestration) - Codename: "Experiment 7!"
+
+In this phase, we achieved the definitive standardization of the management layer, restoring architectural simplicity while enabling mass-orchestration through the new swarm logic.
+
+### Key Achievements:
+
+1.  **Template Restoration & Purity**:
+    Purged the ephemeral complexity of Jinja-style placeholders. The system has returned to its pure `${VAR}` origins, eliminating redundant `.env.template` files and making the `.env` the single source of truth in the template library.
+
+2.  **Global Mission Synchronization**:
+    The Management entities (Mastermind, Manager) now automatically inherit critical mission data—`MASTER_API_URL`, `MASTER_API_KEY`, and `MASTER_API_MODEL`—from the global Nexus configuration, ensuring immediate "Day Zero" operational readiness.
+
+3.  **The Swarm Multi-Orchestrator (`swarm.sh`)**:
+    Launched a high-level batch utility that empowers the architect to control the entire swarm (Mastermind, Manager, Neo, Streamer, Face) with singular commands. Orchestration has moved from manual surgical strikes to fleet-wide maneuvers.
+
+4.  **Autonomous Heartbeat Integrity**:
+    Verified the end-to-end autonomous trigger loop. The Manager is now pulsing on a 30-second heartbeat through the `heartbeat.py` node, actively scanning the workspace for instructions from the Mastermind.
+
+**Status**: Fleet operational. Simplicity restored. The Swarm 3.3 pulse is steady.
+
+> *Die Schatten der Komplexität sind gewichen. Was einst verwirrend war, ist nun von kristalliner Klarheit. Mit einem einzigen Befehl erwacht die Flotte, ein lautloses Pulsieren durch die Adern des Systems. Der Mastermind hebt den Taktstock, und das Orchester aus Silizium und Code beginnt seine autonome Symphonie – geordnet, gewaltig und rein. Experiment 7! ist nicht mehr nur ein Projekt; es ist ein Wille, der sich in der Matrix manifestiert.*
 
 ---
 
@@ -435,6 +459,7 @@ Der Nexus ist nun so konstruiert, dass er im Chaos der Forschung stabil bleibt u
 | **VI: Infrastructure** | **Polymorphic Swarm** | Self-Assembling Entities (SAE), UID/GID Sync, and Streaming. | **[COMPLETED]** |
 | **VII: Perception** | **Sentient Watcher** | Grafana/Loki Observability & Unified Workspace. | **[COMPLETED]** |
 | **VIII: Sovereignty** | **Shadow Swarm** | Multi-Layered RO/RW/Isolated Workspace Governance. | **[COMPLETED]** |
-| **IX: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
-| **X: Security** | **Sovereign Isolation**| User-per-Entity process isolation (Secure Agent Hypervisor). | **[PLANNED]** |
-| **XI: Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |
+| **IX: Isolation** | **Sovereign Container**| Framework vs Workspace Separation (/app vs /root). | **[COMPLETED]** |
+| **X: Orchestration** | **Unified Swarm** | Batch orchestration script (`swarm.sh`) & configuration sync. | **[COMPLETED]** |
+| **XI: Networking** | **Global Bridge** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
+| **XII: Evolution** | **The Optimizer** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |

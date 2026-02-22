@@ -96,6 +96,20 @@ def main():
         default=max_tool_calls_default,
         help="Maximum consecutive tool calls",
     )
+    parser.add_argument(
+        "--render",
+        type=str2bool,
+        default=str2bool(os.getenv("NEXUS_CHAT_RENDER", "True")),
+        help="Enable/disable markdown rendering via rich",
+    )
+    parser.add_argument(
+        "--signal-topic",
+        help="Optional ROS 2 topic to mirror tool calls (std_msgs/String)"
+    )
+    parser.add_argument(
+        "--signal-file",
+        help="Optional local file to append tool call logs"
+    )
 
     # bob_llm Specific
     parser.add_argument(
@@ -105,6 +119,56 @@ def main():
     parser.add_argument("--topic_out", default="llm_stream", help="ROS Output topic for responses")
 
     args = parser.parse_args()
+
+    # --- Signal Mirroring Setup ---
+    signal_pub = None
+    if args.signal_topic:
+        try:
+            import rclpy
+            from std_msgs.msg import String
+            if not rclpy.ok():
+                rclpy.init()
+            node = rclpy.create_node("nexus_signal_mirror")
+            signal_pub = node.create_publisher(String, args.signal_topic, 10)
+            print(f"\033[94m[*] Signal Mirror: Publishing to {args.signal_topic}\033[0m")
+        except Exception as e:
+            print(f"\033[91m[Error] Failed to initialize ROS signal mirror: {e}\033[0m")
+
+    def signal_handler(tool_name, tool_args):
+        formatted = f"[*] NEXUS CALLING: {tool_name}({tool_args})"
+        # 1. Console (Always)
+        print(f"\033[93m{formatted}\033[0m")
+        
+        # 2. File Mirror
+        if args.signal_file:
+            try:
+                with open(args.signal_file, "a") as f:
+                    import datetime
+                    ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    f.write(f"[{ts}] {formatted}\n")
+            except Exception as e:
+                print(f"\033[91m[Error] Failed to write signal to file: {e}\033[0m")
+        
+        # 3. ROS Mirror
+        if signal_pub:
+            try:
+                from std_msgs.msg import String
+                signal_pub.publish(String(data=formatted))
+            except Exception as e:
+                pass # Silent fail for ROS publish in mirror mode
+
+    # Initialize Rich Console if enabled
+    console = None
+    if args.render:
+        try:
+            from rich.console import Console
+            from rich.live import Live
+            from rich.markdown import Markdown
+
+            console = Console()
+        except ImportError:
+            args.render = False
+            print("\n\033[93m[Warning] 'rich' library not found. Rendering disabled.\033[0m")
 
     if args.debug:
         import logging
@@ -124,6 +188,24 @@ def main():
         if not topic_out.startswith("/"):
             topic_out = f"{ns}/{topic_out}".replace("//", "/")
 
+    # --- Dynamic System Prompt Assembly ---
+    identity_file = os.path.join(config_dir, "identity.txt")
+    rules_file = os.path.join(config_dir, "swarm_rules.txt")
+    
+    final_system_prompt = args.oai_system_prompt or ""
+    
+    if not final_system_prompt:
+        parts = []
+        if os.path.exists(identity_file):
+            with open(identity_file, "r") as f:
+                parts.append(f.read().strip())
+        if os.path.exists(rules_file):
+            with open(rules_file, "r") as f:
+                parts.append(f.read().strip())
+        
+        if parts:
+            final_system_prompt = "\n\n".join(parts)
+
     # Initialize Backend
     try:
         backend = get_backend(
@@ -131,13 +213,14 @@ def main():
             oai_api_url=args.oai_api_url,
             oai_api_key=args.oai_api_key,
             oai_api_model=args.oai_api_model,
-            system_prompt=args.oai_system_prompt,
+            system_prompt=final_system_prompt,
             history_limit=args.oai_history,
             persistent_history_path=args.persistent_history,
             enable_tools=args.tools,
             max_tool_calls=args.max_tool_calls,
             enabled_skills=master_skills,
             tool_interfaces=oai_interfaces,
+            signal_callback=signal_handler,
             debug=args.debug,
             topic_in=topic_in,
             topic_out=topic_out,
@@ -146,7 +229,9 @@ def main():
         print(f"\033[91m[Error] Failed to initialize backend: {e}\033[0m")
         sys.exit(1)
 
-    print(f"\033[94m-- Experiment 7! Chat Client ({args.backend}) --\033[0m")
+    print(f"\033[94m-- Bob Nexus Sovereign Swarm Chat ({args.backend}) --\033[0m")
+    if args.render:
+        print("\033[90mPremium Rendering: Enabled (rich)\033[0m")
     print("\033[90mType 'exit' or 'quit' to end the session.\033[0m")
 
     while True:
@@ -161,21 +246,32 @@ def main():
                 print("Goodbye!")
                 break
 
-            # Response Display
-            print("\033[1;34mLLM: \033[0m", end="", flush=True)
-
             # Use Backend
             full_content = ""
-            for chunk in backend.send_message(user_input, stream=args.stream):
-                print(chunk, end="", flush=True)
-                full_content += chunk
-
-            print("\n")  # New line after the whole response
+            if args.render:
+                console.print("\n[bold blue]LLM:[/]")
+                with Live(Markdown(""), console=console, auto_refresh=False) as live:
+                    for chunk in backend.send_message(user_input, stream=args.stream):
+                        full_content += chunk
+                        # Small delay or check for better rendering performance if needed
+                        live.update(Markdown(full_content), refresh=True)
+                console.print("")  # Space after live section
+            else:
+                # Fallback to plain terminal
+                print("\033[1;34mLLM: \033[0m", end="", flush=True)
+                for chunk in backend.send_message(user_input, stream=args.stream):
+                    print(chunk, end="", flush=True)
+                    full_content += chunk
+                print("\n")
 
         except KeyboardInterrupt:
             print("\nSession interrupted. Goodbye!")
             break
         except Exception as e:
+            if args.debug:
+                import traceback
+
+                traceback.print_exc()
             print(f"\n\033[91m[Runtime Error]: {e}\033[0m")
 
 

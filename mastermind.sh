@@ -11,7 +11,6 @@ BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 export BOB_NEXUS_DIR=$(pwd)
-clear
 
 echo -e "${CYAN}${BOLD}"
 echo "  ██████╗  ██████╗ ██████╗     ███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗"

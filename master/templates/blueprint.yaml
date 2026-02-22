@@ -1,30 +1,41 @@
 services:
   mastermind:
     image: ${IMAGE_NAME:-bob-nexus:latest}
-    container_name: ${NAME:-mastermind_core}
-    network_mode: host # Or use a bridge and a discovery server
+    container_name: ${ENTITY_CONTAINER_NAME:-mastermind_core}
+    # network_mode: host
+    working_dir: /root
+    # Standardized environment loading from localized .env (Swarm 8.0)
+    env_file:
+      - .env
     volumes:
-      - ${HOST_NEXUS_DIR}:/app
-      # Explicitly mount sub-dirs to prevent image VOLUME shadowing
-      - ${HOST_NEXUS_DIR}/entities:/app/entities:rw
-      - ${HOST_NEXUS_DIR}/master:/app/master:rw
-      - ${HOST_NEXUS_DIR}/memory:/app/memory:rw
-      # Global workspace mount with variable permissions (ro/rw)
-      - ${HOST_NEXUS_DIR}/ros2_ws:/app/ros2_ws:${WORKSPACE_MODE:-ro}
-      # Allow local workspace overlay if it exists
-      - ${HOST_NEXUS_DIR}/entities/${ENTITY_CATEGORY:-assistant}/${NAME}/ros2_ws:/app/ros2_ws_local:rw
-      # Secure Secrets Vault Mount
-      - ${HOST_NEXUS_DIR}/entities/${ENTITY_CATEGORY:-assistant}/${NAME}/secrets:/run/secrets:ro
-      - /var/run/docker.sock:/var/run/docker.sock # Required if entity manages other containers
+      # REGISTRY: Access to materialized blueprints and configs (Read-Write for Mailbox)
+      - nexus_entities:/app/entities:rw
+      # PERSISTENCE: Isolated Named Volume for the entity state
+      - root_data:/root:rw
+      - /var/run/docker.sock:/var/run/docker.sock 
+    networks:
+      - alpha
     environment:
-      - BOB_LAUNCH_CONFIG
-      - NAME
-      - HOST_UID
-      - HOST_GID
-      - WORKSPACE_POLICY
-      - ENTITY_CATEGORY
-      - WORKSPACE_MODE
-      - ROS_DOMAIN_ID
-      - ROS_DISCOVERY_SERVER
-    command: /app/master/core/entrypoint.sh
+      - HOME=/root
+      - ROS_HOME=/root/.ros
+      - PYTHONPATH=/app/master/core
+      - REDIS_HOST=${REDIS_HOST:-bob_nexus_redis}
+      - NAME=${NAME}
+      - ENTITY_CATEGORY=${ENTITY_CATEGORY}
+      - WORKSPACE_POLICY=${WORKSPACE_POLICY}
+      - ENABLE_ONBOARDING=${ENABLE_ONBOARDING:-true}
+    # Use the framework entrypoint baked into the image
+    command: "${ENTITY_ENTRYPOINT:-/app/master/core/entrypoint.sh}"
     restart: unless-stopped
+
+networks:
+  alpha:
+    external: true
+
+volumes:
+  root_data:
+    # Entities use unique named volumes for total isolation
+    name: ${VOLUME_NAME:-nexus_entity_root}
+  nexus_entities:
+    # Shared Registry for configurations
+    external: true

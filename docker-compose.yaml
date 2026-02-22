@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: bob-nexus:latest
-    container_name: bob_nexus_core
+    container_name: bob-nexus-dev
     network_mode: host
     environment:
       - NAME=mastermind

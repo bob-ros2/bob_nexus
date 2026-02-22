@@ -52,10 +52,12 @@ def generate_skills_prompt(entity_dir):
 def update_entity_yaml(entity_dir):
     yaml_file = os.path.join(entity_dir, "llm.yaml")
     if not os.path.exists(yaml_file):
-        yaml_file = os.path.join(entity_dir, "launch.yaml")
-    
+        yaml_file = os.path.join(entity_dir, "agent.yaml")
     if not os.path.exists(yaml_file):
-        sys.stderr.write(f"Error: No config file (llm.yaml/launch.yaml) found in {entity_dir}\n")
+        yaml_file = os.path.join(entity_dir, "launch.yaml")
+
+    if not os.path.exists(yaml_file):
+        sys.stderr.write(f"Error: No config file found in {entity_dir}\n")
         return False
 
     prompt = generate_skills_prompt(entity_dir)
@@ -63,40 +65,53 @@ def update_entity_yaml(entity_dir):
         print(f"[*] No skills found for entity at {entity_dir}. Skipping prompt update.")
         return False
 
-    # Escape for YAML
+    # Escape for YAML if needed, but since we are inserting into a block,
+    # we can use literal block scalar syntax if we re-write the YAML properly.
+    # For now, let's stick to the current string replacement approach for safety.
     escaped_prompt = prompt.replace("'", "''")
     escaped_prompt = escaped_prompt.replace("\n", "\\n")
 
     with open(yaml_file, "r") as f:
         content = f.read()
 
-    # Pattern for system_prompt:='...' or "system_prompt:=${VAR:-'...'}"
-    pattern = r'(system_prompt:=.*?\')(.*?)(\'\}?\"?)'
+    # Sentinels
+    start_marker = "# --- NEXUS SKILLS PROMPT START ---"
+    end_marker = "# --- NEXUS SKILLS PROMPT END ---"
 
+    # Check if markers already exist
+    marker_pattern = re.compile(f"{re.escape(start_marker)}.*?{re.escape(end_marker)}", re.DOTALL)
+
+    if marker_pattern.search(content):
+        new_content = marker_pattern.sub(f"{start_marker}{escaped_prompt}{end_marker}", content)
+        with open(yaml_file, "w") as f:
+            f.write(new_content)
+        print(f"Successfully updated system prompt via markers in {yaml_file}")
+        return True
+
+    # Fallback to placeholder replacement
+    placeholder = "<ADD_HERE_SKILLS_SYSTEM_PROMPT>"
+    if placeholder in content:
+        # Replace placeholder with marked content
+        marked_prompt = f"{start_marker}{escaped_prompt}{end_marker}"
+        new_content = content.replace(placeholder, marked_prompt)
+        with open(yaml_file, "w") as f:
+            f.write(new_content)
+        print(f"Successfully filled placeholder with markers in {yaml_file}")
+        return True
+
+    # Last resort: ROS legacy pattern
+    pattern = r"(system_prompt:=.*?\')(.*?)(\'\}?\"?)"
     if re.search(pattern, content):
         new_content = re.sub(
             pattern, lambda m: f"{m.group(1)}{escaped_prompt}{m.group(3)}", content
         )
         with open(yaml_file, "w") as f:
             f.write(new_content)
-        print(f"Successfully updated system prompt in {yaml_file}")
+        print(f"Successfully updated legacy system prompt in {yaml_file}")
         return True
-    else:
-        # Check for placeholder
-        placeholder = "<ADD_HERE_SKILLS_SYSTEM_PROMPT>"
-        if placeholder in content:
-            new_content = content.replace(placeholder, escaped_prompt)
-            with open(yaml_file, "w") as f:
-                f.write(new_content)
-            print(f"Successfully filled placeholder in {yaml_file}")
-            return True
-        else:
-            msg = (
-                f"Error: Could not find system_prompt line or placeholder "
-                f"in {yaml_file}\n"
-            )
-            sys.stderr.write(msg)
-            return False
+
+    sys.stderr.write(f"Error: Could not find system_prompt line or placeholder in {yaml_file}\n")
+    return False
 
 
 if __name__ == "__main__":

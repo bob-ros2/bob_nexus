@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     vim \
     git \
     sudo \
+    docker.io \
+    docker-compose-v2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Workspace
@@ -38,7 +40,12 @@ RUN pip3 install --no-cache-dir \
 ENV PATH="/app/master:${PATH}"
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc \
     && echo "if [ -f /app/ros2_ws/install/setup.bash ]; then source /app/ros2_ws/install/setup.bash; fi" >> /root/.bashrc \
-    && echo 'export PATH="/app/master:$PATH"' >> /root/.bashrc
+    && echo 'NEXUS_ROOT=$(find /app /root /home -maxdepth 2 -name "mastermind.sh" 2>/dev/null | head -n 1 | xargs dirname 2>/dev/null || echo "/app")' >> /root/.bashrc \
+    && echo 'if [ -f "$NEXUS_ROOT/.profile" ]; then source "$NEXUS_ROOT/.profile"; fi' >> /root/.bashrc \
+    && echo 'export PATH="$NEXUS_ROOT/master:$PATH"' >> /root/.bashrc \
+    && echo "alias ll='ls -alF --color=auto'" >> /root/.bashrc \
+    && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
+    && echo "PS1='\[\033[01;36m\][🤖]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc
 
 # Copy the framework code
 # Note: .dockerignore ensures secrets (entities, .env, conf.yaml) are NOT copied.
@@ -53,12 +60,8 @@ RUN chmod +x mastermind.sh \
     && find skills -name "*.sh" -o -name "*.py" -exec chmod +x {} + \
     && chmod +x onboarding.sh
 
-# Expose volumes for persistence
-# entities: generated agents
-# memory: Qdrant/JSON storage
-# ros2_ws: Cloned source packages and build files
-# master/config: conf.yaml
-VOLUME ["/app/entities", "/app/memory", "/app/ros2_ws", "/app/master/config"]
+# Expose volumes for persistence (DEPRECATED in 3.0 Isolation - handled by explicit mounts)
+# VOLUME ["/app/entities", "/app/memory", "/app/ros2_ws", "/app/master/config"]
 
 # Default Command
 # For a fresh image, the user should run ./onboarding.sh first.

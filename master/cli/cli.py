@@ -36,6 +36,7 @@ def main():
     up_parser = subparsers.add_parser("up", help="Start an entity")
     up_parser.add_argument("name", help="Entity name (category inferred if omitted)")
     up_parser.add_argument("category", nargs="?", help="Optional entity category")
+    up_parser.add_argument("--refresh", action="store_true", help="Pull latest Git changes before starting")
 
     # Down command
     down_parser = subparsers.add_parser("down", help="Stop an entity")
@@ -44,6 +45,12 @@ def main():
 
     # Status command
     subparsers.add_parser("status", help="Show all entities status")
+
+    # Import command
+    import_parser = subparsers.add_parser("import", help="Import a repository to global workspace")
+    import_parser.add_argument("category", help="Category (currently only 'master' supported)")
+    import_parser.add_argument("repo", help="Repository name")
+    import_parser.add_argument("url", nargs="?", help="Optional Git URL")
 
     # Refresh command
     refresh_parser = subparsers.add_parser(
@@ -85,7 +92,7 @@ def main():
                 raise ValueError(f"Could not find entity '{entity_name}'. Please specify category.")
 
             entity_dir = os.path.join(manager.entities_dir, category, entity_name)
-            res = deployer.up_local(entity_dir)
+            res = deployer.up_local(entity_dir, refresh=args.refresh)
             print(res)
         elif args.command == "down":
             category = args.category
@@ -99,6 +106,9 @@ def main():
             entity_dir = os.path.join(manager.entities_dir, category, entity_name)
             res = deployer.down_local(entity_dir)
             print(res)
+        elif args.command == "import":
+            # category is currently unused but kept for compatibility with onboarding.sh
+            manager.import_repository(args.repo, args.url)
         elif args.command == "refresh":
             category = args.category
             entity_name = args.name
