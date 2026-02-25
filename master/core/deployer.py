@@ -343,6 +343,7 @@ class Deployer:
             "ENABLE_ONBOARDING": "true" if onboarding else "false",
             "NEXUS_REGISTRY_DIR": f"/app/entities/{category}/{entity_name}",
             "NEXUS_OVERLAY_PRIORITY": "true" if overlay_priority else "false",
+            "ENTITY_USE_ROS": "true" if nexus_manifest.get("use_ros") else "false",
         }
         if entrypoint:
             orchestration_signals["ENTITY_ENTRYPOINT"] = entrypoint

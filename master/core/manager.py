@@ -101,6 +101,7 @@ class EntityManager:
                     f.write(f"# Entity Identity\n")
                     f.write(f"NAME={entity_name}\n")
                     f.write(f"ENTITY_CATEGORY={category}\n")
+                    f.write(f"ENTITY_USE_ROS={'true' if manifest_data.get('use_ros') else 'false'}\n")
                     f.write(f"HOST_NEXUS_DIR={os.getenv('HOST_NEXUS_DIR', self.root_dir)}\n")
 
         # Post-spawn: Linking Default Skills from config
