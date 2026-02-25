@@ -4,3 +4,4 @@ python-dotenv
 requests
 flask
 rich
+numpy<2.0

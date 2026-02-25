@@ -1,0 +1,42 @@
+services:
+  mastermind:
+    image: ${IMAGE_NAME:-bob-nexus:av}
+    container_name: ${ENTITY_CONTAINER_NAME:-mastermind_av}
+    working_dir: /root
+    env_file:
+      - .env
+    volumes:
+      # REGISTRY: Access to materialized blueprints and configs
+      - nexus_entities:/app/entities:rw
+      # PERSISTENCE: Isolated Named Volume for the entity state
+      - root_data:/root:rw
+      - /var/run/docker.sock:/var/run/docker.sock 
+      # IPC HUB: Shared volume for pipes/FIFOs (Swarm 9.17)
+      - nexus_pipes:/tmp/nexus_pipes:rw
+    networks:
+      - alpha
+    environment:
+      - HOME=/root
+      - ROS_HOME=/root/.ros
+      - PYTHONPATH=/app/master/core
+      - REDIS_HOST=${REDIS_HOST:-bob_nexus_redis}
+      - NAME=${NAME}
+      - ENTITY_CATEGORY=${ENTITY_CATEGORY}
+      - WORKSPACE_POLICY=${WORKSPACE_POLICY}
+      - ENABLE_ONBOARDING=${ENABLE_ONBOARDING:-true}
+    # Use the framework entrypoint
+    command: "${ENTITY_ENTRYPOINT:-/app/master/core/entrypoint.sh}"
+    restart: unless-stopped
+
+networks:
+  alpha:
+    external: true
+
+volumes:
+  root_data:
+    name: ${VOLUME_NAME:-nexus_entity_root}
+  nexus_entities:
+    external: true
+  nexus_pipes:
+    # Shared IPC Hub for cross-container pipes
+    external: true

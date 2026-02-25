@@ -1,4 +1,5 @@
-FROM bob-nexus:latest
+ARG BASE_IMAGE=av
+FROM bob-nexus:${BASE_IMAGE}
 
 # Isolated Nexus Environment Blueprint
 LABEL maintainer="Bob Nexus Architect"

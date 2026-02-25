@@ -249,7 +249,7 @@ class Deployer:
                 return yaml.safe_load(f) or {}
         return {"orchestration": {"mode": "host"}}
 
-    def _pre_start_assemble(self, entity_dir, category, policy, refresh=False):
+    def _pre_start_assemble(self, entity_dir, category, policy):
         """
         Consolidated Assembly Logic for Swarm 8.0 Hermetic Isolation.
         1. Hierarchy discovery Template -> Local -> Master
@@ -280,16 +280,34 @@ class Deployer:
 
         # 2. Build Consolidated Environment
         final_env = {}
+        if template_dir:
+            # Load template defaults first (Swarm 10.2)
+            template_env_templ = os.path.join(template_dir, ".env.template")
+            if os.path.exists(template_env_templ):
+                final_env.update(dotenv_values(template_env_templ))
+            
+            template_env = os.path.join(template_dir, ".env")
+            if os.path.exists(template_env):
+                final_env.update(dotenv_values(template_env))
+
         if os.path.exists(global_env_path):
             final_env.update(dotenv_values(global_env_path))
-        if template_dir and os.path.exists(os.path.join(template_dir, ".env")):
-            final_env.update(dotenv_values(os.path.join(template_dir, ".env")))
+
         if os.path.exists(local_env_path):
             final_env.update(dotenv_values(local_env_path))
 
         # 3. Dynamic Signals (Overrides)
         project_prefix = os.environ.get("COMPOSE_PROJECT_NAME", "nexus")
         
+        # Decide on Image (IMAGE_NAME is special: it overrides blueprint defaults)
+        if nexus_manifest.get("image"):
+            orchestration_signals_base = {"IMAGE_NAME": nexus_manifest["image"]}
+            final_env["IMAGE_NAME"] = nexus_manifest["image"]
+        else:
+            orchestration_signals_base = {}
+            if "IMAGE_NAME" in final_env:
+                del final_env["IMAGE_NAME"]
+
         # Determine Entrypoint
         entrypoint = nexus_manifest.get("entrypoint")
         if not entrypoint:
@@ -306,6 +324,7 @@ class Deployer:
         overlay_priority = nexus_manifest.get("overlay_priority", False)
         
         orchestration_signals = {
+            **orchestration_signals_base,
             "NAME": entity_name,
             "ENTITY_CATEGORY": category,
             "WORKSPACE_POLICY": policy,
@@ -313,10 +332,8 @@ class Deployer:
             "ENTITY_CONTAINER_NAME": f"{project_prefix}_{entity_name}",
             "REDIS_HOST": os.getenv("REDIS_HOST", "bob_nexus_redis"),
             "ENABLE_ONBOARDING": "true" if onboarding else "false",
-            "IMAGE_NAME": nexus_manifest.get("image", self.docker_driver.image),
             "NEXUS_REGISTRY_DIR": f"/app/entities/{category}/{entity_name}",
             "NEXUS_OVERLAY_PRIORITY": "true" if overlay_priority else "false",
-            "NEXUS_REFRESH": "true" if refresh else "false",
         }
         if entrypoint:
             orchestration_signals["ENTITY_ENTRYPOINT"] = entrypoint
@@ -357,7 +374,7 @@ class Deployer:
 
         # Source Blueprint (Swarm 9.1: Smart Discovery with Fallback)
         orch = self.conf.get("orchestration", {})
-        g_config_path = orch.get("compose_file", "master/templates/blueprint.yaml")
+        g_config_path = nexus_manifest.get("blueprint_base", orch.get("compose_file", "master/templates/blueprint.yaml"))
         
         # 1. Primary path from config
         g_path = g_config_path
@@ -389,12 +406,12 @@ class Deployer:
                 except Exception as e:
                     print(f"    [!] SAE Warning: Failed to assemble {t}: {e}")
 
-    def up_local(self, entity_dir, refresh=False):
+    def up_local(self, entity_dir):
         category = os.path.basename(os.path.dirname(entity_dir))
         policies = self.conf.get("orchestration", {}).get("workspace_policies", {})
         policy = policies.get(category, policies.get("defaults", "ro"))
 
-        self._pre_start_assemble(entity_dir, category, policy, refresh=refresh)
+        self._pre_start_assemble(entity_dir, category, policy)
         local_compose = os.path.join(entity_dir, "docker-compose.yaml")
         bob_launch = os.path.join(entity_dir, "bob_launch.yaml")
         agent_config = os.path.join(entity_dir, "agent.yaml")

@@ -1,0 +1,4 @@
+category: infrastructure
+image: bob-nexus:latest
+ros: true
+entrypoint: "/app/master/core/heartbeat.py --ros-args -p period:=60.0 -r __ns:=${ROOT_NS} -p message:='HEARTBEAT Check your workspace for updates and proceed with your mission.'"

@@ -1,0 +1,11 @@
+- name: webvideo
+  package: bob_av_tools
+  executable: webvideo
+  arguments:
+    - --ros-args
+    - -p
+    - "fifo_path:=${WEBVIDEO_FIFO_PATH:-/tmp/nexus_pipes/overlay_terminal}"
+    - -p
+    - "override_css:=${WEBVIDEO_CSS_PATH:-'./style.css'}"
+    - --remap
+    - "llm_stream:=${SIGNAL_TOPIC:-/bob/llm_stream}"

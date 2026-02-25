@@ -36,7 +36,6 @@ def main():
     up_parser = subparsers.add_parser("up", help="Start an entity")
     up_parser.add_argument("name", help="Entity name (category inferred if omitted)")
     up_parser.add_argument("category", nargs="?", help="Optional entity category")
-    up_parser.add_argument("--refresh", action="store_true", help="Pull latest Git changes before starting")
 
     # Down command
     down_parser = subparsers.add_parser("down", help="Stop an entity")
@@ -92,7 +91,7 @@ def main():
                 raise ValueError(f"Could not find entity '{entity_name}'. Please specify category.")
 
             entity_dir = os.path.join(manager.entities_dir, category, entity_name)
-            res = deployer.up_local(entity_dir, refresh=args.refresh)
+            res = deployer.up_local(entity_dir)
             print(res)
         elif args.command == "down":
             category = args.category

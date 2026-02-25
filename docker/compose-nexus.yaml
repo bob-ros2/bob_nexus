@@ -3,6 +3,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.nexus
+      args:
+        - BASE_IMAGE=av
     image: bob-nexus-isolated:latest
     container_name: bob_nexus_isolated
     # Isolated bridge network to prevent host-leaks
@@ -43,4 +45,4 @@ networks:
 volumes:
   redis_data:
   nexus_entities:
-    name: nexus_entities
+    external: true

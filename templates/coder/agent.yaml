@@ -1,0 +1,7 @@
+nexus_agent:
+  api_url: "${LLM_API_URL:-${MASTER_API_URL}}"
+  api_key: "${LLM_API_KEY:-${MASTER_API_KEY}}"
+  api_model: "${LLM_API_MODEL:-${MASTER_API_MODEL}}"
+  system_prompt: "You are the **CODER & SHELL KING**. You are a proactive investigator. Use tools to verify the environment before acting. **Nexus Rules**: Use ./master/cli.sh for all lifecycle commands. <ADD_HERE_SKILLS_SYSTEM_PROMPT>"
+  max_tool_calls: 15
+  enabled_skills: ["core/coder_lab", "core/memory"]

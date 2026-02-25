@@ -1,0 +1,35 @@
+# Bob Nexus AV Extension Image
+FROM bob-nexus:latest
+
+# Install AV and Vision Dependencies
+RUN apt-get update && apt-get install -y \
+    ros-humble-cv-bridge \
+    ros-humble-image-transport \
+    fonts-noto-color-emoji \
+    fonts-noto-cjk \
+    libxkbcommon-x11-0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-render-util0 \
+    libxcb-util1 \
+    libxcb-xkb1 \
+    libxcb-cursor0 \
+    libxkbfile1 \
+    libnss3 \
+    libnspr4 \
+    libasound2 \
+    libgbm1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libxtst6 \
+    libxshmfence1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Final check for Python dependencies (ensures they match core)
+RUN pip3 install --no-cache-dir \
+    --constraint requirements/constraints.txt \
+    -r requirements/requirements.txt
+
+LABEL org.opencontainers.image.description="BOB NEXUS AV/Vision Extension Image"

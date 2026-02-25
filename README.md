@@ -1,4 +1,6 @@
-# bob_nexus 🚀
+# Welcome to bob_nexus 🚀
+
+![bob-nexus](media/bob-nexus.png)
 
 **The Central Nervous System and Orchestration Hub for the bob-ros2 Ecosystem.**
 

@@ -56,7 +56,6 @@ class EntityManager:
                 "ENTITY_CATEGORY": category,
                 "ENTITY_DIR": dest_dir,
                 "HOST_NEXUS_DIR": host_nexus,
-                "BOB_NEXUS_DIR": host_nexus,
             }
         )
 
@@ -75,6 +74,17 @@ class EntityManager:
                     self.engine.process_file(src_file, dest_file)
                 else:
                     shutil.copy2(src_file, dest_file)
+
+        # Ensure nexus.yaml exists and contains blueprint metadata (Swarm 9.15)
+        nexus_yaml = os.path.join(dest_dir, "nexus.yaml")
+        manifest_data = {}
+        if os.path.exists(nexus_yaml):
+            with open(nexus_yaml, "r") as f:
+                manifest_data = yaml.safe_load(f) or {}
+
+        manifest_data["blueprint"] = template_category
+        with open(nexus_yaml, "w") as f:
+            yaml.dump(manifest_data, f)
 
         # Ensure .env exists (mandatory for blueprint.yaml in Docker mode)
         final_env = os.path.join(dest_dir, ".env")

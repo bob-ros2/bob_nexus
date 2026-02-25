@@ -42,10 +42,9 @@ if [ -n "$NAME" ] && [ -n "$ENTITY_CATEGORY" ] && [ -d "/app/entities/$ENTITY_CA
     echo "[*] Swarm 8.0: Initializing entity state in /root from $ENTITY_SRC..."
     
     # Recursively copy all configuration and assets to /root
-    # We use -a to preserve attributes and -n to avoid overwriting user modifications
-    # if onboarding is triggered on an existing volume.
-    echo "    [*] Transferring initial configuration and assets..."
-    cp -anv "$ENTITY_SRC/." /root/ 2>/dev/null || true
+    # We use -a to preserve attributes.
+    echo "    [*] Transferring configuration and assets..."
+    cp -av "$ENTITY_SRC/." /root/ 2>/dev/null || true
     
     # After sync, we skip the default mastermind initialization
     IS_SUB_ENTITY=true
@@ -131,9 +130,6 @@ if [ "$ENTITY_USE_ROS" = "true" ]; then
         if [ ! -d "src/$repo" ]; then
             echo "        [+] Cloning core: $repo..."
             git clone --depth 1 "https://github.com/bob-ros2/$repo.git" "src/$repo"
-        elif [ "$NEXUS_REFRESH" = "true" ]; then
-            echo "        [*] Refreshing core: $repo (Git pull)..."
-            (cd "src/$repo" && git pull)
         fi
     done
 fi
@@ -170,9 +166,6 @@ if [ -f "$REPOS_FILE" ]; then
             if [ ! -d "src/$name" ]; then
                 echo "        [+] Cloning dynamic: $name from $url..."
                 git clone --depth 1 "$url" "src/$name"
-            elif [ "$NEXUS_REFRESH" = "true" ]; then
-                echo "        [*] Refreshing dynamic: $name (Git pull)..."
-                (cd "src/$name" && git pull)
             fi
         fi
     done < "$REPOS_FILE"
@@ -187,16 +180,24 @@ if [ "$ENTITY_USE_ROS" = "true" ] && [ -w "$TARGET_WS" ]; then
     # 3.4 Python Requirements (inside ROS build context)
     if [ -d "$TARGET_WS/src" ]; then
         echo "[*] Checking for Python requirements in $TARGET_WS/src..."
-        find "$TARGET_WS/src" -maxdepth 2 -name "requirements.txt" -exec pip install --no-cache-dir -r {} \;
+        CONSTRAINT_FILE="/app/requirements/constraints.txt"
+        PIP_ARGS=("--no-cache-dir")
+        
+        if [ -f "$CONSTRAINT_FILE" ]; then
+            echo "[*] Using global constraints from $CONSTRAINT_FILE"
+            PIP_ARGS+=("--constraint" "$CONSTRAINT_FILE")
+        fi
+        
+        find "$TARGET_WS/src" -maxdepth 2 -name "requirements.txt" -exec pip install "${PIP_ARGS[@]}" -r {} \;
     fi
 
     # Colcon Build
     # We clear variables to avoid contamination from previous builds
     unset AMENT_PREFIX_PATH; unset CMAKE_PREFIX_PATH; unset COLCON_PREFIX_PATH; unset PKG_CONFIG_PATH; unset PYTHONPATH;
     
-    BUILD_CMD="source /opt/ros/humble/local_setup.bash"
-    if [ -f "/app/ros2_ws/install/local_setup.bash" ]; then
-        BUILD_CMD="$BUILD_CMD && source /app/ros2_ws/install/local_setup.bash"
+    BUILD_CMD="source /opt/ros/humble/setup.bash"
+    if [ -f "/app/ros2_ws/install/setup.bash" ]; then
+        BUILD_CMD="$BUILD_CMD && source /app/ros2_ws/install/setup.bash"
     fi
     
     /bin/bash -c "$BUILD_CMD && cd $TARGET_WS && colcon build --event-handlers console_cohesion+"

@@ -12,6 +12,8 @@ manager master manager
 neo coder coder
 streamer infrastructure twitch_stream
 face infrastructure face_marker
+overlay infrastructure webvideo
+heartbeat infrastructure heartbeat
 EOF
 )
 

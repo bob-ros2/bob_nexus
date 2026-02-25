@@ -1,0 +1,74 @@
+# Common ROS 2 arguments anchor
+- &common_ns "__ns:=/bob"
+
+- name: face_bag
+  package: bob_face
+  executable: bag
+  arguments:
+    - --ros-args
+    - -r
+    - *common_ns
+    - -r
+    - "face_marker_array:=/bob/marker_array_raw"
+    - -p
+    - bag:=./face_2023-12-05_17-53-25/face_2023-12-05_17-53-25_0.db3
+    - -p
+    - loop:=true
+    - -p
+    - rate:=30
+    - -p
+    - jitter_intensity:=0.005
+    - -p
+    - blend_duration:=10
+
+- name: face_marker
+  package: bob_face
+  executable: face_marker
+  arguments:
+    - --ros-args
+    - -r
+    - *common_ns
+    - -r
+    - "marker_array_in:=/bob/marker_array_raw"
+    - -r
+    - "marker_array_out:=/bob/marker_array"
+    - -p
+    - marker_scale:=0.0
+
+- name: sentiment
+  package: bob_face
+  executable: sentiment_node.py
+  arguments:
+    - --ros-args
+    - -r
+    - "analize:=llm_stream"
+    - -r
+    - "face_color_override:=/bob/face_color_override"
+    - -r
+    - *common_ns
+    - --log-level
+    - debug
+    - -p
+    - cmap_name:=turbo
+    - -p
+    - buffer_size:=100
+    - -p
+    - smooth_alpha:=0.1
+
+- name: motion_manager
+  package: bob_face
+  executable: motion_manager.py
+  arguments:
+    - --ros-args
+    - -p
+    - "idle_sequences:=Calm,Smile,Thinking,Agree,Busy,Idle"
+    - -p
+    - "speaking_sequences:=Speaking"
+    - -r
+    - *common_ns
+
+- name: tf_map_2_face
+  package: tf2_ros
+  executable: static_transform_publisher
+  arguments: ["0.0", "0.0", "1.5", "0", "0", "0", "map", "face"]
+

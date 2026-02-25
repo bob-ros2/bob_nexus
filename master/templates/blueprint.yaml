@@ -13,6 +13,8 @@ services:
       # PERSISTENCE: Isolated Named Volume for the entity state
       - root_data:/root:rw
       - /var/run/docker.sock:/var/run/docker.sock 
+      # IPC HUB: Shared volume for pipes/FIFOs (Swarm 9.17)
+      - nexus_pipes:/tmp/nexus_pipes:rw
     networks:
       - alpha
     environment:
@@ -38,4 +40,7 @@ volumes:
     name: ${VOLUME_NAME:-nexus_entity_root}
   nexus_entities:
     # Shared Registry for configurations
+    external: true
+  nexus_pipes:
+    # Shared IPC Hub for cross-container pipes
     external: true
