@@ -1,1 +1,7 @@
 onboarding: true
+repositories:
+- https://github.com/bob-ros2/bob_launch
+- https://github.com/bob-ros2/bob_msgs
+- https://github.com/bob-ros2/bob_llm
+- https://github.com/bob-ros2/bob_topic_tools
+- https://github.com/bob-ros2/twitch_bot

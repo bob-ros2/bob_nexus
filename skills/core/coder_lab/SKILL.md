@@ -28,4 +28,4 @@ This skill transforms an entity into a high-performance system architect. It pro
 ## Usage Guidelines
 - **Precision**: Be surgical with file paths.
 - **Safety**: Always check the output of a command before proceeding to the next step.
-- **Isolation**: Remember that you are in an isolated research workspace. Your changes here will not corrupt the Mastermind core unless explicitly targeted.
+- **Isolation**: Remember that you are in an isolated workspace. Your changes here will not corrupt the Mastermind core unless explicitly targeted.

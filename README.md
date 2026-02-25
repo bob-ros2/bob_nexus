@@ -134,7 +134,7 @@ Custom orchestration and behavioral logic is defined in `master/config/conf.yaml
 The Nexus enforces a three-tier governance model to ensure stability and isolation:
 - **Infrastructure/Assistant**: Global `ros2_ws` is mounted as **Read-Only**. Stable and non-volatile.
 - **Master**: Full **Read-Write** access to the global workspace. For creating the bridge.
-- **Isolated (Research)**: Each entity receives a private, writable workspace overlay. Safely clone and build custom repositories (`repos.yaml`) without side effects.
+- **Isolated Assistants**: Each entity receives a private, writable workspace overlay. Safely clone and build custom repositories (`repos.yaml`) without side effects.
 
 ### Default Skill Policy
 Manage entity "weaponry" by category. Spawning an entity automatically links skills defined here:

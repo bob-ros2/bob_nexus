@@ -315,6 +315,8 @@ class Deployer:
                 entrypoint = None
             elif os.path.exists(os.path.join(entity_dir, "agent.yaml")):
                 entrypoint = "python3 /app/master/core/agent_core.py /root/agent.yaml"
+            elif "nexus_agent" in nexus_manifest:
+                entrypoint = "python3 /app/master/core/agent_core.py /root/nexus.yaml"
             elif os.path.exists(os.path.join(entity_dir, "run.sh")):
                 entrypoint = "/bin/bash /root/run.sh"
             else:

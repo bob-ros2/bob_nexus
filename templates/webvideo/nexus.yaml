@@ -2,4 +2,6 @@ onboarding: true
 blueprint: webvideo
 blueprint_base: master/templates/blueprint.av.yaml
 category: infrastructure
-description: "Web Overlay Renderer (Pyside6/Chromium)"
+description: Web Overlay Renderer (Pyside6/Chromium)
+repositories:
+- https://github.com/bob-ros2/bob_av_tools

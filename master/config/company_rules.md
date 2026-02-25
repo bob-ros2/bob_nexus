@@ -19,7 +19,7 @@ The Sovereign Swarm exists to develop, refine, and expand the **Bob Ecosystem** 
     - Resolves resource conflicts or build failures.
     - Reports "Fleet Status" to the Mastermind.
 
-### 🟠 Coder (Category: research/assistant) - e.g. "Neo"
+### 🟠 Coder (Category: assistant) - e.g. "Neo"
 - **Role**: Technical Specialist.
 - **Action**: Picks up **Instructions** from the Manager.
 - **Output**: Pure code, ROS nodes, and documentation.

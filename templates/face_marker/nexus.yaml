@@ -1,1 +1,4 @@
 onboarding: true
+repositories:
+- https://github.com/bob-ros2/bob_face
+- https://github.com/bob-ros2/bob_msgs

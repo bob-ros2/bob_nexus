@@ -134,12 +134,43 @@ if [ "$ENTITY_USE_ROS" = "true" ]; then
     done
 fi
 
-# 3.2 Dynamic Repos (repos.yaml)
+# 3.2 Dynamic Repos (nexus.yaml or repos.yaml)
 REPOS_FILE="/root/repos.yaml"
 if [ ! -f "$REPOS_FILE" ] && [ -f "../repos.yaml" ]; then REPOS_FILE="../repos.yaml"; fi
 
+# Strategy: Prefer nexus.yaml if it contains a repositories section, otherwise fall back to repos.yaml
+NEXUS_FILE="/root/nexus.yaml"
+if [ ! -f "$NEXUS_FILE" ] && [ -f "../nexus.yaml" ]; then NEXUS_FILE="../nexus.yaml"; fi
+
+temp_repos="/tmp/nexus_repos.txt"
+> "$temp_repos"
+
+if [ -f "$NEXUS_FILE" ]; then
+    echo "    [*] Checking $NEXUS_FILE for repositories..."
+    # Use python3 to safely extract repositories from YAML
+    python3 -c "
+import yaml, sys
+try:
+    with open('$NEXUS_FILE', 'r') as f:
+        data = yaml.safe_load(f)
+        if data and 'repositories' in data:
+            repos = data['repositories']
+            if isinstance(repos, list):
+                for r in repos: print(r)
+            elif isinstance(repos, dict):
+                for k, v in repos.items(): print(f'{k}:{v}')
+except Exception:
+    pass
+" >> "$temp_repos"
+fi
+
 if [ -f "$REPOS_FILE" ]; then
-    echo "    [*] Processing dynamic repositories from $REPOS_FILE..."
+    echo "    [*] Appending legacy repositories from $REPOS_FILE..."
+    cat "$REPOS_FILE" >> "$temp_repos"
+fi
+
+if [ -s "$temp_repos" ]; then
+    echo "    [*] Processing dynamic repositories..."
     while read -r line || [ -n "$line" ]; do
         clean_line=$(echo "$line" | sed 's/^[[:space:]-]*//' | sed 's/[[:space:]]*$//')
         [[ -z "$clean_line" ]] && continue
@@ -168,8 +199,9 @@ if [ -f "$REPOS_FILE" ]; then
                 git clone --depth 1 "$url" "src/$name"
             fi
         fi
-    done < "$REPOS_FILE"
+    done < "$temp_repos"
 fi
+rm -f "$temp_repos"
 
 popd > /dev/null
 
