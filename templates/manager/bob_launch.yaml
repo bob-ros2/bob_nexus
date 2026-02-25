@@ -1,6 +1,6 @@
 # Sovereign Swarm Manager Node
 # Common ROS 2 arguments anchor
-- &common_ns "__ns:=${COMMON_NS:-/bob}"
+- &common_ns "__ns:=${ROOT_NS:-/bob}"
 
 - name: ${LLM_NAME:-manager_brain}
   package: bob_llm

@@ -1,10 +1,10 @@
 # Twitch Bot Template - Combined Brain & Vision
 # Includes nested namespaces:
-# - Viz: ${COMMON_NS}/${NAME}
-# - LLM: ${COMMON_NS}/${NAME}/llm
+# - Viz: ${ROOT_NS}/${NAME}
+# - LLM: ${ROOT_NS}/${NAME}/llm
 
-- &entity_ns "__ns:=${COMMON_NS}/${NAME}"
-- &llm_ns "__ns:=${COMMON_NS}/${NAME}/llm"
+- &entity_ns "__ns:=${ROOT_NS}/${NAME}"
+- &llm_ns "__ns:=${ROOT_NS}/${NAME}/llm"
 
 # 1. The Dashboard (Visual Head - with FFmpeg Streaming)
 - name: viz

@@ -1,5 +1,5 @@
 # Common ROS 2 arguments anchor
-- &common_ns "__ns:=${COMMON_NS:-/bob}"
+- &common_ns "__ns:=${ROOT_NS:-/bob}"
 
 - name: ${LLM_NAME:-llm}
   package: bob_llm

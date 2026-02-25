@@ -344,7 +344,6 @@ class Deployer:
             "NEXUS_REGISTRY_DIR": f"/app/entities/{category}/{entity_name}",
             "NEXUS_OVERLAY_PRIORITY": "true" if overlay_priority else "false",
             "ENTITY_USE_ROS": "true" if nexus_manifest.get("use_ros") else "false",
-            "COMMON_NS": final_env.get("ROOT_NS", os.getenv("ROOT_NS", "/bob")),
         }
         if entrypoint:
             orchestration_signals["ENTITY_ENTRYPOINT"] = entrypoint
