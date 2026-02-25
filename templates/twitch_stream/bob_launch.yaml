@@ -1,0 +1,36 @@
+# Twitch Bot Template - Combined Brain & Vision
+# Includes nested namespaces:
+# - Viz: ${COMMON_NS}/${NAME}
+# - LLM: ${COMMON_NS}/${NAME}/llm
+
+- &entity_ns "__ns:=${COMMON_NS}/${NAME}"
+- &llm_ns "__ns:=${COMMON_NS}/${NAME}/llm"
+
+# 1. The Dashboard (Visual Head - with FFmpeg Streaming)
+- name: viz
+  package: bob_sdlviz
+  executable: /bin/bash
+  output: screen
+  arguments:
+    - -c
+    - "source /root/ros2_ws/install/setup.bash && /root/ros2_ws/src/bob_sdlviz/scripts/start_stream.sh #"
+
+# 2. The Agent Logic (Cognitive Core)
+- name: brain
+  package: bob_llm
+  executable: llm
+  output: screen
+  arguments:
+    - --ros-args
+    - -p
+    - api_url:=${API_URL}
+    - -p
+    - api_key:=${API_KEY}
+    - -p
+    - api_model:=${API_MODEL}
+    - -p
+    - "system_prompt:=${SYSTEM_PROMPT}"
+    - -p
+    - "tool_interfaces:=['./ros2_ws/src/bob_llm/config/qdrant_tools.py', '/app/master/core/skill_tools.py']"
+    - -r
+    - *llm_ns

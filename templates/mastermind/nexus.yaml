@@ -1,4 +1,6 @@
 onboarding: true
+category: master
+description: "The core orchestrator and strategic architect."
 repositories:
 - https://github.com/bob-ros2/bob_launch
 - https://github.com/bob-ros2/bob_msgs

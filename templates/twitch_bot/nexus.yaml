@@ -1,4 +1,6 @@
 onboarding: true
+category: assistant
+description: "Twitch integration bot for LLM interaction."
 repositories:
 - https://github.com/bob-ros2/bob_launch
 - https://github.com/bob-ros2/bob_msgs

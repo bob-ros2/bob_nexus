@@ -59,6 +59,13 @@ else
     echo "[*] Non-ROS Runtime Mode (ENTITY_USE_ROS != true)."
 fi
 
+# 2.1 Core Services (Background)
+if [ "$NAME" = "mastermind" ] && [ "$ENTITY_USE_ROS" = "true" ]; then
+    echo "[*] Mastermind Detected: Starting Core Dispatcher..."
+    # Configurable topic via DISPATCHER_TOPIC env
+    python3 /app/master/core/dispatcher.py --ros-args -p input_topic:="${DISPATCHER_TOPIC:-llm_prompt}" &
+fi
+
 # 3. Launch
 if [ -n "$ENTITY_ENTRYPOINT" ] && [ "$ENTITY_ENTRYPOINT" != "/app/master/core/entrypoint.sh" ]; then
     echo "[*] Executing Custom Entrypoint: $ENTITY_ENTRYPOINT"

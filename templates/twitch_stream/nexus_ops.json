@@ -54,7 +54,7 @@
         "bg_color": [
             0,
             40,
-            40,
+            50,
             100
         ]
     },
@@ -128,27 +128,15 @@
         ]
     },
     {
-        "topic": "/bob/llm_stream",
+        "type": "VideoStream",
+        "topic": "/tmp/nexus_pipes/overlay_terminal",
         "area": [
             10,
             320,
             834,
             150
         ],
-        "line_limit": 7,
-        "wrap_width": 95,
-        "append_newline": false,
-        "text_color": [
-            100,
-            255,
-            200,
-            255
-        ],
-        "bg_color": [
-            0,
-            20,
-            20,
-            200
-        ]
+        "source_width": 834,
+        "source_height": 150
     }
 ]

@@ -1,4 +1,6 @@
 onboarding: true
+category: infrastructure
+description: "SDL-based ROS 2 visualizer for Bob."
 repositories:
 - https://github.com/bob-ros2/bob_launch
 - https://github.com/bob-ros2/bob_msgs
