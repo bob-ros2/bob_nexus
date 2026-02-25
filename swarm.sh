@@ -8,8 +8,9 @@ CONFIG_FILE=$2
 # Internal default configuration
 DEFAULT_CONFIG=$(cat <<EOF
 mastermind master mastermind
-manager master manager
+prime master prime
 neo coder coder
+twbot infrastructure twitch_bot
 streamer infrastructure twitch_stream
 face infrastructure face_marker
 overlay infrastructure webvideo
