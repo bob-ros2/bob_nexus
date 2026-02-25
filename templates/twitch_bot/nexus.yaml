@@ -1,9 +1,5 @@
 onboarding: true
-category: assistant
-description: "Twitch integration bot for LLM interaction."
+category: infrastructure
+description: "Twitch Chat Bot (tioros) integration."
 repositories:
-- https://github.com/bob-ros2/bob_launch
-- https://github.com/bob-ros2/bob_msgs
-- https://github.com/bob-ros2/bob_llm
-- https://github.com/bob-ros2/bob_topic_tools
-- https://github.com/bob-ros2/twitch_bot
+- https://github.com/bob-ros2/tioros

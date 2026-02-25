@@ -1,0 +1,16 @@
+# Twitch Chat  Bot Template
+- &entity_ns "__ns:=${COMMON_NS}/${NAME}"
+
+# from https://github.com/bob-ros2/tioros
+- name: twitch_bot
+  package: tioros
+  executable: chatbot
+  output: screen
+  arguments:
+    - --ros-args
+    - -p
+    - 'channel:=${TWITCH_CHAT_CHANNEL:-"bobassi"}'
+    - -p
+    - 'secrets:=${TWITCH_CHAT_SECRET:-"no_secret"}'
+    - -r
+    - *entity_ns
