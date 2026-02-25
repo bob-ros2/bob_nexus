@@ -1,5 +1,5 @@
 # Twitch Chat  Bot Template
-- &entity_ns "__ns:=${COMMON_NS}/${NAME}"
+- &entity_ns "__ns:=${COMMON_NS:-/bob}/${NAME}"
 
 # from https://github.com/bob-ros2/tioros
 - name: twitch_bot
