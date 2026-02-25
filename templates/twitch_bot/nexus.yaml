@@ -1,5 +1,6 @@
 onboarding: true
 category: infrastructure
+use_ros: true
 description: "Twitch Chat Bot (tioros) integration."
 repositories:
 - https://github.com/bob-ros2/tioros

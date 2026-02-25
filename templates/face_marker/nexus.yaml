@@ -1,5 +1,6 @@
 onboarding: true
 category: infrastructure
+use_ros: true
 description: "ROS 2 Face recognition and marker overlay."
 repositories:
 - https://github.com/bob-ros2/bob_face

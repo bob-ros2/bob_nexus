@@ -1,5 +1,6 @@
 onboarding: true
 overlay_priority: true
+use_ros: true
 blueprint_base: master/templates/blueprint.av.yaml
 category: infrastructure
 repositories: repos.yaml

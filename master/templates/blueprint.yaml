@@ -26,6 +26,7 @@ services:
       - ENTITY_CATEGORY=${ENTITY_CATEGORY}
       - WORKSPACE_POLICY=${WORKSPACE_POLICY}
       - ENABLE_ONBOARDING=${ENABLE_ONBOARDING:-true}
+      - ENTITY_USE_ROS=${ENTITY_USE_ROS:-false}
     # Use the framework entrypoint baked into the image
     command: "${ENTITY_ENTRYPOINT:-/app/master/core/entrypoint.sh}"
     restart: unless-stopped

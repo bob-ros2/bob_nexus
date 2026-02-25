@@ -1,5 +1,7 @@
 onboarding: true
 category: infrastructure
+image: bob-nexus:latest
+use_ros: true
 description: "SDL-based ROS 2 visualizer for Bob."
 repositories:
 - https://github.com/bob-ros2/bob_launch

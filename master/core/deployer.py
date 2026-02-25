@@ -135,6 +135,13 @@ class DockerDriver(BaseDriver):
         env.update(self._get_docker_env(entity_dir, category, policy))
         if nexus_manifest.get("image"):
             env["IMAGE_NAME"] = nexus_manifest["image"]
+        
+        # Bridge use_ros from manifest to ENTITY_USE_ROS env
+        if nexus_manifest.get("use_ros"):
+            env["ENTITY_USE_ROS"] = "true"
+        elif "ENTITY_USE_ROS" not in env:
+             # Default to false if not already in env (from .env file)
+             env["ENTITY_USE_ROS"] = "false"
 
         # Decide if we use Docker
         run_script = os.path.join(entity_dir, "run.sh")
