@@ -32,16 +32,32 @@ class HostDriver(BaseDriver):
 
         # Build source prefix
         source_prefix = f"{ros_source} && " if ros_source else ""
-        exec_cmd = f"ros2 launch bob_launch generic.launch.py"
         
+        # Use provided entrypoint or fallback to ROS2 launch
+        exec_cmd = manifest.get("entrypoint")
+        if not exec_cmd:
+            exec_cmd = "ros2 launch bob_launch generic.launch.py"
+        
+        # Translation: If entrypoint uses /app/master/core/..., map to local paths
+        # This is CRITICAL when running on host but using 'container-style' entrypoints
+        if "/app/master/core/" in exec_cmd:
+            master_core_abs = os.path.join(self.root_dir, "master/core")
+            exec_cmd = exec_cmd.replace("/app/master/core/", f"{master_core_abs}/")
+        
+        # Mapping /root/ to entity_dir
+        if "/root/" in exec_cmd:
+            exec_cmd = exec_cmd.replace("/root/", f"{entity_dir}/")
+
         command = [
             "/bin/bash",
             "-c",
             f"{source_prefix}{exec_cmd}",
         ]
 
-        log_out = open(os.path.join(entity_dir, "stdout.log"), "w")
-        log_err = open(os.path.join(entity_dir, "stderr.log"), "w")
+        stdout_path = os.path.join(entity_dir, "stdout.log")
+        stderr_path = os.path.join(entity_dir, "stderr.log")
+        log_out = open(stdout_path, "w")
+        log_err = open(stderr_path, "w")
 
         process = subprocess.Popen(
             command, env=env, preexec_fn=os.setsid, stdout=log_out, stderr=log_err, text=True
@@ -403,7 +419,9 @@ class Deployer:
              raise Exception(f"Orchestration Error: Blueprint not found! Tried {g_config_path} and {fallback_path if 'fallback_path' in locals() else '/app/templates/blueprint.yaml'}")
 
         local_compose = os.path.join(entity_dir, "docker-compose.yaml")
-        if os.path.exists(g_path) and not os.path.islink(local_compose):
+        # Only materialize blueprint if we are NOT in host mode
+        orch = self.conf.get("orchestration", {})
+        if orch.get("mode") != "host" and os.path.exists(g_path) and not os.path.islink(local_compose):
             print(f"[*] Orchestration: Syncing blueprint for {entity_name}")
             engine.process_file(g_path, local_compose)
 
@@ -427,7 +445,13 @@ class Deployer:
         agent_config = os.path.join(entity_dir, "agent.yaml")
         run_script = os.path.join(entity_dir, "run.sh")
 
-        if (os.path.exists(local_compose) or os.path.exists(bob_launch) or os.path.exists(agent_config)):
+        # 2. Driver Selection: Prioritize global config mode
+        orch = self.conf.get("orchestration", {})
+        global_mode = orch.get("mode", "swarm")
+
+        if global_mode == "host":
+            active_driver = self.host_driver
+        elif (os.path.exists(local_compose) or os.path.exists(bob_launch) or os.path.exists(agent_config)):
             active_driver = self.docker_driver
         elif os.path.exists(run_script):
             active_driver = self.host_driver

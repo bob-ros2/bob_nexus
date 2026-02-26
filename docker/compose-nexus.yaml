@@ -7,8 +7,6 @@ services:
         - BASE_IMAGE=av
     image: bob-nexus-isolated:latest
     container_name: bob_nexus_isolated
-    # Isolated bridge network to prevent host-leaks
-    network_mode: bridge
     environment:
       - NAME=isolated_master
       - WORKSPACE_POLICY=isolated
