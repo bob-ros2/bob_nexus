@@ -75,15 +75,15 @@ class EntityManager:
                 else:
                     shutil.copy2(src_file, dest_file)
 
-        # Ensure nexus.yaml exists and contains blueprint metadata (Swarm 9.15)
-        nexus_yaml = os.path.join(dest_dir, "nexus.yaml")
+        # Ensure agent.yaml exists and contains blueprint metadata (Swarm 9.15)
+        agent_yaml = os.path.join(dest_dir, "agent.yaml")
         manifest_data = {}
-        if os.path.exists(nexus_yaml):
-            with open(nexus_yaml, "r") as f:
+        if os.path.exists(agent_yaml):
+            with open(agent_yaml, "r") as f:
                 manifest_data = yaml.safe_load(f) or {}
 
         manifest_data["blueprint"] = template_category
-        with open(nexus_yaml, "w") as f:
+        with open(agent_yaml, "w") as f:
             yaml.dump(manifest_data, f)
 
         # Ensure .env exists (mandatory for blueprint.yaml in Docker mode)
@@ -157,8 +157,7 @@ class EntityManager:
         script_path = os.path.join(self.master_dir, "core", "generate_prompt.py")
         if os.path.exists(script_path):
             # Refresh if any valid config exists
-            has_config = os.path.exists(os.path.join(entity_dir, "agent.yaml")) or \
-                         os.path.exists(os.path.join(entity_dir, "nexus.yaml"))
+            has_config = os.path.exists(os.path.join(entity_dir, "agent.yaml"))
 
             if has_config:
                 print(f"[*] auto-refresh: Updating system prompt for {entity_name}...")

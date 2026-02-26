@@ -44,8 +44,6 @@ class HostDriver(BaseDriver):
                 env["BOB_LAUNCH_CONFIG"] = os.path.join(entity_dir, "bob_launch.yaml")
             elif os.path.exists(os.path.join(entity_dir, "agent.yaml")):
                 env["BOB_LAUNCH_CONFIG"] = os.path.join(entity_dir, "agent.yaml")
-            elif os.path.exists(os.path.join(entity_dir, "nexus.yaml")):
-                env["BOB_LAUNCH_CONFIG"] = os.path.join(entity_dir, "nexus.yaml")
 
         # Translation: If entrypoint uses /app/master/core/..., map to local paths
         # This is CRITICAL when running on host but using 'container-style' entrypoints
@@ -150,7 +148,7 @@ class DockerDriver(BaseDriver):
         
         # Manifest check for specific image overrides
         nexus_manifest = {}
-        manifest_path = os.path.join(entity_dir, "nexus.yaml")
+        manifest_path = os.path.join(entity_dir, "agent.yaml")
         if os.path.exists(manifest_path):
             with open(manifest_path, "r") as f:
                 nexus_manifest = yaml.safe_load(f) or {}
@@ -295,7 +293,7 @@ class Deployer:
         entity_name = os.path.basename(entity_dir)
         local_env_path = os.path.join(entity_dir, ".env")
         global_env_path = os.path.join(self.root_dir, "master", "config", ".env")
-        nexus_manifest_path = os.path.join(entity_dir, "nexus.yaml")
+        nexus_manifest_path = os.path.join(entity_dir, "agent.yaml")
 
         # 0. Load Manifest Overrides
         nexus_manifest = {}
@@ -347,8 +345,6 @@ class Deployer:
                 entrypoint = None
             elif os.path.exists(os.path.join(entity_dir, "agent.yaml")):
                 entrypoint = "python3 /app/master/core/agent_core.py /root/agent.yaml"
-            elif "nexus_agent" in nexus_manifest:
-                entrypoint = "python3 /app/master/core/agent_core.py /root/nexus.yaml"
             elif os.path.exists(os.path.join(entity_dir, "run.sh")):
                 entrypoint = "/bin/bash /root/run.sh"
             else:
@@ -479,7 +475,7 @@ class Deployer:
 
         # 3. ROS Support (Conditional to avoid unnecessary warnings)
         ros_source = ""
-        nexus_manifest_path = os.path.join(entity_dir, "nexus.yaml")
+        nexus_manifest_path = os.path.join(entity_dir, "agent.yaml")
         if os.path.exists(nexus_manifest_path):
             with open(nexus_manifest_path, "r") as f:
                 nm = yaml.safe_load(f) or {}

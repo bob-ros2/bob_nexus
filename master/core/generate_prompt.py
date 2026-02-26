@@ -53,8 +53,6 @@ def update_entity_yaml(entity_dir):
     yaml_file = os.path.join(entity_dir, "agent.yaml")
     if not os.path.exists(yaml_file):
         yaml_file = os.path.join(entity_dir, "launch.yaml")
-    if not os.path.exists(yaml_file):
-        yaml_file = os.path.join(entity_dir, "nexus.yaml")
 
     if not os.path.exists(yaml_file):
         sys.stderr.write(f"Error: No config file found in {entity_dir}\n")
