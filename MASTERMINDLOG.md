@@ -477,27 +477,19 @@ In this phase, we transitioned to a strategic autonomous orchestration model by 
 
 ---
 
-## Phase XXI: Infrastructure Hardening & Security (The Fortified Swarm) - Swarm 3.5
+## Phase XXI: Security Hardening (Secret Isolation) - Codename: "Fortify"
 
-In this phase, we fortified the foundation of the Nexus, eliminating critical security leaks and automating complex network governance to ensure maximum resilience.
+In this phase, we secured the Nexus vault by ensuring that sensitive credentials never leave the host environment.
 
 ### Key Achievements:
 
 1.  **Zero-Leak Secret Isolation**:
-    Strictly excluded `master/secrets/` from the Docker build context via `.dockerignore`. This ensures that sensitive credentials (Twitch tokens, JSON keys) are never baked into the image layers, preventing accidental leakage to registries like GHCR.
+    Strictly excluded `master/secrets/` from the Docker build context via `.dockerignore`. This prevents credentials from being baked into image layers or pushed to registries.
 
 2.  **Centralized Secret Propagation**:
-    Transformed secrets from static image assets to dynamic host-mounts. Updated the `blueprint.yaml` and `deployer.py` to propagate centralized host secrets (`HOST_NEXUS_DIR/master/secrets`) into sub-entities via secure read-only volume mounts.
+    Updated the sub-entity blueprint and deployer to mount centralized host secrets (`master/secrets`) via secure read-only volumes, ensuring entities like `twbot` can access their credentials without them being stored in the image.
 
-3.  **Autonomous Network Governance (MTU 1280)**:
-    Solved the "Tailscale Black Hole" issue by automating MTU management. The `alpha` network is now defined directly in `docker/compose-nexus.yaml` with a mandatory MTU of 1280, ensuring that large SSL/TLS packets and git traffic flow seamlessly across VPN tunnels without manual intervention.
-
-4.  **Identity-First Repository Migration**:
-    Successfully migrated core repositories (like `tioros`) to their new homes (GitLab) and updated the `nexus.yaml` manifests to use explicit `.git` URLs, ensuring stable and non-interactive onboarding across the swarm.
-
-**Status**: Infrastructure fortified. Secrets secured. Network resilient.
-
-> *Sicherheit ist kein Zustand, sondern ein Prozess der ständigen Reinigung. Wir haben die Schatten aus den Images verbannt und den Tresor in die reale Welt verlegt, während der Datenstrom nun ungehindert durch die verengten Pfade der VPN-Tunnel fließt. Die Festung steht – sicher, autonom und unerschütterlich.*
+**Status**: Secrets secured. Isolation verified.
 
 ---
 
@@ -507,7 +499,7 @@ In this phase, we fortified the foundation of the Nexus, eliminating critical se
 | :--- | :--- | :--- | :--- |
 | **I-X** | **Deep Infrastructure** | Foundation, SAE, and batch orchestration. | **[COMPLETED]** |
 | **XX** | **Strategic MVP** | Unified Governance, Prime Coordinator & Dispatcher Bridge. | **[COMPLETED]** |
-| **XXI** | **Fortification** | Secret Isolation & Network (MTU) Automation. | **[COMPLETED]** |
+| **XXI** | **Fortification** | Secret Isolation & Volume Propagation. | **[COMPLETED]** |
 | **XI** | **Networking** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
 | **XII** | **Evolution** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |
 | **XIII** | **Stray Logic** | Integration of Marketing, Finance, and Artistic strategic entities. | **[PLANNED]** |

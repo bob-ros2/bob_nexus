@@ -46,8 +46,6 @@ networks:
   alpha:
     name: alpha
     driver: bridge
-    driver_opts:
-      com.docker.network.driver.mtu: 1280
 
 volumes:
   redis_data:
