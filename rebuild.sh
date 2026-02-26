@@ -8,6 +8,9 @@ echo "[*] Ensuring global volumes exist..."
 docker volume create nexus_pipes >/dev/null
 docker volume create nexus_entities >/dev/null
 
+echo "[*] Ensuring global network (alpha) exists with correct MTU..."
+docker network create --opt com.docker.network.driver.mtu=1280 alpha 2>/dev/null || true
+
 echo "[*] Tearing down existing isolated Nexus..."
 docker compose -f docker/compose-nexus.yaml down || true
 
