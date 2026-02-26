@@ -106,15 +106,48 @@ def read_skill_resource(skill_name: str, resource_path: str):
         return str(e)
 
 
+def function_to_openai_tool(func):
+    """
+    Converts a Python function to an OpenAI-compatible tool definition using its docstring.
+    """
+    name = func.__name__
+    doc = inspect.getdoc(func) or "No description available."
+    
+    # Simple parser for parameters (assumes standard types for now)
+    sig = inspect.signature(func)
+    parameters = {
+        "type": "object",
+        "properties": {},
+        "required": []
+    }
+    
+    for param_name, param in sig.parameters.items():
+        parameters["properties"][param_name] = {
+            "type": "string", # Default to string
+            "description": f"Parameter {param_name}"
+        }
+        if param.default is inspect.Parameter.empty:
+            parameters["required"].append(param_name)
+            
+    return {
+        "type": "function",
+        "function": {
+            "name": name,
+            "description": doc,
+            "parameters": parameters,
+        }
+    }
+
 def get_orchestrator_tools():
     """
-    Returns the list of core orchestrator tools.
+    Returns the list of core orchestrator tools as OpenAI definitions.
     """
-    return [
+    funcs = [
         list_available_skills,
         load_skill_md,
         read_skill_resource,
     ]
+    return [function_to_openai_tool(f) for f in funcs]
 
 
 def get_tools_from_skills(skill_names: list):
@@ -149,7 +182,7 @@ def get_tools_from_skills(skill_names: list):
             for attr_name in dir(mod):
                 attr = getattr(mod, attr_name)
                 if inspect.isfunction(attr) and not attr_name.startswith("_"):
-                    tools.append(attr)
+                    tools.append(function_to_openai_tool(attr))
         except Exception as e:
             print(f"Error loading skill {name}: {e}")
     
