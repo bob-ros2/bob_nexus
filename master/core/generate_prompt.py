@@ -109,8 +109,8 @@ def update_entity_yaml(entity_dir):
         print(f"Successfully updated system prompt in {yaml_file}")
         return True
 
-    sys.stderr.write(f"Error: Could not find system_prompt line or placeholder in {yaml_file}\n")
-    return False
+    print(f"[*] No system_prompt or placeholder found in {yaml_file}. Skipping injection.")
+    return True
 
 
 if __name__ == "__main__":
