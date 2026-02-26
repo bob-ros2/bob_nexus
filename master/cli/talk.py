@@ -21,12 +21,14 @@ RESET = "\033[0m"
 GREEN = "\033[32m"
 CYAN = "\033[36m"
 YELLOW = "\033[33m"
+RED = "\033[31m"
 
 class AgentTalk:
     def __init__(self, entity_dir):
         self.entity_dir = Path(entity_dir).absolute()
         self.status_path = self.entity_dir / "status.json"
         self.inbox_path = self.entity_dir / "inbox.json"
+        self.outbox_path = self.entity_dir / "outbox.json"
         self.log_path = self.entity_dir / "stdout.log"
         self.running = True
         self.last_status = {}
