@@ -50,9 +50,7 @@ def generate_skills_prompt(entity_dir):
 
 
 def update_entity_yaml(entity_dir):
-    yaml_file = os.path.join(entity_dir, "llm.yaml")
-    if not os.path.exists(yaml_file):
-        yaml_file = os.path.join(entity_dir, "agent.yaml")
+    yaml_file = os.path.join(entity_dir, "agent.yaml")
     if not os.path.exists(yaml_file):
         yaml_file = os.path.join(entity_dir, "launch.yaml")
     if not os.path.exists(yaml_file):

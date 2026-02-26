@@ -399,7 +399,7 @@ class Deployer:
         engine = TemplateEngine(local_env_path, extra_vars=orchestration_signals)
         
         # Standard targets
-        targets = ["docker-compose.yaml", "llm.yaml", "launch.yaml", "bob_launch.yaml", "agent.yaml"]
+        targets = ["docker-compose.yaml", "launch.yaml", "bob_launch.yaml", "agent.yaml"]
         import glob
         all_yamls = glob.glob(os.path.join(entity_dir, "*.yaml"))
         for y in all_yamls:
@@ -469,7 +469,7 @@ class Deployer:
 
         config_path = os.path.join(entity_dir, "agent.yaml")
         if not os.path.exists(config_path):
-            config_path = os.path.join(entity_dir, "llm.yaml")
+            config_path = os.path.join(entity_dir, "nexus.yaml")
         if not os.path.exists(config_path):
             import glob
             yamls = glob.glob(os.path.join(entity_dir, "*.yaml"))

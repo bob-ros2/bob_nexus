@@ -63,8 +63,8 @@ class AgentCore:
             if isinstance(data, list):
                 logger.warning("Agent Core received a list-based YAML (likely a launch file). Skipping tiered detection.")
                 return {}
-            # Tiered detection: nexus_agent -> llm.ros__parameters -> flat
-            return data.get("nexus_agent", data.get("llm", {}).get("ros__parameters", data))
+            # Tiered detection: nexus_agent -> flat
+            return data.get("nexus_agent", data)
 
     def _update_status(self, state, thought=None):
         self.state = state
