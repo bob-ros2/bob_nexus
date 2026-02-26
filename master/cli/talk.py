@@ -95,11 +95,17 @@ class AgentTalk:
         except: pass
 
     def draw_logs(self):
-        # Position log area (starting at line 12)
+        # Position log area (starting at line 18)
         sys.stdout.write("\033[s")
-        start_line = 12
+        start_line = 18
         cols = os.get_terminal_size().columns
-        for i, line in enumerate(self.log_lines):
+        rows = os.get_terminal_size().lines
+        
+        # Draw at most 6-8 lines of logs to keep it compact
+        max_log_display = rows - start_line
+        display_lines = self.log_lines[-max_log_display:] if len(self.log_lines) > max_log_display else self.log_lines
+        
+        for i, line in enumerate(display_lines):
             sys.stdout.write(MOVE.format(line=start_line+i, col=1))
             sys.stdout.write(f"{RESET}{line[:cols-1]}{CLR}")
         sys.stdout.write("\033[u")
@@ -112,17 +118,31 @@ class AgentTalk:
                     data = json.load(f)
                     result = data.get("result", "")
                     if result:
-                        # Draw to a specific area (line 28+)
+                        # Draw to line 11 (above logs)
                         sys.stdout.write("\033[s")
-                        sys.stdout.write(MOVE.format(line=28, col=1))
+                        sys.stdout.write(MOVE.format(line=11, col=1))
                         sys.stdout.write(f"{BOLD}{GREEN}--- FINAL RESULT ---{RESET}{CLR}\n")
-                        # Wrap or truncate result for display? Truncate for now to avoid screen mess
                         lines = result.splitlines()
                         for i, l in enumerate(lines[:5]):
                             sys.stdout.write(f"{l[:os.get_terminal_size().columns-1]}{CLR}\n")
                         sys.stdout.write("\033[u")
                         sys.stdout.flush()
-        except: pass
+            else:
+                # Clear the area if no outbox exists
+                sys.stdout.write("\033[s")
+                sys.stdout.write(MOVE.format(line=11, col=1))
+                sys.stdout.write(f"{YELLOW}Waiting for result...{RESET}{CLR}\n")
+                for i in range(1, 6):
+                    sys.stdout.write(MOVE.format(line=11+i, col=1) + CLR + "\n")
+                sys.stdout.write("\033[u")
+                sys.stdout.flush()
+        except Exception as e:
+            # Show parsing error briefly
+            sys.stdout.write("\033[s")
+            sys.stdout.write(MOVE.format(line=11, col=1))
+            sys.stdout.write(f"{YELLOW}Result parsing... ({str(e)[:20]}){RESET}{CLR}")
+            sys.stdout.write("\033[u")
+            sys.stdout.flush()
 
     def update_loop(self):
         while self.running:
@@ -171,6 +191,10 @@ class AgentTalk:
 
             if mission:
                 try:
+                    # Clear old result first
+                    if self.outbox_path.exists():
+                        self.outbox_path.unlink()
+
                     with open(self.inbox_path, "w") as f:
                         json.dump({"mission": mission}, f)
                     
