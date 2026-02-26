@@ -493,6 +493,25 @@ In this phase, we secured the Nexus vault by ensuring that sensitive credentials
 
 ---
 
+## Phase XXII: Host Orchestration Mode - Codename: "Native"
+
+In this phase, we broke free from the Docker-only mandate by enabling native host process orchestration.
+
+### Key Achievements:
+
+1.  **Hybrid Orchestration**:
+    The `Deployer` now supports `mode: "host"`, allowing entities to run as native processes. This is ideal for light-weight agents or environments where Docker-in-Docker is undesirable.
+
+2.  **Autonomous Path Translation**:
+    Implemented an intelligent mapping layer in `HostDriver` that translates container-intrinsic paths (like `/app/` and `/root/`) to their respective host-local equivalents, maintaining blueprint compatibility across both and host environments.
+
+3.  **Network Stability Fix**:
+    Resolved a Docker Compose labeling conflict by automating the recreation of the `alpha` network in `rebuild.sh`, ensuring a clean state for the master orchestrator.
+
+**Status**: Orchestration parity achieved. Native logic active.
+
+---
+
 ## The Creative Roadmap: "The Path to the Sovereign Swarm"
 
 | Phase | Milestone | Description | Status |
@@ -500,6 +519,7 @@ In this phase, we secured the Nexus vault by ensuring that sensitive credentials
 | **I-X** | **Deep Infrastructure** | Foundation, SAE, and batch orchestration. | **[COMPLETED]** |
 | **XX** | **Strategic MVP** | Unified Governance, Prime Coordinator & Dispatcher Bridge. | **[COMPLETED]** |
 | **XXI** | **Fortification** | Secret Isolation & Volume Propagation. | **[COMPLETED]** |
+| **XXII** | **Host Mode** | Native process orchestration & path translation. | **[COMPLETED]** |
 | **XI** | **Networking** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
 | **XII** | **Evolution** | Automatic refinement of entity prompts based on mission success. | **[PLANNED]** |
 | **XIII** | **Stray Logic** | Integration of Marketing, Finance, and Artistic strategic entities. | **[PLANNED]** |
