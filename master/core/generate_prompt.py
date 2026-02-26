@@ -55,6 +55,8 @@ def update_entity_yaml(entity_dir):
         yaml_file = os.path.join(entity_dir, "agent.yaml")
     if not os.path.exists(yaml_file):
         yaml_file = os.path.join(entity_dir, "launch.yaml")
+    if not os.path.exists(yaml_file):
+        yaml_file = os.path.join(entity_dir, "nexus.yaml")
 
     if not os.path.exists(yaml_file):
         sys.stderr.write(f"Error: No config file found in {entity_dir}\n")
@@ -99,15 +101,16 @@ def update_entity_yaml(entity_dir):
         print(f"Successfully filled placeholder with markers in {yaml_file}")
         return True
 
-    # Last resort: ROS legacy pattern
-    pattern = r"(system_prompt:=.*?\')(.*?)(\'\}?\"?)"
+    # Last resort: ROS legacy or Generic YAML prompt pattern
+    # Matches 'system_prompt: "..." ' or 'system_prompt:= "..." '
+    pattern = r"(system_prompt[:=].*?[\"'])(.*?)([\"']\}?\"?)"
     if re.search(pattern, content):
         new_content = re.sub(
             pattern, lambda m: f"{m.group(1)}{escaped_prompt}{m.group(3)}", content
         )
         with open(yaml_file, "w") as f:
             f.write(new_content)
-        print(f"Successfully updated legacy system prompt in {yaml_file}")
+        print(f"Successfully updated system prompt in {yaml_file}")
         return True
 
     sys.stderr.write(f"Error: Could not find system_prompt line or placeholder in {yaml_file}\n")

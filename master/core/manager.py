@@ -157,9 +157,9 @@ class EntityManager:
         script_path = os.path.join(self.master_dir, "core", "generate_prompt.py")
         if os.path.exists(script_path):
             # Refresh if any valid config exists
-            has_config = os.path.exists(os.path.join(entity_dir, "llm.yaml")) or os.path.exists(
-                os.path.join(entity_dir, "agent.yaml")
-            )
+            has_config = os.path.exists(os.path.join(entity_dir, "llm.yaml")) or \
+                         os.path.exists(os.path.join(entity_dir, "agent.yaml")) or \
+                         os.path.exists(os.path.join(entity_dir, "nexus.yaml"))
 
             if has_config:
                 print(f"[*] auto-refresh: Updating system prompt for {entity_name}...")
