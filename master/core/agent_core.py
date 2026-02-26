@@ -123,6 +123,11 @@ class AgentCore:
                 logger.info(f"Calling Tool: {func_name}({args})")
 
                 result = skill_tools.dispatch_tool(func_name, args)
+                
+                # IMPORTANT: LLM APIs require 'content' to be a string
+                if not isinstance(result, str):
+                    result = json.dumps(result)
+
                 self.history.append(
                     {
                         "role": "tool",
