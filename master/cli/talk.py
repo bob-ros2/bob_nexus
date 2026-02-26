@@ -105,10 +105,30 @@ class AgentTalk:
         sys.stdout.write("\033[u")
         sys.stdout.flush()
 
+    def draw_outbox(self):
+        try:
+            if self.outbox_path.exists():
+                with open(self.outbox_path, "r") as f:
+                    data = json.load(f)
+                    result = data.get("result", "")
+                    if result:
+                        # Draw to a specific area (line 28+)
+                        sys.stdout.write("\033[s")
+                        sys.stdout.write(MOVE.format(line=28, col=1))
+                        sys.stdout.write(f"{BOLD}{GREEN}--- FINAL RESULT ---{RESET}{CLR}\n")
+                        # Wrap or truncate result for display? Truncate for now to avoid screen mess
+                        lines = result.splitlines()
+                        for i, l in enumerate(lines[:5]):
+                            sys.stdout.write(f"{l[:os.get_terminal_size().columns-1]}{CLR}\n")
+                        sys.stdout.write("\033[u")
+                        sys.stdout.flush()
+        except: pass
+
     def update_loop(self):
         while self.running:
             self.draw_status()
             self.tail_logs()
+            self.draw_outbox()
             time.sleep(1.5)
 
     def get_multi_line_input(self):
