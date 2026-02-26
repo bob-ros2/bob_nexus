@@ -24,6 +24,7 @@ services:
 
       # nur temporär!!!
       - ../master/config/.env:/app/master/config/.env:ro
+      - ../master/secrets:/app/master/secrets:ro
 
       # INFRASTRUCTURE: DooD (Docker-outside-Docker)
       - /var/run/docker.sock:/var/run/docker.sock

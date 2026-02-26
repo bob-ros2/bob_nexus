@@ -1,5 +1,6 @@
 .env
 master/config/.env
+master/secrets/
 .git
 entities/
 memory/
