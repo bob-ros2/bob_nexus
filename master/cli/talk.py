@@ -34,6 +34,7 @@ class AgentTalk:
         self.last_status = {}
         self.log_pos = 0
         self.log_lines = []
+        self.result_height = 5 # Default height for result area
         
         # Verify if it looks like an entity directory
         if not (self.entity_dir / "agent.yaml").exists() and not self.status_path.exists():
@@ -97,14 +98,16 @@ class AgentTalk:
         except: pass
 
     def draw_logs(self):
-        # Position log area (starting at line 18)
+        # Position log area dynamically based on result height
         sys.stdout.write("\033[s")
-        start_line = 18
+        start_line = 13 + self.result_height 
         cols = os.get_terminal_size().columns
         rows = os.get_terminal_size().lines
         
-        # Draw at most 6-8 lines of logs to keep it compact
+        # Draw logs to fill the rest of the screen
         max_log_display = rows - start_line
+        if max_log_display < 1: return # Screen too small
+        
         display_lines = self.log_lines[-max_log_display:] if len(self.log_lines) > max_log_display else self.log_lines
         
         for i, line in enumerate(display_lines):
@@ -123,10 +126,17 @@ class AgentTalk:
                         # Draw to line 11 (above logs)
                         sys.stdout.write("\033[s")
                         sys.stdout.write(MOVE.format(line=11, col=1))
-                        sys.stdout.write(f"{BOLD}{GREEN}--- FINAL RESULT ---{RESET}{CLR}\n")
+                        sys.stdout.write(f"{BOLD}{GREEN}--- FINAL RESULT (Tailing {self.result_height} lines) ---{RESET}{CLR}\n")
                         lines = result.splitlines()
-                        for i, l in enumerate(lines[:5]):
+                        
+                        # Show the LAST lines of the result
+                        display_lines = lines[-self.result_height:] if len(lines) > self.result_height else lines
+                        for i, l in enumerate(display_lines):
                             sys.stdout.write(f"{l[:os.get_terminal_size().columns-1]}{CLR}\n")
+                        
+                        # Clear any remaining lines from previous height if result shrank
+                        # (Not strictly necessary if we use CLR and fixed height, but good practice)
+                        
                         sys.stdout.write("\033[u")
                         sys.stdout.flush()
             else:
@@ -217,5 +227,12 @@ class AgentTalk:
         print(f"\n{BOLD}Exiting Talk TUI.{RESET}")
 
 if __name__ == "__main__":
-    target_dir = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
-    AgentTalk(target_dir).run()
+    import argparse
+    parser = argparse.ArgumentParser(description="Agent Talk TUI")
+    parser.add_argument("dir", nargs="?", default=os.getcwd(), help="Entity directory")
+    parser.add_argument("--height", type=int, default=5, help="Height of the result area")
+    args = parser.parse_args()
+    
+    talk = AgentTalk(args.dir)
+    talk.result_height = args.height
+    talk.run()
