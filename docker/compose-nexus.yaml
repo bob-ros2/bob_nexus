@@ -30,18 +30,24 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: /app/master/core/entrypoint.sh
     restart: unless-stopped
+    networks:
+      - alpha
 
   nexus-redis:
     image: redis:alpine
     container_name: bob_nexus_redis
-    # Standard Redis port accessible within the bridge network
     ports:
       - "6379:6379"
     restart: unless-stopped
+    networks:
+      - alpha
 
 networks:
-  bridge:
-    name: bridge
+  alpha:
+    name: alpha
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1280
 
 volumes:
   redis_data:
