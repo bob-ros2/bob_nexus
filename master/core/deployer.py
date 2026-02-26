@@ -320,13 +320,18 @@ class Deployer:
             if os.path.exists(template_env):
                 final_env.update(dotenv_values(template_env))
 
-        if os.path.exists(global_env_path):
-            final_env.update(dotenv_values(global_env_path))
-
         if os.path.exists(local_env_path):
             final_env.update(dotenv_values(local_env_path))
 
-        # 3. Dynamic Signals (Overrides)
+        # 3. Demand-driven Global Variable Injection
+        # Only pull from master/config/.env if the variable is already 'known' to the entity
+        if os.path.exists(global_env_path):
+            global_vars = dotenv_values(global_env_path)
+            for k, v in final_env.items():
+                if (not v or v == f"${{{k}}}") and k in global_vars:
+                    final_env[k] = global_vars[k]
+
+        # 4. Dynamic Signals (Overrides)
         project_prefix = os.environ.get("COMPOSE_PROJECT_NAME", "nexus")
         
         # Decide on Image (IMAGE_NAME is special: it overrides blueprint defaults)
