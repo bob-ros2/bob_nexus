@@ -477,8 +477,15 @@ class Deployer:
             if other_yamls:
                 config_path = other_yamls[0]
 
-        from env_helper import get_ros_setup_cmd
-        ros_source = get_ros_setup_cmd(self.root_dir)
+        # 3. ROS Support (Conditional to avoid unnecessary warnings)
+        ros_source = ""
+        nexus_manifest_path = os.path.join(entity_dir, "nexus.yaml")
+        if os.path.exists(nexus_manifest_path):
+            with open(nexus_manifest_path, "r") as f:
+                nm = yaml.safe_load(f) or {}
+                if nm.get("use_ros"):
+                    from env_helper import get_ros_setup_cmd
+                    ros_source = get_ros_setup_cmd(self.root_dir)
 
         try:
             result = active_driver.up(entity_dir, config_path, ros_source, category=category, policy=policy)
