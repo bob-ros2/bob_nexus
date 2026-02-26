@@ -33,11 +33,20 @@ class HostDriver(BaseDriver):
         # Build source prefix
         source_prefix = f"{ros_source} && " if ros_source else ""
         
-        # Use provided entrypoint or fallback to ROS2 launch
-        exec_cmd = manifest.get("entrypoint")
+        # Use resolved entrypoint from environment or fallback
+        exec_cmd = env.get("ENTITY_ENTRYPOINT")
         if not exec_cmd:
             exec_cmd = "ros2 launch bob_launch generic.launch.py"
         
+        # Determine config path for BOB_LAUNCH_CONFIG fallback
+        if not env.get("BOB_LAUNCH_CONFIG"):
+            if os.path.exists(os.path.join(entity_dir, "bob_launch.yaml")):
+                env["BOB_LAUNCH_CONFIG"] = os.path.join(entity_dir, "bob_launch.yaml")
+            elif os.path.exists(os.path.join(entity_dir, "agent.yaml")):
+                env["BOB_LAUNCH_CONFIG"] = os.path.join(entity_dir, "agent.yaml")
+            elif os.path.exists(os.path.join(entity_dir, "nexus.yaml")):
+                env["BOB_LAUNCH_CONFIG"] = os.path.join(entity_dir, "nexus.yaml")
+
         # Translation: If entrypoint uses /app/master/core/..., map to local paths
         # This is CRITICAL when running on host but using 'container-style' entrypoints
         if "/app/master/core/" in exec_cmd:

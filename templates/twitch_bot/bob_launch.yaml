@@ -11,6 +11,6 @@
     - -p
     - 'channel:=${TWITCH_CHAT_CHANNEL:-"bobassi"}'
     - -p
-    - 'secrets:=${TWITCH_CHAT_SECRET:-"no_secret"}'
+    - 'credentials:=${TWITCH_CHAT_CREDENTIALS:-"no_credentials"}'
     - -r
     - *entity_ns
