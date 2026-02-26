@@ -3,4 +3,5 @@ category: infrastructure
 use_ros: true
 description: "Twitch Chat Bot (tioros) integration."
 repositories:
-- https://github.com/bob-ros2/tioros
+#- https://github.com/bob-ros2/tioros
+- https://gitlab.com/bob-ros2/tioros.git

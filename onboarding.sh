@@ -196,7 +196,12 @@ if [ -s "$temp_repos" ]; then
 
             if [ ! -d "src/$name" ]; then
                 echo "        [+] Cloning dynamic: $name from $url..."
-                git clone --depth 1 "$url" "src/$name"
+                # Use GIT_TERMINAL_PROMPT=0 to fail fast instead of hanging on potential auth/redirect issues
+                GIT_TERMINAL_PROMPT=0 git clone --depth 1 "$url" "src/$name" || {
+                    echo "        [!] ERROR: Failed to clone $name."
+                    echo "        [!] Check internet connectivity or if the repo requires authentication."
+                    continue
+                }
             fi
         fi
     done < "$temp_repos"
