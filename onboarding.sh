@@ -134,12 +134,14 @@ if [ "$ENTITY_USE_ROS" = "true" ]; then
     done
 fi
 
-# 3.2 Dynamic Repos (nexus.yaml or repos.yaml)
+# 3.2 Dynamic Repos (agent.yaml, nexus.yaml or repos.yaml)
 REPOS_FILE="/root/repos.yaml"
 if [ ! -f "$REPOS_FILE" ] && [ -f "../repos.yaml" ]; then REPOS_FILE="../repos.yaml"; fi
 
-# Strategy: Prefer nexus.yaml if it contains a repositories section, otherwise fall back to repos.yaml
-NEXUS_FILE="/root/nexus.yaml"
+# Strategy: Prefer agent.yaml (then nexus.yaml) if it contains a repositories/ros_repos section
+NEXUS_FILE="/root/agent.yaml"
+if [ ! -f "$NEXUS_FILE" ]; then NEXUS_FILE="/root/nexus.yaml"; fi
+if [ ! -f "$NEXUS_FILE" ] && [ -f "../agent.yaml" ]; then NEXUS_FILE="../agent.yaml"; fi
 if [ ! -f "$NEXUS_FILE" ] && [ -f "../nexus.yaml" ]; then NEXUS_FILE="../nexus.yaml"; fi
 
 temp_repos="/tmp/nexus_repos.txt"
@@ -153,12 +155,13 @@ import yaml, sys
 try:
     with open('$NEXUS_FILE', 'r') as f:
         data = yaml.safe_load(f)
-        if data and 'repositories' in data:
-            repos = data['repositories']
-            if isinstance(repos, list):
-                for r in repos: print(r)
-            elif isinstance(repos, dict):
-                for k, v in repos.items(): print(f'{k}:{v}')
+        if data:
+            repos = data.get('ros_repos', data.get('repositories'))
+            if repos:
+                if isinstance(repos, list):
+                    for r in repos: print(r)
+                elif isinstance(repos, dict):
+                    for k, v in repos.items(): print(f'{k}:{v}')
 except Exception:
     pass
 " >> "$temp_repos"

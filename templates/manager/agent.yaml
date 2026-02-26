@@ -1,7 +1,7 @@
 onboarding: true
 category: master
 description: "High-level fleet manager and coordinator."
-repositories:
+ros_repos:
 - https://github.com/bob-ros2/bob_launch
 - https://github.com/bob-ros2/bob_msgs
 - https://github.com/bob-ros2/bob_llm

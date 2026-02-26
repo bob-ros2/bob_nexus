@@ -4,5 +4,5 @@ blueprint_base: master/templates/blueprint.av.yaml
 category: infrastructure
 use_ros: true
 description: Web Overlay Renderer (Pyside6/Chromium)
-repositories:
+ros_repos:
 - https://github.com/bob-ros2/bob_av_tools

@@ -12,4 +12,4 @@ nexus_agent:
   enabled_skills:
   - core/coder_lab
   - core/memory
-repositories: null
+ros_repos: null
