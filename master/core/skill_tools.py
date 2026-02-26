@@ -11,6 +11,9 @@ import yaml
 SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SELF_DIR, "..", ".."))
 
+# Global registry to map tool names to function objects for dispatch
+TOOL_REGISTRY = {}
+
 
 def get_entity_skills_dir():
     """
@@ -138,6 +141,29 @@ def function_to_openai_tool(func):
         }
     }
 
+def dispatch_tool(func_name: str, args):
+    """
+    Executes a tool from the registry. Handles JSON string or dict arguments.
+    """
+    if func_name not in TOOL_REGISTRY:
+        return f"Error: Tool '{func_name}' not found in registry."
+    
+    func = TOOL_REGISTRY[func_name]
+    
+    # Handle JSON string args from LLM
+    if isinstance(args, str):
+        try:
+            args = json.loads(args)
+        except Exception as e:
+            return f"Error parsing arguments: {e}"
+            
+    try:
+        if isinstance(args, dict):
+            return func(**args)
+        return func()
+    except Exception as e:
+        return f"Error executing {func_name}: {e}"
+
 def get_orchestrator_tools():
     """
     Returns the list of core orchestrator tools as OpenAI definitions.
@@ -147,6 +173,9 @@ def get_orchestrator_tools():
         load_skill_md,
         read_skill_resource,
     ]
+    for f in funcs:
+        TOOL_REGISTRY[f.__name__] = f
+        
     return [function_to_openai_tool(f) for f in funcs]
 
 
@@ -182,6 +211,7 @@ def get_tools_from_skills(skill_names: list):
             for attr_name in dir(mod):
                 attr = getattr(mod, attr_name)
                 if inspect.isfunction(attr) and not attr_name.startswith("_"):
+                    TOOL_REGISTRY[attr_name] = attr
                     tools.append(function_to_openai_tool(attr))
         except Exception as e:
             print(f"Error loading skill {name}: {e}")
