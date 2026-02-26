@@ -58,6 +58,11 @@ def main():
     refresh_parser.add_argument("name", help="Entity name")
     refresh_parser.add_argument("category", nargs="?", help="Optional entity category")
 
+    # Talk command
+    talk_parser = subparsers.add_parser("talk", help="Enter interactive TUI for an agent")
+    talk_parser.add_argument("name", help="Entity name")
+    talk_parser.add_argument("category", nargs="?", help="Optional entity category")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -156,6 +161,25 @@ def main():
                                     identifier = "DOCKER"
 
                     print(f"{cat:<15} {ent:<15} {status:<10} {identifier:<15}")
+        elif args.command == "talk":
+            category = args.category
+            entity_name = args.name
+            if not category:
+                category, _ = manager.find_entity(entity_name)
+
+            if not category:
+                raise ValueError(f"Could not find entity '{entity_name}'. Please specify category.")
+
+            entity_dir = os.path.join(manager.entities_dir, category, entity_name)
+            
+            # Start talk.py
+            cmd = [
+                "python3",
+                os.path.join(manager.master_dir, "cli", "talk.py"),
+                entity_dir,
+            ]
+            import subprocess
+            subprocess.run(cmd)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
