@@ -29,16 +29,18 @@ class AgentCore:
 
         self.conf = self._load_config()
 
-        # Paths for the Worker-Manager Protocol
+        # Paths for the Worker-Manager Protocol (Swarm 10.3)
         registry_dir = os.environ.get("NEXUS_REGISTRY_DIR")
         if registry_dir and os.path.exists(registry_dir):
             logger.info(f"Registry Protocol: Using mailbox in {registry_dir}")
             self.inbox_path = os.path.join(registry_dir, "inbox.json")
+            self.status_path = os.path.join(registry_dir, "status.json")
+            self.outbox_path = os.path.join(registry_dir, "outbox.json")
         else:
+            logger.info(f"Registry Protocol: No registry dir found. Using local mailbox in {self.entity_dir}")
             self.inbox_path = os.path.join(self.entity_dir, "inbox.json")
-
-        self.status_path = os.path.join(self.entity_dir, "status.json")
-        self.outbox_path = os.path.join(self.entity_dir, "outbox.json")
+            self.status_path = os.path.join(self.entity_dir, "status.json")
+            self.outbox_path = os.path.join(self.entity_dir, "outbox.json")
 
         self.api_url = self.conf.get("api_url", "http://localhost:8000/v1")
         self.api_key = self.conf.get("api_key", "no_key")
