@@ -15,6 +15,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock 
       # IPC HUB: Shared volume for pipes/FIFOs (Swarm 9.17)
       - nexus_pipes:/tmp/nexus_pipes:rw
+      # GLOBAL CONFIG & SECRETS: Access to centralized master logic
+      - ${HOST_NEXUS_DIR}/master/config:/app/master/config:ro
+      - ${HOST_NEXUS_DIR}/master/secrets:/app/master/secrets:ro
     networks:
       - alpha
     environment:

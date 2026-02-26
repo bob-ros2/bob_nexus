@@ -360,7 +360,7 @@ class Deployer:
         # 4.1 Build Environment YAML for Blueprint Injection
         whitelist = ["ENTITY_", "MASTER_", "NEXUS_", "BOB_", "ROS_", "API_", "MATRIX_", "QDRANT_", "REDIS_", "HEADSCALE_"]
         explicit = ["NAME", "WORKSPACE_POLICY", "WORKSPACE_MODE", "ENTITY_ENTRYPOINT", 
-                    "ENABLE_ONBOARDING", "ENTITY_CONTAINER_NAME", "VOLUME_NAME"]
+                    "ENABLE_ONBOARDING", "ENTITY_CONTAINER_NAME", "VOLUME_NAME", "HOST_NEXUS_DIR"]
         
         env_lines = []
         for k, v in sorted(final_env.items()):
