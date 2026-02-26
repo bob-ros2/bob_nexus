@@ -104,3 +104,53 @@ def read_skill_resource(skill_name: str, resource_path: str):
             return f.read()
     except Exception as e:
         return str(e)
+
+
+def get_orchestrator_tools():
+    """
+    Returns the list of core orchestrator tools.
+    """
+    return [
+        list_available_skills,
+        load_skill_md,
+        read_skill_resource,
+    ]
+
+
+def get_tools_from_skills(skill_names: list):
+    """
+    Dynamically loads all functions from the specified skills.
+    """
+    tools = []
+    for name in skill_names:
+        path = resolve_skill_path(name)
+        if not path:
+            continue
+
+        # Look for a python file with the same name as the skill or 'logic.py'
+        logic_files = [os.path.join(path, f"{os.path.basename(path)}.py"), os.path.join(path, "logic.py"), os.path.join(path, f"{name}.py")]
+        
+        target_file = None
+        for lf in logic_files:
+            if os.path.exists(lf):
+                target_file = lf
+                break
+        
+        if not target_file:
+            continue
+
+        try:
+            module_name = f"skill_{name.replace('/', '_')}"
+            spec = importlib.util.spec_from_file_location(module_name, target_file)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+
+            # Export all functions from the module
+            for attr_name in dir(mod):
+                attr = getattr(mod, attr_name)
+                if inspect.isfunction(attr) and not attr_name.startswith("_"):
+                    tools.append(attr)
+        except Exception as e:
+            print(f"Error loading skill {name}: {e}")
+    
+    return tools
