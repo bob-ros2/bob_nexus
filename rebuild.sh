@@ -9,7 +9,14 @@ docker volume create nexus_pipes >/dev/null
 docker volume create nexus_entities >/dev/null
 
 echo "[*] Ensuring global network (alpha) exists with correct MTU..."
-docker network create --opt com.docker.network.driver.mtu=1280 alpha 2>/dev/null || true
+CURRENT_MTU=$(docker network inspect alpha --format '{{index .Options "com.docker.network.driver.mtu"}}' 2>/dev/null || echo "0")
+if [ "$CURRENT_MTU" != "1280" ]; then
+    echo "    [!] MTU mismatch (found $CURRENT_MTU, need 1280). Recreating alpha network..."
+    docker network rm alpha 2>/dev/null || true
+    docker network create --opt com.docker.network.driver.mtu=1280 alpha
+else
+    echo "    [ok] Network alpha already has MTU 1280."
+fi
 
 echo "[*] Tearing down existing isolated Nexus..."
 docker compose -f docker/compose-nexus.yaml down || true
