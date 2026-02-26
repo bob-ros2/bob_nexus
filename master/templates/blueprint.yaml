@@ -30,8 +30,8 @@ services:
       - WORKSPACE_POLICY=${WORKSPACE_POLICY}
       - ENABLE_ONBOARDING=${ENABLE_ONBOARDING:-true}
       - ENTITY_USE_ROS=${ENTITY_USE_ROS:-false}
-    # Use the framework entrypoint baked into the image
-    command: "${ENTITY_ENTRYPOINT:-/app/master/core/entrypoint.sh}"
+    # Always start with the framework entrypoint to handle environment and onboarding
+    command: "/app/master/core/entrypoint.sh"
     restart: unless-stopped
 
 networks:
