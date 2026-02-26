@@ -1,22 +1,21 @@
----
-name: memory
-description: Unified memory skill for storing and searching information. Supports Qdrant (local file) and JSON backends.
----
-
 # Persistent Memory Skill
 
-This skill allows an entity to store and retrieve information persistently. It serves as a fallback or local alternative to the global Qdrant tools.
+This skill allows an entity to store and retrieve information persistently. It automatically switches between Qdrant (local/server) and JSON backends depending on the environment.
 
 ## Instructions
 
-1. **Save Memory**: Call `run_skill_script('memory', 'scripts/memory_manager.py', ['save', '--content', 'your info here', '--path', 'memory'])`.
-2. **Search Memory**: Call `run_skill_script('memory', 'scripts/memory_manager.py', ['search', '--query', 'your query', '--path', 'memory'])`.
-3. **Get Memory Info**: Call `run_skill_script('memory', 'scripts/memory_manager.py', ['info', '--path', 'memory'])`.
+The following tools are available directly to the AI:
 
-## Configuration
-- **Backend**: Set `MEMORY_BACKEND=json` in `.env` to force JSON storage. Default is `qdrant` (local file mode).
-- **Storage Path**: Data is stored relative to the entity's root by default.
+1. **`save_memory(content: str)`**: Saves important facts, preferences, or thoughts.
+2. **`search_memory(query: str)`**: Searches past memories for relevant context using keyword matching.
+
+## Configuration (Environment Variables)
+
+- **`MEMORY_BACKEND`**: Force a backend (`json`, `local`, `remote`).
+- **`QDRANT_URL`**: Set this to use a remote Qdrant server.
+- **`COLLECTION_NAME`**: The name of the collection to use (default: `nexus_memory`).
 
 ## Usage Guidelines
 - Use this to remember user preferences, past conversations, or facts.
-- It is particularly useful for entities that need to operate offline or when the primary Qdrant DB is unavailable.
+- The JSON backend is used by default on Raspberry Pi or when Qdrant is unavailable.
+- For high-performance vector search in larger swarms, configure a central Qdrant server via `QDRANT_URL`.
