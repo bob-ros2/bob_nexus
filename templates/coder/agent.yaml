@@ -1,5 +1,5 @@
 onboarding: true
-category: assistant
+category: coder
 description: "Technical specialist (Neo) for code and system tasks."
 nexus_agent:
   api_url: ${LLM_API_URL:-${MASTER_API_URL}}

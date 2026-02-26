@@ -33,5 +33,8 @@ skills:
     - ["core", "send_matrix"]
   assistant:
     - ["core", "memory"]
+  coder:
+    - ["core", "memory"]
+    - ["core", "coder_lab"]
   defaults:
     - ["core", "memory"]

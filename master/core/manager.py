@@ -108,10 +108,27 @@ class EntityManager:
         skill_conf = self.conf.get("skills", {})
         # Prioritize category specifically, fall back to 'defaults'
         defaults = skill_conf.get(category, skill_conf.get("defaults", []))
+        
+        # ALSO check for explicitly enabled skills in the agent manifest (Swarm 9.15)
+        # Handle both flat and nexus_agent structures
+        agent_data = manifest_data.get("nexus_agent", manifest_data)
+        manifest_skills = agent_data.get("enabled_skills", [])
+        
+        # Combine both, maintaining order and avoiding duplicates
+        all_to_link = []
+        for s in defaults:
+            if s not in all_to_link: all_to_link.append(s)
+            
+        for s_path in manifest_skills:
+            if isinstance(s_path, str) and "/" in s_path:
+                parts = s_path.split("/")
+                s_cat, s_name = parts[0], parts[1]
+                if [s_cat, s_name] not in all_to_link:
+                    all_to_link.append([s_cat, s_name])
 
-        if defaults:
-            print(f"[*] Post-spawn: Linking default skills for category '{category}'...")
-            for s_cat, s_name in defaults:
+        if all_to_link:
+            print(f"[*] Post-spawn: Linking background skills for category '{category}'...")
+            for s_cat, s_name in all_to_link:
                 try:
                     self.link_skill(category, entity_name, s_cat, s_name)
                 except Exception as e:
