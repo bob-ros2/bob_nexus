@@ -7,11 +7,6 @@ The following environment variables are defined in `master/config/.env` and are 
 - `MASTER_API_KEY`: The authentication key for the LLM API.
 - `MASTER_API_MODEL`: The specific model ID to use (e.g., `deepseek-chat`).
 
-## Matrix / Communication
-- `MATRIX_TOKEN`: Access token for the Matrix bot account.
-- `MATRIX_HOMESERVER`: The URL of the Matrix homeserver (e.g., `https://uavcgbs1.selfhost.eu`).
-- `MATRIX_ROOM_ID`: The default internal room ID for system notifications and chat.
-
 ## Shared Memory & Database
 - `QDRANT_URL`: The URL of the Qdrant vector database used for long-term memory.
 - `QDRANT_API_KEY`: API key for Qdrant (defaults to `none` if not secured).

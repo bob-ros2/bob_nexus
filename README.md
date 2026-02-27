@@ -19,7 +19,7 @@ For a fresh setup (native or inside a container), use the automated onboarding s
 ```
 
 ### 2. Configure your Environment
-Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSeek, OpenAI, or Matrix).
+Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSeek, OpenAI).
 
 ### 3. Wake Up the Swarm
 ```bash

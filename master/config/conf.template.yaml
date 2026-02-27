@@ -30,7 +30,6 @@ skills:
   master:
     - ["core", "memory"]
     - ["core", "sdlviz"]
-    - ["core", "send_matrix"]
   assistant:
     - ["core", "memory"]
   coder:
