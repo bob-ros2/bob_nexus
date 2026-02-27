@@ -84,9 +84,10 @@ class AgentCore:
 
         self.history = [{"role": "system", "content": self.system_prompt}]
         self.state = "idle"
+        self.current_thought = "Waiting for mission..."
         
         # Swarm 10.5: Immediate status write to announce presence
-        self._update_status("idle", "Agent Core initialized and ready.")
+        self._update_status("idle", self.current_thought)
 
     def _load_config(self):
         if not os.path.exists(self.config_path):
@@ -102,10 +103,13 @@ class AgentCore:
 
     def _update_status(self, state, thought=None):
         self.state = state
+        if thought is not None:
+            self.current_thought = thought
+
         status = {
             "name": getattr(self, "name", os.environ.get("NAME", "unknown")),
             "state": state,
-            "thought": thought,
+            "thought": self.current_thought,
             "last_heartbeat": time.time(),
             "model": self.model,
         }
@@ -114,7 +118,9 @@ class AgentCore:
                 json.dump(status, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to write status: {e}")
-        logger.info(f"Status Update: {state} - {thought if thought else ''}")
+        
+        if thought:
+            logger.info(f"Status Update: {state} - {thought}")
 
 
     def _chat(self):
@@ -204,9 +210,9 @@ class AgentCore:
                     logger.error(f"Error reading inbox: {e}")
                     self._update_status("stuck", f"Error reading inbox: {str(e)}")
 
-            # Heartbeat
+            # Heartbeat (Swarm 10.7: No more thought-shredding)
             if time.time() % 30 < 2:  # Every ~30s
-                self._update_status(self.state, "Agent is alive and heartbeat pulsed.")
+                self._update_status(self.state)
 
             time.sleep(2)
 
