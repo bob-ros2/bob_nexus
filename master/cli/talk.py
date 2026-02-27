@@ -13,6 +13,14 @@ try:
 except ImportError:
     pass
 
+# Try to import rich for markdown rendering (optional)
+try:
+    from rich.console import Console
+    from rich.markdown import Markdown
+    HAS_RICH = True
+except ImportError:
+    HAS_RICH = False
+
 # --- ANSI Constants ---
 CLR = "\033[K"          # Clear to end of line
 MOVE = "\033[{line};{col}H"
@@ -35,6 +43,11 @@ class AgentTalk:
         self.log_pos = 0
         self.log_lines = []
         self.result_height = 5 # Default height for result area
+        
+        if HAS_RICH:
+            self.console = Console()
+        else:
+            self.console = None
         
         # Verify if it looks like a Communication Registry
         if not self.inbox_path.exists() and not self.status_path.exists():
@@ -131,11 +144,21 @@ class AgentTalk:
                         
                         # Show the LAST lines of the result
                         display_lines = lines[-self.result_height:] if len(lines) > self.result_height else lines
-                        for i, l in enumerate(display_lines):
-                            sys.stdout.write(f"{l[:os.get_terminal_size().columns-1]}{CLR}\n")
                         
-                        # Clear any remaining lines from previous height if result shrank
-                        # (Not strictly necessary if we use CLR and fixed height, but good practice)
+                        if HAS_RICH:
+                            # Render via rich to string first, then handle line height
+                            from io import StringIO
+                            with StringIO() as buf:
+                                console = Console(file=buf, force_terminal=True, width=os.get_terminal_size().columns-2)
+                                console.print(Markdown(result))
+                                rendered = buf.getvalue()
+                                r_lines = rendered.splitlines()
+                                r_display = r_lines[-self.result_height:] if len(r_lines) > self.result_height else r_lines
+                                for i, l in enumerate(r_display):
+                                    sys.stdout.write(f"{l}{CLR}\n")
+                        else:
+                            for i, l in enumerate(display_lines):
+                                sys.stdout.write(f"{l[:os.get_terminal_size().columns-1]}{CLR}\n")
                         
                         sys.stdout.write("\033[u")
                         sys.stdout.flush()
@@ -190,6 +213,12 @@ class AgentTalk:
         # Initial screen wipe: Clear scrollback and screen (ANSI)
         sys.stdout.write("\033[H\033[2J\033[3J")
         sys.stdout.flush()
+
+        if not HAS_RICH:
+            print(f"{YELLOW}[Tip] Install 'rich' (pip install rich) for markdown rendering!{RESET}")
+            time.sleep(1)
+            sys.stdout.write("\033[H\033[2J\033[3J") # Clear again
+            sys.stdout.flush()
         
         # Start background update thread
         updater = threading.Thread(target=self.update_loop, daemon=True)
