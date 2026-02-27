@@ -187,8 +187,9 @@ class AgentTalk:
         return "\n".join(lines).strip()
 
     def run(self):
-        # Initial space
-        print("\n" * 30) 
+        # Initial screen wipe: Clear scrollback and screen (ANSI)
+        sys.stdout.write("\033[H\033[2J\033[3J")
+        sys.stdout.flush()
         
         # Start background update thread
         updater = threading.Thread(target=self.update_loop, daemon=True)

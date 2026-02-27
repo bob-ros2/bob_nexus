@@ -70,6 +70,9 @@ class AgentCore:
 
         self.history = [{"role": "system", "content": self.system_prompt}]
         self.state = "idle"
+        
+        # Swarm 10.5: Immediate status write to announce presence
+        self._update_status("idle", "Agent Core initialized and ready.")
 
     def _load_config(self):
         if not os.path.exists(self.config_path):
@@ -86,14 +89,19 @@ class AgentCore:
     def _update_status(self, state, thought=None):
         self.state = state
         status = {
+            "name": getattr(self, "name", os.environ.get("NAME", "unknown")),
             "state": state,
             "thought": thought,
             "last_heartbeat": time.time(),
             "model": self.model,
         }
-        with open(self.status_path, "w") as f:
-            json.dump(status, f, indent=2)
+        try:
+            with open(self.status_path, "w") as f:
+                json.dump(status, f, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to write status: {e}")
         logger.info(f"Status Update: {state} - {thought if thought else ''}")
+
 
     def _chat(self):
         payload = {

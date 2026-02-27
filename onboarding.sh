@@ -5,6 +5,9 @@ set -e
 # This script initializes the bob_nexus environment inside the container.
 # It handles both the Mastermind setup and sub-entity configuration transfer.
 
+# Handle ONNX Runtime warnings globally (Swarm 10.5)
+export ORT_LOGGING_LEVEL=3
+
 # Colors for the terminal
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
