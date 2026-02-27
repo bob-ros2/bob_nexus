@@ -217,3 +217,28 @@ def get_tools_from_skills(skill_names: list):
             print(f"Error loading skill {name}: {e}")
     
     return tools
+
+
+def get_tools_from_file(file_path):
+    """
+    Loads tools from a specific python file (interface definition).
+    """
+    if not os.path.exists(file_path):
+        return []
+
+    try:
+        module_name = f"interface_{os.path.basename(file_path).replace('.', '_')}"
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        tools = []
+        for attr_name in dir(mod):
+            attr = getattr(mod, attr_name)
+            if inspect.isfunction(attr) and not attr_name.startswith("_"):
+                TOOL_REGISTRY[attr_name] = attr
+                tools.append(function_to_openai_tool(attr))
+        return tools
+    except Exception as e:
+        print(f"Error loading tools from {file_path}: {e}")
+        return []

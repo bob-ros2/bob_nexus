@@ -143,6 +143,13 @@ class OAIBackend(ChatBackend):
         t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             os.makedirs(os.path.dirname(os.path.abspath(self.persistent_path)), exist_ok=True)
+            # Ensure content is a string for the history file representation
+            if not isinstance(content, str):
+                try:
+                    content = json.dumps(content, ensure_ascii=False)
+                except:
+                    content = str(content)
+
             with open(self.persistent_path, "a") as f:
                 f.write("---\nROLE: " + role + "\nTIMESTAMP: " + t + "\n")
                 if tool_calls:
@@ -267,6 +274,11 @@ class OAIBackend(ChatBackend):
                         else:
                             print(f"\033[93m[*] NEXUS CALLING: {f_name}({f_args})\033[0m")
                         res = skill_tools.dispatch_tool(f_name, f_args)
+                        
+                        # IMPORTANT: LLM APIs require 'content' to be a string
+                        if not isinstance(res, str):
+                            res = json.dumps(res)
+
                         self.history.append(
                             {"role": "tool", "tool_call_id": call["id"], "name": f_name, "content": res}
                         )
@@ -294,6 +306,11 @@ class OAIBackend(ChatBackend):
                             else:
                                 print(f"\033[93m[*] NEXUS CALLING: {f_name}({f_args})\033[0m")
                             res = skill_tools.dispatch_tool(f_name, f_args)
+                            
+                            # IMPORTANT: LLM APIs require 'content' to be a string
+                            if not isinstance(res, str):
+                                res = json.dumps(res)
+
                             self.history.append(
                                 {"role": "tool", "tool_call_id": call["id"], "name": f_name, "content": res}
                             )
