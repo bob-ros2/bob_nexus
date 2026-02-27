@@ -412,6 +412,15 @@ class Deployer:
         orch = self.conf.get("orchestration", {})
         g_config_path = nexus_manifest.get("blueprint_base", orch.get("compose_file", "master/templates/blueprint.yaml"))
         
+        # Swarm 10.9: Check if template provides its own orchestration
+        has_specialized_orch = False
+        if template_dir and os.path.exists(os.path.join(template_dir, "docker-compose.yaml")):
+            has_specialized_orch = True
+
+        # Ensure HOST_NEXUS_DIR is absolute and available for the engine
+        if "HOST_NEXUS_DIR" not in orchestration_signals:
+             orchestration_signals["HOST_NEXUS_DIR"] = os.getenv("HOST_NEXUS_DIR", self.root_dir)
+        
         # 1. Primary path from config
         g_path = g_config_path
         if not os.path.isabs(g_path):
@@ -429,9 +438,11 @@ class Deployer:
              raise Exception(f"Orchestration Error: Blueprint not found! Tried {g_config_path} and {fallback_path if 'fallback_path' in locals() else '/app/templates/blueprint.yaml'}")
 
         local_compose = os.path.join(entity_dir, "docker-compose.yaml")
-        # Only materialize blueprint if we are NOT in host mode
-        orch = self.conf.get("orchestration", {})
-        if orch.get("mode") != "host" and os.path.exists(g_path) and not os.path.islink(local_compose):
+        # Only materialize blueprint if we are NOT in host mode AND the template isn't specialized
+        if (orch.get("mode") != "host" and 
+            os.path.exists(g_path) and 
+            not os.path.islink(local_compose) and 
+            not has_specialized_orch):
             print(f"[*] Orchestration: Syncing blueprint for {entity_name}")
             engine.process_file(g_path, local_compose)
 
