@@ -21,10 +21,10 @@ For a fresh setup (native or inside a container), use the automated onboarding s
 ### 2. Configure your Environment
 Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSeek, OpenAI, or Matrix).
 
-### 3. Wake Up the Mastermind
+### 3. Wake Up the Swarm
 ```bash
-./mastermind.sh
-# Select [1] to awaken the core management entity (Start Core).
+./swarm.sh up
+# This will spin up the management layer and any default entities.
 ```
 
 ### 4. Create your first Assistant
@@ -65,16 +65,15 @@ cli up alice
 
 Access the collective consciousness through multiple interfaces:
 
-### 1. The Awakening Console (`./mastermind.sh`)
-The primary interactive entry point.
-- **Toggle Core**: Start/Stop the main Mastermind entity.
-- **Integrated View**: Quick access to Telemetry, Manual Shell, and the Integrated Dashboard.
+### 1. The Swarm Controller (`./swarm.sh`)
+The primary orchestration entry point.
+- **up / down**: Manage the lifecycle of the entire Nexus or specific entities.
+- **status**: Check the health of all containers and services.
 
-### 2. The Nexus Dashboard (`./master/dashboard.sh`)
-Real-time awareness of the Swarm.
-- **Terminal Mode** (`./dashboard.sh`): A high-performance cyberpunk terminal dashboard with live CPU/MEM/Entity stats.
-- **Status Mode** (`./dashboard.sh status`): Instant one-time status dump.
-- **Window Mode** (`./dashboard.sh window`): A native high-contrast OS GUI (Tkinter) with copyable paths and auto-refresh.
+### 2. The Agent Talk TUI (`./cli talk`)
+The real-time interactive face of the Swarm.
+- **Mission Control**: Send complex prompts to agents.
+- **Live Monitoring**: See agent thoughts and logs in a cyberpunk-styled TUI.
 
 ### 3. The Nexus Chat Interface (`./master/chat.sh`)
 The direct communication link to your entities.
@@ -97,7 +96,7 @@ The Nexus includes a built-in observability stack (`infrastructure/observer`) ba
 ### Directory Structure
 ```yaml
 .
-├── master/          # Core orchestration logic (Python) & Dashboard
+├── master/          # Core orchestration logic (Python) & configuration
 │   └── config/      # Central persistent configuration (.env, conf.yaml)
 ├── skills/          # Reusable skill modules (e.g., memory, vision)
 ├── templates/       # Entity blueprints and Docker Composers

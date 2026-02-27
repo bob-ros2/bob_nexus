@@ -26,7 +26,7 @@ rules:
     - "Context for docker-compose in docker/ should be project root (..)"
 
   entity_management:
-    - "Entities should be spawned via the Mastermind CLI or mastermind.sh."
+    - "Entities should be spawned via the Mastermind CLI or swarm.sh."
     - "Skills must be linked via symbolic links."
     - "Recursive template resolution (${VAR:-${DEFAULT}}) is mandatory for portability."
 

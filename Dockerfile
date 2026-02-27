@@ -72,9 +72,7 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc \
 COPY . /app/
 
 # Ensure scripts are executable
-RUN chmod +x mastermind.sh \
-    && chmod +x master/cli.sh \
-    && chmod +x master/dashboard.sh \
+RUN chmod +x master/cli.sh \
     && chmod +x master/chat.sh \
     && find master -name "*.sh" -o -name "*.py" -exec chmod +x {} + \
     && find skills -name "*.sh" -o -name "*.py" -exec chmod +x {} + \

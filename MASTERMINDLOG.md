@@ -266,7 +266,7 @@ We have solidified the project's identity and established clear governance struc
     Established a localized `./ros2_ws/src/` hierarchy within the repository. This prepares the system for self-contained deployment with `bob_llm` and `bob_launch` as integrated components (optionally via git submodules).
 
 9.  **Execution Hardening**:
-    Enforced executable permissions (`chmod +x`) across all core entry points (`mastermind.sh`, `cli.sh`, `dashboard.sh`) and skill scripts. The Nexus is now ready for direct execution in any POSIX environment.
+    Enforced executable permissions (`chmod +x`) across all core entry points (`swarm.sh`, `cli.sh`, `talk.py`) and skill scripts. The Nexus is now ready for direct execution in any POSIX environment.
 
 **Status**: Governance established. Identity solidified. Portability achieved. Execution hardened.
 

@@ -29,5 +29,5 @@ docker compose -f docker/compose-nexus.yaml up -d
 echo "[*] Waiting for Core initialization..."
 sleep 2
 
-echo "[*] Entering Nexus Console..."
-docker exec -it bob_nexus_isolated bash
+echo "[*] Swarm is up and running."
+echo "[*] Use './master/cli/talk.py' to interact with agents."
