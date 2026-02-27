@@ -14,7 +14,22 @@ sys.path.append(SELF_DIR)
 import requests
 import skill_tools
 
-logging.basicConfig(level=logging.INFO, format="[*] %(message)s")
+# --- Logging Setup (Swarm 10.4) ---
+LOG_FORMAT = "[*] %(message)s"
+registry_dir = os.environ.get("NEXUS_REGISTRY_DIR")
+if registry_dir and os.path.exists(registry_dir):
+    log_file = os.path.join(registry_dir, "stdout.log")
+    logging.basicConfig(
+        level=logging.INFO,
+        format=LOG_FORMAT,
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+else:
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+
 logger = logging.getLogger("AgentCore")
 
 

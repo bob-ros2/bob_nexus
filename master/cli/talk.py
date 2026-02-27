@@ -36,10 +36,10 @@ class AgentTalk:
         self.log_lines = []
         self.result_height = 5 # Default height for result area
         
-        # Verify if it looks like an entity directory
-        if not (self.entity_dir / "agent.yaml").exists() and not self.status_path.exists():
-            print(f"{YELLOW}Warning: {self.entity_dir} does not contain agent.yaml or status.json.{RESET}")
-            print(f"I will still try to work here, but I might not find what I need.")
+        # Verify if it looks like a Communication Registry
+        if not self.inbox_path.exists() and not self.status_path.exists():
+            print(f"{YELLOW}Warning: {self.entity_dir} doesn't look like a Nexus Registry.{RESET}")
+            print(f"I will watch for incoming status/results here anyway.")
 
     def format_timestamp(self, ts):
         if not ts: return "--:--:--.---"
@@ -161,7 +161,7 @@ class AgentTalk:
             self.draw_status()
             self.tail_logs()
             self.draw_outbox()
-            time.sleep(1.5)
+            time.sleep(1.0) # Faster updates
 
     def get_multi_line_input(self):
         lines = []
