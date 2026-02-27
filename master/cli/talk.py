@@ -142,23 +142,28 @@ class AgentTalk:
                         sys.stdout.write(f"{BOLD}{GREEN}--- FINAL RESULT (Tailing {self.result_height} lines) ---{RESET}{CLR}\n")
                         lines = result.splitlines()
                         
-                        # Show the LAST lines of the result
-                        display_lines = lines[-self.result_height:] if len(lines) > self.result_height else lines
+                        # Swarm 10.8: Strictly cap rendering to avoid scrolling loop
+                        rows = os.get_terminal_size().lines
+                        cols = os.get_terminal_size().columns
+                        available_lines = max(1, rows - 15) # Leave space for header/logs/input
+                        target_height = min(self.result_height, available_lines)
                         
                         if HAS_RICH:
-                            # Render via rich to string first, then handle line height
                             from io import StringIO
                             with StringIO() as buf:
-                                console = Console(file=buf, force_terminal=True, width=os.get_terminal_size().columns-2)
+                                console = Console(file=buf, force_terminal=True, width=cols-2)
                                 console.print(Markdown(result))
                                 rendered = buf.getvalue()
                                 r_lines = rendered.splitlines()
-                                r_display = r_lines[-self.result_height:] if len(r_lines) > self.result_height else r_lines
+                                r_display = r_lines[-target_height:] if len(r_lines) > target_height else r_lines
                                 for i, l in enumerate(r_display):
-                                    sys.stdout.write(f"{l}{CLR}\n")
+                                    sys.stdout.write(MOVE.format(line=12+i, col=1))
+                                    sys.stdout.write(f"{l[:cols-1]}{CLR}\n")
                         else:
+                            display_lines = lines[-target_height:] if len(lines) > target_height else lines
                             for i, l in enumerate(display_lines):
-                                sys.stdout.write(f"{l[:os.get_terminal_size().columns-1]}{CLR}\n")
+                                sys.stdout.write(MOVE.format(line=12+i, col=1))
+                                sys.stdout.write(f"{l[:cols-1]}{CLR}\n")
                         
                         sys.stdout.write("\033[u")
                         sys.stdout.flush()
@@ -199,6 +204,11 @@ class AgentTalk:
                 if not line:
                     if lines: break
                     else: continue
+                
+                # Check for direct commands while working
+                if line.lower() in ["abort", "stop"] and not lines:
+                    return "abort"
+                
                 if line.lower() in ["exit", "quit"] and not lines:
                     return "exit"
                 lines.append(line)
@@ -230,6 +240,17 @@ class AgentTalk:
             if mission == "exit":
                 self.running = False
                 break
+            
+            if mission == "abort":
+                try:
+                    with open(self.inbox_path, "w") as f:
+                        json.dump({"command": "abort"}, f)
+                    sys.stdout.write(MOVE.format(line=8, col=1))
+                    sys.stdout.write(f"{RED}ABORT SIGNAL SENT!{RESET}{CLR}")
+                    time.sleep(1.0)
+                    sys.stdout.write(MOVE.format(line=8, col=1) + CLR)
+                except: pass
+                continue
 
             if mission:
                 try:

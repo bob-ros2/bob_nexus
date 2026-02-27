@@ -162,6 +162,20 @@ class AgentCore:
                     json.dump({"result": message.get("content")}, f, indent=2)
                 return message["content"]
 
+            # Swarm 10.8: Emergency Stop Check
+            if os.path.exists(self.inbox_path):
+                try:
+                    with open(self.inbox_path, "r") as f:
+                        inbox_cmd = json.load(f)
+                    if inbox_cmd.get("command") == "abort":
+                        logger.warning("Emergency Stop: Aborting mission as requested.")
+                        archive_path = self.inbox_path + ".last"
+                        os.rename(self.inbox_path, archive_path)
+                        self._update_status("done", "Mission aborted by user.")
+                        return "Mission aborted."
+                except:
+                    pass
+
             for tool_call in message["tool_calls"]:
                 func_name = tool_call["function"]["name"]
                 args = tool_call["function"]["arguments"]
