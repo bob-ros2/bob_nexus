@@ -123,15 +123,15 @@ class MemoryManager:
 # --- LLM Tools ---
 _manager = None
 
-def get_manager():
+def _get_manager():
     global _manager
     if _manager is None: _manager = MemoryManager()
     return _manager
 
 def save_memory(content: str):
     """Stores information persistently."""
-    return get_manager().save_memory(content)
+    return _get_manager().save_memory(content)
 
 def search_memory(query: str):
     """Searches past memories by keyword."""
-    return get_manager().search_memory(query)
+    return _get_manager().search_memory(query)
