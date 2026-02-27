@@ -63,10 +63,24 @@ class AgentCore:
         self.system_prompt = self.conf.get("system_prompt", "You are a Nexus Agent.")
         self.max_tool_calls = self.conf.get("max_tool_calls", 15)
 
-        # Load tools
+        # Load tools (Swarm 10.6: Auto-discover local skills)
         self.tools = skill_tools.get_orchestrator_tools()
-        enabled_skills = self.conf.get("enabled_skills", [])
-        self.tools.extend(skill_tools.get_tools_from_skills(enabled_skills))
+        
+        # 1. Explicitly enabled skills from config
+        all_skill_names = self.conf.get("enabled_skills", [])
+        
+        # 2. Discover linked skills in local directory
+        local_skills_dir = os.path.join(self.entity_dir, "skills")
+        if os.path.exists(local_skills_dir):
+            for entry in os.listdir(local_skills_dir):
+                if os.path.isdir(os.path.join(local_skills_dir, entry)) and entry not in all_skill_names:
+                    all_skill_names.append(entry)
+        
+        if all_skill_names:
+            logger.info(f"Loading tools from {len(all_skill_names)} skills: {all_skill_names}")
+            self.tools.extend(skill_tools.get_tools_from_skills(all_skill_names))
+        else:
+            logger.warning("No skills enabled or discovered.")
 
         self.history = [{"role": "system", "content": self.system_prompt}]
         self.state = "idle"
