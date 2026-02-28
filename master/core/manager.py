@@ -105,17 +105,35 @@ class EntityManager:
                         f.write(f"ENTITY_USE_ROS={'true' if manifest_data.get('use_ros') else 'false'}\n")
                     f.write(f"HOST_NEXUS_DIR={os.getenv('HOST_NEXUS_DIR', self.root_dir)}\n")
 
-        # Post-spawn: Linking Default Skills from config
+        # Post-spawn: Linking skills
+        all_to_link = self._resolve_skills(category, manifest_data)
+
+        if all_to_link:
+            print(f"[*] Post-spawn: Linking background skills for category '{category}'...")
+            for s_cat, s_name in all_to_link:
+                try:
+                    # link_skill internally calls _refresh_entity_prompt, 
+                    # but we also call it at the end for the final state.
+                    self.link_skill(category, entity_name, s_cat, s_name, refresh_prompt=False)
+                except Exception as e:
+                    print(f"    [!] Error linking skill {s_cat}/{s_name}: {e}")
+
+        # Finally, refresh the prompt so the entity knows its skills
+        print(f"Entity '{entity_name}' spawned successfully at {dest_dir}")
+        self._refresh_entity_prompt(category, entity_name)
+
+        return dest_dir
+
+    def _resolve_skills(self, category, manifest_data):
+        """
+        Resolves which skills should be linked to an entity based on defaults and manifest.
+        """
         skill_conf = self.conf.get("skills", {})
-        # Prioritize category specifically, fall back to 'defaults'
         defaults = skill_conf.get(category, skill_conf.get("defaults", []))
         
-        # ALSO check for explicitly enabled skills in the agent manifest (Swarm 9.15)
-        # Handle both flat and nexus_agent structures
         agent_data = manifest_data.get("nexus_agent", manifest_data)
         manifest_skills = agent_data.get("enabled_skills", [])
         
-        # Combine both, maintaining order and avoiding duplicates
         all_to_link = []
         for s in defaults:
             if s not in all_to_link: all_to_link.append(s)
@@ -126,20 +144,10 @@ class EntityManager:
                 s_cat, s_name = parts[0], parts[1]
                 if [s_cat, s_name] not in all_to_link:
                     all_to_link.append([s_cat, s_name])
-
-        if all_to_link:
-            print(f"[*] Post-spawn: Linking background skills for category '{category}'...")
-            for s_cat, s_name in all_to_link:
-                try:
-                    self.link_skill(category, entity_name, s_cat, s_name)
-                except Exception as e:
-                    print(f"    [!] Error linking skill {s_cat}/{s_name}: {e}")
-
-        # Finally, refresh the prompt so the entity knows its skills
-        print(f"Entity '{entity_name}' spawned successfully at {dest_dir}")
-        self._refresh_entity_prompt(category, entity_name)
-
-        return dest_dir
+            elif isinstance(s_path, list) and len(s_path) == 2:
+                 if s_path not in all_to_link:
+                    all_to_link.append(s_path)
+        return all_to_link
 
     def import_repository(self, name, url=None):
         """
@@ -200,7 +208,7 @@ class EntityManager:
 
         return None, None
 
-    def link_skill(self, category, entity_name, skill_category, skill_name):
+    def link_skill(self, category, entity_name, skill_category, skill_name, refresh_prompt=True):
         """
         Symlinks a skill into the entity's skill folder.
         """
@@ -229,7 +237,46 @@ class EntityManager:
         print(f"[*] Bundled skill '{skill_name}' to entity '{entity_name}'")
 
         # Auto-refresh prompt after linking
+        if refresh_prompt:
+            self._refresh_entity_prompt(category, entity_name)
+
+
+    def refresh_entity_skills(self, category, entity_name):
+        """
+        Re-links skills for an existing entity based on its manifest.
+        """
+        dest_dir = os.path.join(self.entities_dir, category, entity_name)
+        manifest_path = os.path.join(dest_dir, "agent.yaml")
+        if not os.path.exists(manifest_path):
+            print(f"    [!] Error: Manifest not found at {manifest_path}")
+            return False
+
+        with open(manifest_path, "r") as f:
+            manifest_data = yaml.safe_load(f)
+
+        # Clear existing skill links to ensure a clean state
+        skills_dest = os.path.join(dest_dir, "skills")
+        if os.path.exists(skills_dest):
+            for item in os.listdir(skills_dest):
+                item_path = os.path.join(skills_dest, item)
+                if os.path.islink(item_path):
+                    os.unlink(item_path)
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+
+        # Resolve skills to link
+        all_to_link = self._resolve_skills(category, manifest_data)
+
+        print(f"[*] Refreshing skills for {entity_name} ({category})...")
+        for s_cat, s_name in all_to_link:
+            try:
+                self.link_skill(category, entity_name, s_cat, s_name, refresh_prompt=False)
+            except Exception as e:
+                print(f"    [!] Error linking skill {s_cat}/{s_name}: {e}")
+        
+        # Finally, refresh the prompt once
         self._refresh_entity_prompt(category, entity_name)
+        return True
 
 
     def refresh_entity_skills(self, category, entity_name):

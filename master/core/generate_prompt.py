@@ -19,10 +19,13 @@ def generate_skills_prompt(entity_dir):
     if not os.path.exists(skills_path):
         return None
 
+    print(f"[*] Scanning for skills in: {skills_path}")
     skill_files = glob.glob(os.path.join(skills_path, "**/SKILL.md"), recursive=True)
+    print(f"[*] Found {len(skill_files)} SKILL.md files.")
 
     found = False
     for file_path in skill_files:
+        print(f"  -> Processing {file_path}")
         try:
             with open(file_path, "r") as f:
                 content = f.read()
@@ -40,6 +43,7 @@ def generate_skills_prompt(entity_dir):
             continue
 
     if not found:
+        print("[!] No valid SKILL.md metadata found.")
         return None
 
     prompt += (

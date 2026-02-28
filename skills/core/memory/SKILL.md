@@ -1,3 +1,7 @@
+---
+name: memory
+description: Persistent information storage and retrieval via JSON or Qdrant.
+---
 # Persistent Memory Skill
 
 This skill allows an entity to store and retrieve information persistently. It automatically switches between Qdrant (local/server) and JSON backends depending on the environment.
