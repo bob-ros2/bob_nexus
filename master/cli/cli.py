@@ -58,6 +58,13 @@ def main():
     refresh_parser.add_argument("name", help="Entity name")
     refresh_parser.add_argument("category", nargs="?", help="Optional entity category")
 
+    # Refresh-skills command
+    refresh_skills_parser = subparsers.add_parser(
+        "refresh-skills", help="Re-link entity skills based on manifest"
+    )
+    refresh_skills_parser.add_argument("name", help="Entity name")
+    refresh_skills_parser.add_argument("category", nargs="?", help="Optional entity category")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -128,6 +135,27 @@ def main():
                 "--update",
             ]
             subprocess.run(cmd)
+        elif args.command == "refresh-skills":
+            category = args.category
+            entity_name = args.name
+            if not category:
+                category, _ = manager.find_entity(entity_name)
+
+            if not category:
+                raise ValueError(f"Could not find entity '{entity_name}'. Please specify category.")
+
+            if manager.refresh_entity_skills(category, entity_name):
+                # Also refresh prompt to reflect skill changes
+                entity_dir = os.path.join(manager.entities_dir, category, entity_name)
+                import subprocess
+                cmd = [
+                    "python3",
+                    os.path.join(manager.master_dir, "core", "generate_prompt.py"),
+                    entity_dir,
+                    "--update",
+                ]
+                subprocess.run(cmd)
+                print(f"[*] Skills and prompt refreshed for {entity_name}.")
         elif args.command == "status":
             print(f"{'CATEGORY':<15} {'NAME':<15} {'STATUS':<10} {'IDENTIFIER':<15}")
             print("-" * 65)

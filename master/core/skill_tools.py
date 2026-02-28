@@ -235,10 +235,82 @@ def get_tools_from_file(file_path):
         tools = []
         for attr_name in dir(mod):
             attr = getattr(mod, attr_name)
-            if inspect.isfunction(attr) and not attr_name.startswith("_"):
+            if inspect.isfunction(attr) and not attr_name.startswith("_") and attr_name != "register":
                 TOOL_REGISTRY[attr_name] = attr
                 tools.append(function_to_openai_tool(attr))
         return tools
     except Exception as e:
         print(f"Error loading tools from {file_path}: {e}")
         return []
+
+
+def register(module, node):
+    """
+    Universal registration bridge for bob_llm.
+    Automatically discovers and loads all skills linked in the entity's local 'skills/' folder.
+    """
+    node.get_logger().info("[Skill Bridge] Initializing universal tool bridge...")
+    
+    # 1. Register core orchestrator tools
+    all_tools = get_orchestrator_tools()
+    
+    # 2. Find local skills
+    skills_dir = get_entity_skills_dir()
+    if not skills_dir:
+        node.get_logger().warn("[Skill Bridge] No local skills directory found.")
+        return all_tools
+
+    # Scan for directories in skills/ (these are our linked skills)
+    skill_names = []
+    for item in os.listdir(skills_dir):
+        if os.path.isdir(os.path.join(skills_dir, item)):
+            skill_names.append(item)
+    
+    if not skill_names:
+        node.get_logger().info("[Skill Bridge] No linked skills found in /skills.")
+    else:
+        node.get_logger().info(f"[Skill Bridge] Discovered {len(skill_names)} skills: {skill_names}")
+
+    # 3. Load tools from each skill
+    for name in skill_names:
+        path = os.path.join(skills_dir, name)
+        
+        # Look for logic files (standardized locations)
+        logic_candidates = [
+            os.path.join(path, "scripts", "chat_logic.py"), # New standard
+            os.path.join(path, "logic.py"),                 # Simple standard
+            os.path.join(path, f"{name}.py")               # Legacy
+        ]
+        
+        target_file = None
+        for lf in logic_candidates:
+            if os.path.exists(lf):
+                target_file = lf
+                break
+        
+        if target_file:
+            node.get_logger().info(f"  -> Loading tools from skill '{name}' ({os.path.basename(target_file)})")
+            
+            # Use get_tools_from_file but handle registration with the node
+            try:
+                module_name = f"skill_{name.replace('/', '_')}"
+                spec = importlib.util.spec_from_file_location(module_name, target_file)
+                mod = importlib.util.module_from_spec(spec)
+                
+                # If the skill has its own specialized register, call it
+                if hasattr(mod, "register") and callable(mod.register):
+                    skill_tools = mod.register(mod, node)
+                    all_tools.extend(skill_tools)
+                else:
+                    # Otherwise use generic discovery
+                    spec.loader.exec_module(mod)
+                    for attr_name in dir(mod):
+                        attr = getattr(mod, attr_name)
+                        if inspect.isfunction(attr) and not attr_name.startswith("_"):
+                            TOOL_REGISTRY[attr_name] = attr
+                            all_tools.append(function_to_openai_tool(attr))
+            except Exception as e:
+                node.get_logger().error(f"  [!] Failed to load skill '{name}': {e}")
+    
+    node.get_logger().info(f"[Skill Bridge] Registration complete. Total tools: {len(all_tools)}")
+    return all_tools

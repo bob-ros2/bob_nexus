@@ -34,6 +34,6 @@
     - -p
     - "system_prompt:=${SYSTEM_PROMPT}"
     - -p
-    - "tool_interfaces:=['./ros2_ws/src/bob_llm/config/qdrant_tools.py', '/app/master/core/skill_tools.py', './skills/director/scripts/chat_logic.py']"
+    - "tool_interfaces:=['./ros2_ws/src/bob_llm/config/qdrant_tools.py', '/app/master/core/skill_tools.py']"
     - -r
     - *llm_ns

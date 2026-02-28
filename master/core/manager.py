@@ -232,6 +232,60 @@ class EntityManager:
         self._refresh_entity_prompt(category, entity_name)
 
 
+    def refresh_entity_skills(self, category, entity_name):
+        """
+        Re-links skills for an existing entity based on its manifest.
+        """
+        dest_dir = os.path.join(self.entities_dir, category, entity_name)
+        manifest_path = os.path.join(dest_dir, "agent.yaml")
+        if not os.path.exists(manifest_path):
+            print(f"    [!] Error: Manifest not found at {manifest_path}")
+            return False
+
+        with open(manifest_path, "r") as f:
+            manifest_data = yaml.safe_load(f)
+
+        # Clear existing skill links to ensure a clean state
+        skills_dest = os.path.join(dest_dir, "skills")
+        if os.path.exists(skills_dest):
+            for item in os.listdir(skills_dest):
+                item_path = os.path.join(skills_dest, item)
+                if os.path.islink(item_path):
+                    os.unlink(item_path)
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+
+        # Resolve skills to link
+        skill_conf = self.conf.get("skills", {})
+        defaults = skill_conf.get(category, skill_conf.get("defaults", []))
+        
+        agent_data = manifest_data.get("nexus_agent", manifest_data)
+        manifest_skills = agent_data.get("enabled_skills", [])
+        
+        all_to_link = []
+        for s in defaults:
+            if s not in all_to_link: all_to_link.append(s)
+            
+        for s_path in manifest_skills:
+            if isinstance(s_path, str) and "/" in s_path:
+                parts = s_path.split("/")
+                s_cat, s_name = parts[0], parts[1]
+                if [s_cat, s_name] not in all_to_link:
+                    all_to_link.append([s_cat, s_name])
+            elif isinstance(s_path, list) and len(s_path) == 2:
+                 if s_path not in all_to_link:
+                    all_to_link.append(s_path)
+
+        print(f"[*] Refreshing skills for {entity_name} ({category})...")
+        for s_cat, s_name in all_to_link:
+            try:
+                self.link_skill(category, entity_name, s_cat, s_name)
+            except Exception as e:
+                print(f"    [!] Error linking skill {s_cat}/{s_name}: {e}")
+        
+        return True
+
+
 if __name__ == "__main__":
     # Test stub
     import sys
@@ -246,3 +300,4 @@ if __name__ == "__main__":
             manager.spawn_entity(sys.argv[2], sys.argv[3], sys.argv[4])
         elif sys.argv[1] == "link":
             manager.link_skill(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+
