@@ -1,4 +1,5 @@
 onboarding: true
+use_ros: true
 category: master
 description: "The core orchestrator and strategic architect."
 ros_repos:
