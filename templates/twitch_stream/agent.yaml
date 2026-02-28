@@ -3,6 +3,9 @@ overlay_priority: true
 use_ros: true
 blueprint_base: master/templates/blueprint.av.yaml
 category: infrastructure
+enabled_skills:
+  - ["core", "director"]
+  - ["core", "memory"]
 ros_repos:
   - https://github.com/bob-ros2/bob_launch
   - https://github.com/bob-ros2/bob_msgs

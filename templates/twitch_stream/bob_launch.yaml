@@ -7,13 +7,16 @@
 - &llm_ns "__ns:=${ROOT_NS}/${NAME}/llm"
 
 # 1. The Dashboard (Visual Head - with FFmpeg Streaming)
-- name: viz
+- name: streamer
   package: bob_sdlviz
-  executable: /bin/bash
+  executable: start_stream.sh
   output: screen
   arguments:
-    - -c
-    - "source /root/ros2_ws/install/setup.bash && /root/ros2_ws/src/bob_sdlviz/scripts/start_stream.sh #"
+    - --ros-args
+    - -r
+    - __node:=streamer
+    - -r
+    - *entity_ns
 
 # 2. The Agent Logic (Cognitive Core)
 - name: brain
@@ -31,6 +34,6 @@
     - -p
     - "system_prompt:=${SYSTEM_PROMPT}"
     - -p
-    - "tool_interfaces:=['./ros2_ws/src/bob_llm/config/qdrant_tools.py', '/app/master/core/skill_tools.py']"
+    - "tool_interfaces:=['./ros2_ws/src/bob_llm/config/qdrant_tools.py', '/app/master/core/skill_tools.py', './skills/director/scripts/chat_logic.py']"
     - -r
     - *llm_ns
