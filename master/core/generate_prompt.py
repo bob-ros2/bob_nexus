@@ -13,7 +13,6 @@ def generate_skills_prompt(entity_dir):
         "To use a skill, first call `load_skill(name)` to read its full "
         "instructions.\n\n"
     )
-
     # Scan the entity's own skills directory (where skills are symlinked)
     skills_path = os.path.join(entity_dir, "skills")
     if not os.path.exists(skills_path):
@@ -29,15 +28,21 @@ def generate_skills_prompt(entity_dir):
         try:
             with open(file_path, "r") as f:
                 content = f.read()
-                if content.startswith("---"):
-                    parts = content.split("---")
-                    if len(parts) >= 2:
-                        frontmatter = parts[1]
-                        data = yaml.safe_load(frontmatter)
-                        name = data.get("name")
-                        desc = data.get("description")
+                # Use regex to find frontmatter between --- markers
+                match = re.search(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL | re.MULTILINE)
+                if match:
+                    frontmatter = match.group(1)
+                    data = yaml.safe_load(frontmatter)
+                    name = data.get("name")
+                    desc = data.get("description")
+                    if name and desc:
                         prompt += f"- **{name}**: {desc}\n"
                         found = True
+                        print(f"     [+] Added skill metadata: {name}")
+                    else:
+                        print(f"     [!] Missing name or description in frontmatter.")
+                else:
+                    print(f"     [!] No YAML frontmatter found (expected --- headers).")
         except Exception as e:
             sys.stderr.write(f"Warning: Error parsing {file_path}: {e}\n")
             continue
@@ -93,18 +98,23 @@ def update_entity_yaml(entity_dir):
     # Fallback to placeholder replacement
     placeholder = "<ADD_HERE_SKILLS_SYSTEM_PROMPT>"
     if placeholder in content:
-        # Replace placeholder with marked content
-        marked_prompt = f"{start_marker}{escaped_prompt}{end_marker}"
+        # Use literal block scalar for YAML if inserting a multiline string
+        # We MUST include the markers so subsequent refreshes can find it!
+        marked_prompt_raw = f"{start_marker}\n{prompt}\n{end_marker}"
+        indented_prompt = "\n".join(["    " + line for line in marked_prompt_raw.split("\n")])
+        marked_prompt = f"|\n{indented_prompt}"
+        
         new_content = content.replace(placeholder, marked_prompt)
         with open(yaml_file, "w") as f:
             f.write(new_content)
-        print(f"Successfully filled placeholder with markers in {yaml_file}")
+        print(f"Successfully filled placeholder with block scalar and markers in {yaml_file}")
         return True
 
     # Last resort: ROS legacy or Generic YAML prompt pattern
     # Matches 'system_prompt: "..." ' or 'system_prompt:= "..." '
     pattern = r"(system_prompt[:=].*?[\"'])(.*?)([\"']\}?\"?)"
     if re.search(pattern, content):
+        # Even for legacy, let's try to be cleaner
         new_content = re.sub(
             pattern, lambda m: f"{m.group(1)}{escaped_prompt}{m.group(3)}", content
         )

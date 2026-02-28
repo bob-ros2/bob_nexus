@@ -19,6 +19,13 @@ def get_entity_skills_dir():
     """
     Intelligently find the skills directory of the current entity.
     """
+    # Check environment variable first (set by deployer .env)
+    ent_dir = os.environ.get("ENTITY_DIR")
+    if ent_dir:
+        p = os.path.join(ent_dir, "skills")
+        if os.path.exists(p) and os.path.isdir(p):
+            return p
+
     curr = os.getcwd()
     while curr and curr != "/":
         candidate = os.path.join(curr, "skills")
@@ -116,6 +123,16 @@ def function_to_openai_tool(func):
     name = func.__name__
     doc = inspect.getdoc(func) or "No description available."
     
+    # Map Python types to JSON Schema types
+    TYPE_MAP = {
+        str: 'string',
+        int: 'integer',
+        float: 'number',
+        bool: 'boolean',
+        list: 'array',
+        dict: 'object'
+    }
+
     # Simple parser for parameters (assumes standard types for now)
     sig = inspect.signature(func)
     parameters = {
@@ -125,8 +142,13 @@ def function_to_openai_tool(func):
     }
     
     for param_name, param in sig.parameters.items():
+        if param.annotation is inspect.Parameter.empty:
+            param_type = 'string'
+        else:
+            param_type = TYPE_MAP.get(param.annotation, 'string')
+
         parameters["properties"][param_name] = {
-            "type": "string", # Default to string
+            "type": param_type,
             "description": f"Parameter {param_name}"
         }
         if param.default is inspect.Parameter.empty:
@@ -140,6 +162,7 @@ def function_to_openai_tool(func):
             "parameters": parameters,
         }
     }
+
 
 def dispatch_tool(func_name: str, args):
     """
@@ -163,6 +186,7 @@ def dispatch_tool(func_name: str, args):
         return func()
     except Exception as e:
         return f"Error executing {func_name}: {e}"
+
 
 def get_orchestrator_tools():
     """
@@ -253,7 +277,12 @@ def register(module, node):
     
     # 1. Register core orchestrator tools
     all_tools = get_orchestrator_tools()
-    
+    # Also export them to the module so llm_node can find them
+    for t_def in all_tools:
+        f_name = t_def['function']['name']
+        if f_name in TOOL_REGISTRY:
+            setattr(module, f_name, TOOL_REGISTRY[f_name])
+
     # 2. Find local skills
     skills_dir = get_entity_skills_dir()
     if not skills_dir:
@@ -300,6 +329,16 @@ def register(module, node):
                 # If the skill has its own specialized register, call it
                 if hasattr(mod, "register") and callable(mod.register):
                     skill_tools = mod.register(mod, node)
+                    
+                    # Capture functions from this mod and export them to the bridge module
+                    # This is key! llm_node looks in 'module' (skill_tools)
+                    for t_def in skill_tools:
+                        f_name = t_def['function']['name']
+                        if hasattr(mod, f_name):
+                            func_obj = getattr(mod, f_name)
+                            TOOL_REGISTRY[f_name] = func_obj
+                            setattr(module, f_name, func_obj)
+                    
                     all_tools.extend(skill_tools)
                 else:
                     # Otherwise use generic discovery
@@ -308,6 +347,7 @@ def register(module, node):
                         attr = getattr(mod, attr_name)
                         if inspect.isfunction(attr) and not attr_name.startswith("_"):
                             TOOL_REGISTRY[attr_name] = attr
+                            setattr(module, attr_name, attr)
                             all_tools.append(function_to_openai_tool(attr))
             except Exception as e:
                 node.get_logger().error(f"  [!] Failed to load skill '{name}': {e}")
