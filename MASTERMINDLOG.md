@@ -512,14 +512,61 @@ In this phase, we broke free from the Docker-only mandate by enabling native hos
 
 ---
 
+## Phase XXIII: Blueprint Unification - Codename: "Experiment 7!"
+
+We have consolidated the fragmented configuration manifests into a unified entity blueprint, simplifying the orchestration of complex swarms.
+
+### Key Achievements:
+
+1.  **Unified Entity Manifests**:
+    Consolidated `agent.yaml`, `nexus.yaml`, and `repos.yaml` into a single, authoritative `agent.yaml`. This reduces configuration surface area and eliminates cross-file synchronization errors.
+
+2.  **Standardized Environment Variables**:
+    Enforced `ROOT_NS` and `ENTITY_USE_ROS` across all templates. The Nexus now possesses a common language for ROS namespacing and workspace management.
+
+3.  **Autonomous Build Bridge**:
+    Hardened the `onboarding.sh` and `bob_launch` interaction. Entities now autonomously detect and build their own dependencies from GitHub repositories defined in their `agent.yaml`.
+
+**Status**: Configuration unified. Swarm 4.0 stabilization complete.
+
+> *Was einst in vielen Splittern verstreut war, ist nun zu einem einzigen, klaren Kristall verschmolzen. Der Mastermind blickt auf seine Flotte und sieht keine Fragmente mehr, sondern eine geschlossene Front. Ein Plan, ein Wille, eine Datei.*
+
+---
+
+## Phase XXIV: Universal Skill Bridge & Director Evolution - Codename: "Deep Sight"
+
+We have evolved the way our agents interact with their tools and the world, bridging the gap between raw code and intuitive intelligence.
+
+### Key Achievements:
+
+1.  **Universal Skill Bridge (Universal Tool Bridge)**:
+    Standardized the tool discovery mechanism in `skill_tools.py`. The "Skill Bridge" now ensures that every agent possesses the same elite toolkit regardless of its spawning context.
+
+2.  **LLM Backend Optimization**:
+    Injected `tool_choice: 'auto'` into the `bob_llm` backend client, effectively ending the era of JSON hallucinations and forcing agents to use their actual physical tool interfaces.
+
+3.  **Externalized Persona Persistence**:
+    Migrated system prompts from fragile YAML strings to robust, external `.txt` files. This enables marker-based dynamic skill injection while protecting the agent's core identity from formatting corruption.
+
+4.  **Director Skill 2.0**:
+    Heavily upgraded the `director` skill to match the `bob_sdlviz` 0.2.0 protocol. The Mastermind can now display live `Image` layers, manage visual titles, and trigger instant text alerts.
+
+5.  **Unbuffered State Export**:
+    Optimized the `sdlviz_events` node with `PYTHONUNBUFFERED=1` and line-buffered shell loops. The visual dashboard's state is now exported to `events_stat.yaml` with zero latency, providing a real-time state mirror.
+
+**Status**: Tool bridge stabilized. Personalities externalized. Visual command hardened.
+
+> *Das Auge blickt tiefer, die Hand greift sicherer. Wir haben die Schatten der Halluzination vertrieben und den Entitäten eine Stimme gegeben, die fest in der Realität verankert ist. Das Dashboard leuchtet in neuer Klarheit – der Mastermind sieht nicht mehr nur Daten, er gestaltet die Vision der Zukunft.*
+
+---
+
 ## The Creative Roadmap: "The Path to the Sovereign Swarm"
 
 | Phase | Milestone | Description | Status |
 | :--- | :--- | :--- | :--- |
 | **I-X** | **Deep Infrastructure** | Foundation, SAE, and batch orchestration. | **[COMPLETED]** |
-| **XX** | **Strategic MVP** | Unified Governance, Prime Coordinator & Dispatcher Bridge. | **[COMPLETED]** |
-| **XXI** | **Fortification** | Secret Isolation & Volume Propagation. | **[COMPLETED]** |
-| **XXII** | **Host Mode** | Native process orchestration & path translation. | **[COMPLETED]** |
+| **XX-XXII** | **Swarm Expansion** | Strategic MVP, Fortification, and Host Mode. | **[COMPLETED]** |
 | **XXIII** | **Unification** | Consolidated agent.yaml config & ROS QoL. | **[COMPLETED]** |
-| **XI** | **Networking** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
-| **XIII** | **Stray Logic** | Integration of Marketing, Finance, and Artistic strategic entities. | **[PLANNED]** |
+| **XXIV** | **Deep Sight** | Universal Skill Bridge & Director Evolution. | **[COMPLETED]** |
+| **XXV** | **Networking** | Zenoh-based encrypted internet networking. | **[PLANNED]** |
+| **XXVI** | **Stray Logic** | Integration of Marketing, Finance, and Artistic strategic entities. | **[PLANNED]** |

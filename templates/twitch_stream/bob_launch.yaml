@@ -32,8 +32,22 @@
     - -p
     - api_model:=${API_MODEL}
     - -p
-    - "system_prompt:=${SYSTEM_PROMPT}"
+    - "eof:='&nbsp;⚜️<br>'"
     - -p
-    - "tool_interfaces:=['./ros2_ws/src/bob_llm/config/qdrant_tools.py', '/app/master/core/skill_tools.py']"
+    - system_prompt:=./system_prompt.txt
+    - -p
+    - "tool_interfaces:=['./ros2_ws/src/bob_llm/config/qdrant_tools.py', './skill_tools.py']"
+    - --log-level
+    - debug
     - -r
     - *llm_ns
+
+# 3. Get latest overlay
+- name: sdlviz_events
+  package: bob_llm
+  executable: /bin/bash
+  output: screen
+  arguments:
+    - -c
+    - -c
+    - "source /opt/ros/${ROS_DISTRO:-humble}/setup.bash && stdbuf -oL PYTHONUNBUFFERED=1 ros2 topic echo ${ROOT_NS}/${NAME}/events_changed --field data | while read -r line; do [ \"$line\" != \"---\" ] && echo \"$line\" > ./events_stat.yaml; done #"

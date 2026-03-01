@@ -84,7 +84,7 @@ def list_available_skills():
     return skills
 
 
-def load_skill(skill_name: str):
+def load_skill_md(skill_name: str):
     """
     Loads the detailed documentation (SKILL.md) for a specific skill.
     Use this if you are unsure how to use a specific skill or what parameters it expects.
@@ -194,7 +194,7 @@ def get_orchestrator_tools():
     """
     funcs = [
         list_available_skills,
-        load_skill,
+        load_skill_md,
         read_skill_resource,
     ]
     for f in funcs:

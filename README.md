@@ -142,12 +142,33 @@ skills:
   master:
     - ["core", "memory"]
     - ["core", "sdlviz"]
-    - ["core", "send_matrix"]
   assistant:
     - ["core", "memory"]
   defaults:
     - ["core", "memory"]
 ```
+
+---
+
+## 🧠 System Prompts & Dynamic Skills
+
+The Nexus manages entity behavior through a sophisticated system prompt orchestration layer.
+
+### 1. Externalized Prompts (Best Practice)
+To ensure YAML stability and readability, we strongly recommend externalizing system prompts into dedicated files (e.g., `system_prompt.txt` or `persona.md`).
+- **YAML Reference**: `system_prompt: ./system_prompt.txt`
+- **Benefit**: Avoids complex YAML block scalars (`|`) and escaping issues, especially for prompts containing Markdown or structural symbols.
+
+### 2. Automated Skill Injection
+When an entity is spawned or a skill is linked, the Nexus automatically advertises the new capabilities to the agent's persona.
+- **Marker-based Injection**: The `generate_prompt.py` logic looks for specialized markers in your prompt file:
+  ```text
+  # --- NEXUS SKILLS PROMPT START ---
+  (Skills will be listed here)
+  # --- NEXUS SKILLS PROMPT END ---
+  ```
+- **Execution**: If markers are present, the Nexus replaces the content between them with a generated list of available skills (Name & Description from the entity's linked `SKILL.md` files). If markers are missing, it appends the list to the end of the file.
+- **Manual Refresh**: Use `cli refresh <name>` to manually trigger a re-scan of the **entity's linked skills** and update the skill descriptions within its system prompt file. Note: This does *not* re-copy the base persona from the original template folder; it only refreshes the dynamic skill block.
 
 ---
 
