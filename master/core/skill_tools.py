@@ -308,6 +308,7 @@ def register(module, node):
         # Look for logic files (standardized locations)
         logic_candidates = [
             os.path.join(path, "scripts", "chat_logic.py"), # New standard
+            os.path.join(path, "chat_logic.py"),           # Root standard
             os.path.join(path, "logic.py"),                 # Simple standard
             os.path.join(path, f"{name}.py")               # Legacy
         ]
