@@ -171,8 +171,8 @@ def update_entity_yaml(entity_dir):
                         skip_indented = True
                     
                     # Write new reference line
-                    # Ensure space after colon
-                    if not prefix.endswith(" "):
+                    # Ensure space after colon only if it's NOT a ROS argument (:=)
+                    if ":=" not in prefix and not prefix.endswith(" "):
                         prefix += " "
                     new_lines.append(f"{prefix}./system_prompt.txt\n")
                     
