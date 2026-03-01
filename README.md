@@ -1,209 +1,132 @@
-# Welcome to bob_nexus 🚀
+# Welcome to bob_nexus 🚀 (v0.5.0)
 
 ![bob-nexus](media/bob-nexus.png)
 
 **The Central Nervous System and Orchestration Hub for the bob-ros2 Ecosystem.**
 
-`bob_nexus` is the authoritative management layer for spawning, configuring, and deploying specialized AI entities. It acts as the "Home of the Mastermind," providing a unified interface to orchestrate both LLM-bases agents and standard ROS 2 nodes (visualizers, drivers, etc.) across various environments (Host, Docker, Swarm).
+`bob_nexus` is the authoritative management layer for spawning, configuring, and deploying specialized AI entities. It provides a unified interface to orchestrate both LLM-based agents and standard ROS 2 nodes (visualizers, drivers, stream-engines) across Host, Docker, and Swarm environments.
 
 ---
 
-## � Quick Start & Onboarding
-
-For a fresh setup (native or inside a container), use the automated onboarding script to initialize your environment, download core ROS 2 dependencies, and build the workspace.
+## 🚀 Quick Start & Onboarding
 
 ### 1. Initialize the Nexus
 ```bash
-# This will clone bob_llm, bob_launch, and bob_topic_tools and build the ros2_ws
+# Automated onboarding: Clones core dependencies and builds the workspace
 ./onboarding.sh
 ```
 
-### 2. Configure your Environment
-Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSeek, OpenAI).
-
-### 3. Wake Up the Swarm
+### 2. Wake Up the Swarm
 ```bash
 ./swarm.sh up
-# This will spin up the management layer and any default entities.
+# Spin up the management layer and core infrastructure
 ```
 
-### 4. Create your first Assistant
+### 3. Spawn & Deploy an Entity
 ```bash
-# cli is available in the global PATH after awakening
-cli spawn assistant alice bob_llm
+# cli is available in the global PATH or via master/cli.sh
+cli spawn assistant alice twitch_stream
 cli up alice
 ```
 
-### 5. Chat with the Swarm
+### 4. Interactive Command (`cli talk`)
 ```bash
-# Connect via the cloud backend (OAI) - Default
-./master/chat.sh --backend oai
-
-# Integrated ROS-Backend (via local bob_llm node)
-./master/chat.sh --backend bob_llm
+# Engage with the swarm via the cyberpunk TUI Mission Control
+cli talk
 ```
 
 ---
 
-## �🛠️ System Overview
+## 🛠️ Nexus Core Concepts
 
-`bob_nexus` leverages **ROS 2 (Humble)** as its underlying transport and discovery mechanism. While most entities are high-level agents, the communication backbone relies on the resilience of the ROS 2 ecosystem.
+`bob_nexus` leverages **ROS 2 (Humble)** as its underlying transport mechanism, providing a decentralized and resilient backbone for all entities.
 
-### Key Logic
-- **Self-Assembling Entities (SAE)**: Each entity dynamically builds its own ROS 2 environment on startup using JIT template processing and automated `onboarding.sh` execution within the container.
-- **Soul in `.env`**: Centralized configuration where the `.env` file is the authoritative source for an entity's identity, properties, and environment variables.
-- **Host-to-Container Permission Sync**: Automatic mapping of `HOST_UID`/`HOST_GID` to ensure all build artifacts, logs (`.ros`), and files remain owned by the host user.
-- **Decentralized Capabilities**: Skills are developed centrally and symlinked to entities.
-- **Hierarchical Orchestration**: Layered Docker Compose support—merge global blueprints with entity-specific overrides for surgical customization.
-- **Secrets Vault**: Secure credential management via read-only Docker mounts, ensuring sensitive keys never touch environment variables or logs.
-- **Dynamic Orchestration**: Support for `subprocess` (Host), `docker run` (Swarm), and `docker compose` (Project/Entity Swarm).
-- **Quality Assured**: Built-in integrity suite to validate configurations, symlinks, and network health.
+- **Self-Assembling Entities (SAE)**: Entities dynamically build their own isolated environments upon spawning.
+- **Blueprint Maturity**: Configurations are resolved JIT using a recursive template engine (`${VAR:-${DEFAULT}}`).
+- **Hermetic Isolation**: Secure separation of Framework (`/app`), Private Workspace (`/root`), and Secrets (`/app/master/secrets`).
+- **Dynamic Skill Binding**: Shared capabilities (Skills) are symlinked/bundled to entities, enabling instant updates.
+- **Observation Stack**: Integrated Grafana/Loki logging for real-time telemetry across the entire swarm.
 
 ---
 
-## 📡 Governance & Dashboards
+## ⚙️ Operation Modes (Host vs. Swarm)
 
-Access the collective consciousness through multiple interfaces:
+Bob Nexus supports two primary execution modes, each handling entity workspaces differently.
 
-### 1. The Swarm Controller (`./swarm.sh`)
-The primary orchestration entry point.
-- **up / down**: Manage the lifecycle of the entire Nexus or specific entities.
-- **status**: Check the health of all containers and services.
+### 🏠 Host Mode (`mode: "host"`)
+Entities run as native processes on the host system.
+- **Workspace**: The folder `./entities/<category>/<name>` **IS** the actual working directory.
+- **I/O**: Logs (`stdout.log`, `stderr.log`) and build artifacts are written directly to this host folder.
+- **Best for**: Lightweight agents, GUI-heavy nodes, or environments where Docker isolation is unnecessary.
 
-### 2. The Agent Talk TUI (`./cli talk`)
-The real-time interactive face of the Swarm.
-- **Mission Control**: Send complex prompts to agents.
-- **Live Monitoring**: See agent thoughts and logs in a cyberpunk-styled TUI.
-
-### 3. The Nexus Chat Interface (`./master/chat.sh`)
-The direct communication link to your entities.
-- **Backend OAI**: Direct link to your cloud LLM (DeepSeek, OpenAI, etc.).
-- **Backend Bob**: Interactive ROS 2 link to your local `bob_llm` node.
-
-### 4. Vision & Streaming
-Specialized templates (like `twitch_stream`) allow entities to act as high-performance visual dashboards with integrated FFmpeg streaming support (Twitch/YouTube).
-
-### 5. Observability (Grafana & Loki)
-The Nexus includes a built-in observability stack (`infrastructure/observer`) based on Grafana, Loki, and Promtail.
-- **Real-time Logs**: Aggregates logs from all entities and Docker containers.
-- **NEXUS Health Dashboard**: Pre-configured Grafana dashboard for system-wide telemetry.
-- **Explore**: Direct query access to logs via Loki.
+### 🐳 Swarm Mode (`mode: "swarm"`)
+Entities run as isolated Docker containers within a managed project.
+- **Registry (Host)**: `./entities/<category>/<name>` acts as the **Blueprint/Registry**. It provides the initial configuration and seeds the entity.
+- **Workspace (Volume)**: The "Reality" lives in a **Named Docker Volume** (mounted at `/root`). This ensures high-performance I/O and persistence across container lifecycles.
+- **Syncing**: Onboarding logic automatically synchronizes changes from the Registry to the Volume on startup.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture & CLI
 
 ### Directory Structure
-```yaml
+```text
 .
-├── master/          # Core orchestration logic (Python) & configuration
-│   └── config/      # Central persistent configuration (.env, conf.yaml)
-├── skills/          # Reusable skill modules (e.g., memory, vision)
-├── templates/       # Entity blueprints and Docker Composers
-│   └── composers/   # Reusable Docker Compose templates for groups/swarms
-├── entities/        # Generated entity instances (The "Swarm")
-├── requirements/    # Environment dependency definitions
-└── tests/           # Integrity and architecture validation suite
+├── master/          # Core orchestration logic (Python)
+├── skills/          # Reusable skill modules (memory, director, etc.)
+├── templates/       # Entity blueprints and Docker Compose layers
+├── entities/        # Generated entity instances (Registry)
+├── requirements/    # Global and specialized dependency definitions
+└── ros2_ws/         # The global ROS 2 workspace (Read-Only for assistants)
 ```
 
-### The Mastermind CLI
-The `cli` tool is your scalpel for entity lifecycles. It is automatically available in your PATH once the Nexus environment is sourced (or can be called via `master/cli.sh`).
+### The Mastermind CLI (`cli`)
 
 | Command | Description | Example |
 | :--- | :--- | :--- |
-| `spawn` | Create a new entity from a template | `cli spawn assistant bob bob_launch` |
+| `spawn` | Create a new entity from a template | `cli spawn assistant bob twitch_stream` |
 | `up` | Start an entity (Host, Docker, or Compose) | `cli up bob` |
 | `down` | Gracefully stop an entity | `cli down bob` |
-| `status` | List all entities, their status, and PIDs/CIDs | `cli status` |
-| `link` | Attach a shared skill to an entity | `cli link bob memory` |
-| `refresh` | Re-generate entity system prompt | `cli refresh bob` |
-
----
-
-## ⚙️ Configuration (`conf.yaml`)
-
-Custom orchestration and behavioral logic is defined in `master/config/conf.yaml`.
-
-### Orchestration Modes
-- **Host**: Entities run as local processes.
-- **Swarm**: Entities run as Docker containers or Compose projects.
-- **Networking**: Support for custom Docker networks and ROS Discovery Servers.
-
-### Entity Categories & Workspace Governance
-The Nexus enforces a three-tier governance model to ensure stability and isolation:
-- **Infrastructure/Assistant**: Global `ros2_ws` is mounted as **Read-Only**. Stable and non-volatile.
-- **Master**: Full **Read-Write** access to the global workspace. For creating the bridge.
-- **Isolated Assistants**: Each entity receives a private, writable workspace overlay. Safely clone and build custom repositories (`repos.yaml`) without side effects.
-
-### Default Skill Policy
-Manage entity "weaponry" by category. Spawning an entity automatically links skills defined here:
-```yaml
-skills:
-  master:
-    - ["core", "memory"]
-    - ["core", "sdlviz"]
-  assistant:
-    - ["core", "memory"]
-  defaults:
-    - ["core", "memory"]
-```
+| `status` | List all entities and their process/container IDs | `cli status` |
+| `link` | Attach a shared skill to an entity | `cli link bob director` |
+| `refresh` | Re-generate entity system prompt (Skill sync) | `cli refresh bob` |
+| `refresh-skills` | Re-bundle all skills defined in manifest | `cli refresh-skills bob` |
+| `talk` | Launch the interactive Mission Control TUI | `cli talk` |
 
 ---
 
 ## 🧠 System Prompts & Dynamic Skills
 
-The Nexus manages entity behavior through a sophisticated system prompt orchestration layer.
+The Nexus manages agent personas through an externalized orchestration layer.
 
-### 1. Externalized Prompts (Best Practice)
-To ensure YAML stability and readability, we strongly recommend externalizing system prompts into dedicated files (e.g., `system_prompt.txt` or `persona.md`).
-- **YAML Reference**: `system_prompt: ./system_prompt.txt`
-- **Benefit**: Avoids complex YAML block scalars (`|`) and escaping issues, especially for prompts containing Markdown or structural symbols.
+### 1. Externalized Prompts
+We strongly recommend using `system_prompt: ./system_prompt.txt` in your `agent.yaml`. This avoids YAML formatting issues and enables clean Markdown personas.
 
-### 2. Automated Skill Injection
-When an entity is spawned or a skill is linked, the Nexus automatically advertises the new capabilities to the agent's persona.
-- **Marker-based Injection**: The `generate_prompt.py` logic looks for specialized markers in your prompt file:
-  ```text
-  # --- NEXUS SKILLS PROMPT START ---
-  (Skills will be listed here)
-  # --- NEXUS SKILLS PROMPT END ---
-  ```
-- **Execution**: If markers are present, the Nexus replaces the content between them with a generated list of available skills (Name & Description from the entity's linked `SKILL.md` files). If markers are missing, it appends the list to the end of the file.
-- **Manual Refresh**: Use `cli refresh <name>` to manually trigger a re-scan of the **entity's linked skills** and update the skill descriptions within its system prompt file. Note: This does *not* re-copy the base persona from the original template folder; it only refreshes the dynamic skill block.
+### 2. Automated Marker Injection
+The Nexus automatically advertises linked skills by looking for specialized markers in your prompt file:
+```text
+# --- NEXUS SKILLS PROMPT START ---
+(Dynamically updated skill descriptions go here)
+# --- NEXUS SKILLS PROMPT END ---
+```
+Use `cli refresh <name>` to forcefully re-scan linked `SKILL.md` files and update the agent's awareness.
 
 ---
 
 ## 🛡️ Quality & Integrity
-Maintain the standards of the stack using the **Quality Suite**:
+Maintain system standards via the **Quality Suite**:
 - `make lint`: Static analysis with **Ruff**.
 - `make format`: Consistent code formatting.
-- `make test`: Global integrity checks (YAML validity, Symlink health).
-- **System Sanity Checks**: Verified E2E testing of the whole stack.
-
-### 🧪 System Sanity Tests
-The Nexus includes a dedicated integration suite that mocks the OAI environment to verify tool execution and entity lifecycles without any cost.
-
-**Run locally:**
-```bash
-python3 tests/system_sanity.py -v
-```
-
-**Run in an isolated Docker environment:**
-```bash
-cd tests && docker compose -f docker-compose.test.yaml up --build
-```
+- `make test`: Global integrity checks (YAML, Paths, Symlinks).
+- `python3 tests/system_sanity.py`: E2E verification using a Mock LLM Backend.
 
 ---
 
 ## 🗺️ Roadmap
-
-Future enhancements for the Mastermind:
-- **Polymorpher Swarm**: Expansion beyond ROS-only entities to include pure Inference (llama.cpp), Infrastructure (Qdrant), and Bridge (Zenoh) entities.
-- **Global Swarm (Bridge)**: Implementation of Zenoh-based encrypted tunnels for cross-network/internet ROS communication.
-- **User-per-Entity Prinzip**: Implementation of strict process isolation by creating dedicated system users for each spawned entity (Security Hardening).
-- **Perception Layer**: Dedicated entities for Vision-Language Models (Moondream) and sensory edge-processing.
-- **Integrated Memory Explorer**: Web-view for the shared vector database.
-- **Auto-Scale Swarm**: Dynamic spawning of assistants based on topic load.
+- **Zenoh Bridge**: Encrypted internet tunnels for cross-site swarms.
+- **Stray Logic**: Integration of non-technical strategic entities (Finance, Marketing).
+- **Hardened Isolation**: Per-entity system users for extreme process segregation.
+- **Perception Layer**: Dedicated Vision-Language (VLM) processing nodes.
 
 ---
-
 > *"The identity is independent of the matter. Whether process, container, or distributed across networks—the nexus remains the core."* -- Experiment 7!
