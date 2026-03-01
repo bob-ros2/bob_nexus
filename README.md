@@ -21,8 +21,9 @@ Edit the generated `master/config/.env` file and add your API keys (e.g., DeepSe
 
 ### 3. Wake Up the Swarm
 ```bash
-./swarm.sh up
-# This will spin up the management layer and any default entities.
+./swarm.sh spawn  # Create entities from templates (First time only)
+./swarm.sh up     # Start the spawned swarm
+# This will spin up the management layer and all default agents.
 ```
 
 ### 4. Create your first Assistant
